@@ -60,6 +60,7 @@ impl OpenAI {
     }
 
     /// Send a GET request and deserialize the response.
+    #[allow(dead_code)]
     pub(crate) async fn get<T: serde::de::DeserializeOwned>(
         &self,
         path: &str,
@@ -79,6 +80,7 @@ impl OpenAI {
     }
 
     /// Send a DELETE request and deserialize the response.
+    #[allow(dead_code)]
     pub(crate) async fn delete<T: serde::de::DeserializeOwned>(
         &self,
         path: &str,
