@@ -2,7 +2,8 @@
 
 use crate::client::OpenAI;
 use crate::error::OpenAIError;
-use crate::types::chat::{ChatCompletionRequest, ChatCompletionResponse};
+use crate::streaming::SseStream;
+use crate::types::chat::{ChatCompletionChunk, ChatCompletionRequest, ChatCompletionResponse};
 
 /// Access chat-related endpoints.
 pub struct Chat<'a> {
@@ -36,6 +37,45 @@ impl<'a> Completions<'a> {
         request: ChatCompletionRequest,
     ) -> Result<ChatCompletionResponse, OpenAIError> {
         self.client.post("/chat/completions", &request).await
+    }
+
+    /// Create a streaming chat completion.
+    ///
+    /// Returns a `Stream<Item = Result<ChatCompletionChunk>>`.
+    /// The `stream` field in the request is automatically set to `true`.
+    pub async fn create_stream(
+        &self,
+        mut request: ChatCompletionRequest,
+    ) -> Result<SseStream<ChatCompletionChunk>, OpenAIError> {
+        request.stream = Some(true);
+        let response = self
+            .client
+            .request(reqwest::Method::POST, "/chat/completions")
+            .json(&request)
+            .send()
+            .await?;
+
+        let status = response.status();
+        if !status.is_success() {
+            let status_code = status.as_u16();
+            let body = response.text().await.unwrap_or_default();
+            if let Ok(error_resp) = serde_json::from_str::<crate::error::ErrorResponse>(&body) {
+                return Err(OpenAIError::ApiError {
+                    status: status_code,
+                    message: error_resp.error.message,
+                    type_: error_resp.error.type_,
+                    code: error_resp.error.code,
+                });
+            }
+            return Err(OpenAIError::ApiError {
+                status: status_code,
+                message: body,
+                type_: None,
+                code: None,
+            });
+        }
+
+        Ok(SseStream::new(response))
     }
 }
 
