@@ -7,6 +7,7 @@ use crate::error::{ErrorResponse, OpenAIError};
 use crate::resources::audio::Audio;
 use crate::resources::chat::Chat;
 use crate::resources::embeddings::Embeddings;
+use crate::resources::files::Files;
 use crate::resources::images::Images;
 use crate::resources::models::Models;
 use crate::resources::moderations::Moderations;
@@ -54,6 +55,11 @@ impl OpenAI {
     /// Access the Models resource.
     pub fn models(&self) -> Models<'_> {
         Models::new(self)
+    }
+
+    /// Access the Files resource.
+    pub fn files(&self) -> Files<'_> {
+        Files::new(self)
     }
 
     /// Access the Images resource.
@@ -121,6 +127,18 @@ impl OpenAI {
             .send()
             .await?;
         Self::handle_response(response).await
+    }
+
+    /// Send a GET request and return raw bytes.
+    pub(crate) async fn get_raw(&self, path: &str) -> Result<bytes::Bytes, OpenAIError> {
+        let response = self.request(reqwest::Method::GET, path).send().await?;
+
+        let status = response.status();
+        if status.is_success() {
+            Ok(response.bytes().await?)
+        } else {
+            Err(Self::extract_error(status.as_u16(), response).await)
+        }
     }
 
     /// Send a POST request with JSON body and return raw bytes (for binary responses like audio).
