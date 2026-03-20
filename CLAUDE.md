@@ -150,6 +150,47 @@ This crate aims for production-grade quality. Every change must pass this bar:
 - Error types are precise — `ApiError { status, type_, message, code }`, not `String`
 - Streaming returns `impl Stream<Item = Result<T, E>>` — never collects internally
 
+**Architecture (async patterns):**
+
+```rust
+// 1. Config trait — provider-agnostic (OpenAI, Azure, custom)
+pub trait Config: Send + Sync {
+    fn base_url(&self) -> &str;
+    fn auth_header(&self) -> HeaderMap;
+    fn api_version(&self) -> Option<&str>;  // Azure needs this
+}
+// Client is generic: Client<C: Config> — supports dyn dispatch too
+
+// 2. Middleware trait (Tower-style, but simpler)
+pub trait Middleware: Send + Sync {
+    fn on_request(&self, req: &mut reqwest::RequestBuilder);
+    fn on_response(&self, resp: &reqwest::Response);
+    fn on_error(&self, err: &OpenAIError);
+}
+// Chain: LoggingMiddleware, MetricsMiddleware, RateLimitTracker
+
+// 3. Streaming — zero-copy SSE with backpressure
+// SseStream<T> implements futures::Stream + Unpin
+// Consumer controls pace via .next().await — no internal buffering
+// Supports: ChatCompletionChunk, ResponseStreamEvent, RunStreamEvent
+
+// 4. Pagination — async iterator
+pub struct Paginator<T> { /* cursor, has_more, fetch_next() */ }
+impl<T> Stream for Paginator<T> { /* auto-fetches next page */ }
+// Usage: client.files().list_all().collect::<Vec<_>>().await
+
+// 5. Resource access — zero-cost, borrows client
+// client.chat() returns Chat<'_> (borrows, no clone, no Arc)
+// Resources are thin wrappers — all state lives in Client
+
+// 6. Retry — configurable strategy
+pub trait RetryPolicy: Send + Sync {
+    fn should_retry(&self, attempt: u32, error: &OpenAIError) -> Option<Duration>;
+}
+// Default: ExponentialBackoff { max_retries: 2, jitter: true }
+// Per-request override: client.chat().with_retry(NoRetry).completions().create(req)
+```
+
 **Tests:**
 - Every endpoint: at least one mockito test with realistic fixture JSON
 - Every type: at least one deserialization test with a full real-world response
@@ -160,6 +201,8 @@ This crate aims for production-grade quality. Every change must pass this bar:
 - DRY: if 3+ resources share a pattern (list/retrieve/delete), extract a macro or trait
 - Pagination: list endpoints return a typed `ListResponse<T>` with `has_more` + cursor
 - Multipart: use a shared helper for file upload endpoints (audio, files, images)
+- `#[must_use]` on all builders — compiler warns if you forget `.await`
+- All public types: `Clone + Debug + Send + Sync` (thread-safe by default)
 
 **On every iteration:**
 - Run `cargo test --test openapi_coverage -- --nocapture` to see current gaps
