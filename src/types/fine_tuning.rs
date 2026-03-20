@@ -134,6 +134,8 @@ pub struct FineTuningJobEvent {
     pub created_at: i64,
     pub level: FineTuningEventLevel,
     pub message: String,
+    /// Unstructured event data — varies by event type (metrics, checkpoints, etc.).
+    /// Kept as `serde_json::Value` because the shape is genuinely dynamic.
     #[serde(default)]
     pub data: Option<serde_json::Value>,
     #[serde(default, rename = "type")]

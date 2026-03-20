@@ -294,7 +294,7 @@ pub enum ResponseTool {
         #[serde(skip_serializing_if = "Option::is_none")]
         search_context_size: Option<String>,
         #[serde(skip_serializing_if = "Option::is_none")]
-        user_location: Option<serde_json::Value>,
+        user_location: Option<crate::types::chat::WebSearchUserLocation>,
     },
     /// File search tool.
     #[serde(rename = "file_search")]
@@ -303,13 +303,13 @@ pub enum ResponseTool {
         #[serde(skip_serializing_if = "Option::is_none")]
         max_num_results: Option<i64>,
         #[serde(skip_serializing_if = "Option::is_none")]
-        ranking_options: Option<serde_json::Value>,
+        ranking_options: Option<ResponseRankingOptions>,
     },
     /// Code interpreter tool.
     #[serde(rename = "code_interpreter")]
     CodeInterpreter {
         #[serde(skip_serializing_if = "Option::is_none")]
-        container: Option<serde_json::Value>,
+        container: Option<String>,
     },
     /// Computer use tool.
     #[serde(rename = "computer")]
@@ -321,7 +321,8 @@ pub enum ResponseTool {
         #[serde(skip_serializing_if = "Option::is_none")]
         server_url: Option<String>,
         #[serde(skip_serializing_if = "Option::is_none")]
-        allowed_tools: Option<serde_json::Value>,
+        allowed_tools: Option<Vec<String>>,
+        /// Approval config — polymorphic ("never" | filter object), kept as Value.
         #[serde(skip_serializing_if = "Option::is_none")]
         require_approval: Option<serde_json::Value>,
     },
@@ -335,6 +336,17 @@ pub enum ResponseTool {
         #[serde(skip_serializing_if = "Option::is_none")]
         size: Option<String>,
     },
+}
+
+/// Ranking options for file search in the Responses API.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ResponseRankingOptions {
+    /// Score threshold (0.0–1.0).
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub score_threshold: Option<f64>,
+    /// Ranker to use: "auto" or "default-2024-11-15".
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub ranker: Option<String>,
 }
 
 // ── Response types ──

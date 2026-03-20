@@ -136,7 +136,7 @@ pub struct ChatCompletionRequest {
     /// DEPRECATED: Controls how the model calls functions.
     /// Use tool_choice instead.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub function_call: Option<serde_json::Value>,
+    pub function_call: Option<FunctionCallOption>,
 }
 
 impl ChatCompletionRequest {
@@ -475,6 +475,17 @@ pub struct FunctionDef {
     pub parameters: Option<serde_json::Value>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub strict: Option<bool>,
+}
+
+/// DEPRECATED: How the model calls functions (use ToolChoice instead).
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(untagged)]
+#[non_exhaustive]
+pub enum FunctionCallOption {
+    /// "none" or "auto".
+    Mode(String),
+    /// Force a specific function.
+    Named { name: String },
 }
 
 /// How the model picks tools.
