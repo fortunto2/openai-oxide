@@ -224,6 +224,48 @@ impl ResponseCreateRequest {
         self.model = model.into();
         self
     }
+
+    /// Set text output configuration (format + verbosity).
+    pub fn text(mut self, text: ResponseTextConfig) -> Self {
+        self.text = Some(text);
+        self
+    }
+
+    /// Set top_p (nucleus sampling).
+    pub fn top_p(mut self, top_p: f64) -> Self {
+        self.top_p = Some(top_p);
+        self
+    }
+
+    /// Enable or disable parallel tool calls.
+    pub fn parallel_tool_calls(mut self, parallel: bool) -> Self {
+        self.parallel_tool_calls = Some(parallel);
+        self
+    }
+
+    /// Set metadata key-value pairs.
+    pub fn metadata(mut self, metadata: std::collections::HashMap<String, String>) -> Self {
+        self.metadata = Some(metadata);
+        self
+    }
+
+    /// Set include fields for additional response data.
+    pub fn include(mut self, include: Vec<String>) -> Self {
+        self.include = Some(include);
+        self
+    }
+
+    /// Set service tier ("auto", "default", "flex", "scale", "priority").
+    pub fn service_tier(mut self, tier: impl Into<String>) -> Self {
+        self.service_tier = Some(tier.into());
+        self
+    }
+
+    /// Set end user identifier.
+    pub fn user(mut self, user: impl Into<String>) -> Self {
+        self.user = Some(user.into());
+        self
+    }
 }
 
 /// Reasoning configuration for o-series models.
@@ -392,18 +434,35 @@ pub struct ResponseAnnotation {
 }
 
 /// Output item in a response.
+///
+/// Covers multiple output types: `message`, `function_call`, `web_search_call`, etc.
 #[derive(Debug, Clone, Deserialize)]
 pub struct ResponseOutputItem {
+    /// Item type: "message", "function_call", "function_call_output", "web_search_call", etc.
     #[serde(rename = "type")]
     pub type_: String,
+    /// Unique ID of the output item.
     #[serde(default)]
     pub id: Option<String>,
+    /// Role (for message items).
     #[serde(default)]
     pub role: Option<Role>,
+    /// Content blocks (for message items).
     #[serde(default)]
     pub content: Option<Vec<ResponseOutputContent>>,
+    /// Item status: "in_progress", "completed", "incomplete".
     #[serde(default)]
     pub status: Option<String>,
+    // ── function_call fields ──
+    /// Function name (for function_call items).
+    #[serde(default)]
+    pub name: Option<String>,
+    /// JSON-encoded arguments string (for function_call items).
+    #[serde(default)]
+    pub arguments: Option<String>,
+    /// Unique call ID for matching with function_call_output (for function_call items).
+    #[serde(default)]
+    pub call_id: Option<String>,
 }
 
 /// Content block within an output item.
@@ -500,6 +559,17 @@ pub struct Response {
     pub max_tool_calls: Option<i64>,
 }
 
+/// A function call extracted from response output.
+#[derive(Debug, Clone)]
+pub struct FunctionCall {
+    /// The call ID for matching with function_call_output.
+    pub call_id: String,
+    /// Function name.
+    pub name: String,
+    /// Parsed JSON arguments.
+    pub arguments: serde_json::Value,
+}
+
 impl Response {
     /// Get the text output, concatenating all text content blocks.
     pub fn output_text(&self) -> String {
@@ -516,6 +586,38 @@ impl Response {
             }
         }
         result
+    }
+
+    /// Extract all function calls from the response output.
+    pub fn function_calls(&self) -> Vec<FunctionCall> {
+        self.output
+            .iter()
+            .filter(|item| item.type_ == "function_call")
+            .map(|item| {
+                let call_id = item
+                    .call_id
+                    .as_deref()
+                    .or(item.id.as_deref())
+                    .unwrap_or("unknown")
+                    .to_string();
+                let name = item.name.clone().unwrap_or_default();
+                let arguments = item
+                    .arguments
+                    .as_deref()
+                    .and_then(|s| serde_json::from_str(s).ok())
+                    .unwrap_or(serde_json::Value::Object(Default::default()));
+                FunctionCall {
+                    call_id,
+                    name,
+                    arguments,
+                }
+            })
+            .collect()
+    }
+
+    /// Check if the response has any function calls.
+    pub fn has_function_calls(&self) -> bool {
+        self.output.iter().any(|item| item.type_ == "function_call")
     }
 }
 

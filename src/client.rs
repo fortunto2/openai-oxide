@@ -75,6 +75,11 @@ impl OpenAI {
         let options = config.initial_options();
         let http = reqwest::Client::builder()
             .timeout(Duration::from_secs(config.timeout_secs))
+            .tcp_nodelay(true)
+            .tcp_keepalive(Some(Duration::from_secs(30)))
+            .pool_idle_timeout(Some(Duration::from_secs(90)))
+            .pool_max_idle_per_host(4)
+            .gzip(true)
             .build()
             .expect("failed to build HTTP client");
         Self {
@@ -431,8 +436,18 @@ impl OpenAI {
         let status = response.status();
         if status.is_success() {
             let body = response.text().await?;
-            let value: T = serde_json::from_str(&body)?;
-            Ok(value)
+            match serde_json::from_str::<T>(&body) {
+                Ok(value) => Ok(value),
+                Err(e) => {
+                    tracing::error!(
+                        error = %e,
+                        body_len = body.len(),
+                        body_preview = %body.chars().take(500).collect::<String>(),
+                        "failed to deserialize API response"
+                    );
+                    Err(e.into())
+                }
+            }
         } else {
             Err(Self::extract_error(status.as_u16(), response).await)
         }
