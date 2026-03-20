@@ -113,7 +113,10 @@ mod tests {
 
         let job = client.fine_tuning().jobs().create(request).await.unwrap();
         assert_eq!(job.id, "ftjob-abc123");
-        assert_eq!(job.status, "running");
+        assert_eq!(
+            job.status,
+            crate::types::fine_tuning::FineTuningStatus::Running
+        );
         mock.assert_async().await;
     }
 
@@ -166,7 +169,10 @@ mod tests {
             .cancel("ftjob-abc123")
             .await
             .unwrap();
-        assert_eq!(job.status, "cancelled");
+        assert_eq!(
+            job.status,
+            crate::types::fine_tuning::FineTuningStatus::Cancelled
+        );
         mock.assert_async().await;
     }
 
@@ -201,7 +207,10 @@ mod tests {
             .await
             .unwrap();
         assert_eq!(events.data.len(), 1);
-        assert_eq!(events.data[0].level, "info");
+        assert_eq!(
+            events.data[0].level,
+            crate::types::fine_tuning::FineTuningEventLevel::Info
+        );
         mock.assert_async().await;
     }
 }

@@ -4,6 +4,32 @@ use serde::{Deserialize, Serialize};
 
 use super::common::Role;
 
+/// Status of a thread run.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+#[non_exhaustive]
+pub enum RunStatus {
+    Queued,
+    InProgress,
+    RequiresAction,
+    Cancelling,
+    Cancelled,
+    Failed,
+    Completed,
+    Incomplete,
+    Expired,
+}
+
+/// Status of a vector store.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+#[non_exhaustive]
+pub enum VectorStoreStatus {
+    Expired,
+    InProgress,
+    Completed,
+}
+
 // ── Tool types ──
 
 /// A tool available to an assistant or run.
@@ -288,7 +314,7 @@ pub struct Run {
     pub created_at: i64,
     pub thread_id: String,
     pub assistant_id: String,
-    pub status: String,
+    pub status: RunStatus,
     #[serde(default)]
     pub model: Option<String>,
     #[serde(default)]
@@ -341,7 +367,7 @@ pub struct VectorStore {
     pub created_at: i64,
     #[serde(default)]
     pub name: Option<String>,
-    pub status: String,
+    pub status: VectorStoreStatus,
     #[serde(default)]
     pub file_counts: Option<VectorStoreFileCounts>,
     #[serde(default)]
@@ -470,7 +496,7 @@ mod tests {
             "tools": []
         }"#;
         let run: Run = serde_json::from_str(json).unwrap();
-        assert_eq!(run.status, "completed");
+        assert_eq!(run.status, RunStatus::Completed);
     }
 
     #[test]

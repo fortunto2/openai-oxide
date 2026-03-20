@@ -128,7 +128,7 @@ mod tests {
             .await
             .unwrap();
         assert_eq!(run.id, "run_abc123");
-        assert_eq!(run.status, "queued");
+        assert_eq!(run.status, crate::types::beta::RunStatus::Queued);
         mock.assert_async().await;
     }
 
@@ -161,7 +161,7 @@ mod tests {
             .cancel("run_abc123")
             .await
             .unwrap();
-        assert_eq!(run.status, "cancelling");
+        assert_eq!(run.status, crate::types::beta::RunStatus::Cancelling);
         mock.assert_async().await;
     }
 }

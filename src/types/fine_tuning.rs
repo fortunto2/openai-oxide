@@ -2,6 +2,29 @@
 
 use serde::{Deserialize, Serialize};
 
+/// Status of a fine-tuning job.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+#[non_exhaustive]
+pub enum FineTuningStatus {
+    ValidatingFiles,
+    Queued,
+    Running,
+    Succeeded,
+    Failed,
+    Cancelled,
+}
+
+/// Event severity level.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+#[non_exhaustive]
+pub enum FineTuningEventLevel {
+    Info,
+    Warn,
+    Error,
+}
+
 // ── Request types ──
 
 /// Request body for `POST /fine_tuning/jobs`.
@@ -73,7 +96,7 @@ pub struct FineTuningJob {
     pub created_at: i64,
     pub model: String,
     pub training_file: String,
-    pub status: String,
+    pub status: FineTuningStatus,
     #[serde(default)]
     pub fine_tuned_model: Option<String>,
     #[serde(default)]
@@ -109,7 +132,7 @@ pub struct FineTuningJobEvent {
     pub id: String,
     pub object: String,
     pub created_at: i64,
-    pub level: String,
+    pub level: FineTuningEventLevel,
     pub message: String,
     #[serde(default)]
     pub data: Option<serde_json::Value>,
@@ -153,7 +176,7 @@ mod tests {
         }"#;
         let job: FineTuningJob = serde_json::from_str(json).unwrap();
         assert_eq!(job.id, "ftjob-abc123");
-        assert_eq!(job.status, "running");
+        assert_eq!(job.status, FineTuningStatus::Running);
     }
 
     #[test]
@@ -166,7 +189,7 @@ mod tests {
             "message": "Training started"
         }"#;
         let event: FineTuningJobEvent = serde_json::from_str(json).unwrap();
-        assert_eq!(event.level, "info");
+        assert_eq!(event.level, FineTuningEventLevel::Info);
         assert_eq!(event.message, "Training started");
     }
 }
