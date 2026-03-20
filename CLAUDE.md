@@ -40,16 +40,17 @@ src/
   client.rs           — OpenAI client (api_key, base_url, org, retries, Beta struct, with_options, azure())
   error.rs            — OpenAIError enum
   config.rs           — ClientConfig (timeouts, retries, base_url, default_headers, default_query, azure auth mode)
+  pagination.rs       — Paginator<T> async stream for automatic cursor-based pagination
   request_options.rs  — RequestOptions (per-request headers, query, extra_body, timeout)
   streaming.rs        — SSE stream parser
   resources/
     audio.rs          — transcriptions, translations, speech
-    batches.rs        — batch create/list/retrieve/cancel
+    batches.rs        — batch create/list/list_page/list_auto/retrieve/cancel
     beta/             — assistants, threads, runs, vector_stores (v2 header)
     chat/             — chat.completions.create() + create_stream() + create_raw()
     embeddings.rs     — embeddings.create() + create_raw()
-    files.rs          — file CRUD + content download
-    fine_tuning.rs    — fine_tuning.jobs CRUD + events
+    files.rs          — file CRUD + content download + list_page/list_auto
+    fine_tuning.rs    — fine_tuning.jobs CRUD + events + list_page/list_auto
     images.rs         — generate, edit, create_variation
     models.rs         — list, retrieve, delete
     moderations.rs    — moderations.create()
@@ -57,13 +58,13 @@ src/
     uploads.rs        — upload create/cancel/complete
   types/
     audio.rs          — Transcription, Translation, Speech types + AudioVoice, AudioResponseFormat, SpeechResponseFormat enums
-    batch.rs          — Batch types + BatchStatus enum
-    beta.rs           — Assistant, Thread, Run, VectorStore types + RunStatus, VectorStoreStatus enums
+    batch.rs          — Batch types + BatchStatus enum + BatchListParams
+    beta.rs           — Assistant, Thread, Run, VectorStore types + RunStatus, VectorStoreStatus enums + AssistantListParams, MessageListParams, VectorStoreListParams, RunListParams
     chat.rs           — ChatCompletionRequest, ChatCompletionResponse, ... + ImageDetail, FunctionCallOption enums
-    common.rs         — Usage, Role, FinishReason, ServiceTier, ReasoningEffort, SearchContextSize, AutoOrFixed<T>, MaxResponseTokens
+    common.rs         — Usage, Role, FinishReason, ServiceTier, ReasoningEffort, SearchContextSize, SortOrder, AutoOrFixed<T>, MaxResponseTokens
     embedding.rs      — Embedding types + EncodingFormat enum
-    file.rs           — FileObject, FileDeleted types + FilePurpose, FileStatus enums
-    fine_tuning.rs    — FineTuningJob types + FineTuningStatus, FineTuningEventLevel enums
+    file.rs           — FileObject, FileDeleted types + FilePurpose, FileStatus enums + FileListParams
+    fine_tuning.rs    — FineTuningJob types + FineTuningStatus, FineTuningEventLevel enums + FineTuningJobListParams, FineTuningEventListParams
     image.rs          — Image types + ImageQuality, ImageSize, ImageStyle, ImageOutputFormat, ImageBackground, ImageModeration enums + Image::save()
     model.rs          — Model types
     moderation.rs     — Moderation types
@@ -84,15 +85,15 @@ src/
 | Models | `client.models().list()` / `retrieve()` / `delete()` | Done |
 | Images | `client.images().generate()` / `edit()` / `create_variation()` | Done |
 | Audio | `client.audio().transcriptions()` / `translations()` / `speech()` | Done |
-| Files | `client.files().create()` / `list()` / `retrieve()` / `delete()` / `content()` | Done |
-| Fine-tuning | `client.fine_tuning().jobs().create()` / `list()` / `cancel()` / `list_events()` | Done |
+| Files | `client.files().create()` / `list()` / `list_page()` / `list_auto()` / `retrieve()` / `delete()` / `content()` | Done |
+| Fine-tuning | `client.fine_tuning().jobs().create()` / `list()` / `list_page()` / `list_auto()` / `cancel()` / `list_events()` / `list_events_auto()` | Done |
 | Moderations | `client.moderations().create()` | Done |
-| Batches | `client.batches().create()` / `list()` / `retrieve()` / `cancel()` | Done |
+| Batches | `client.batches().create()` / `list()` / `list_page()` / `list_auto()` / `retrieve()` / `cancel()` | Done |
 | Uploads | `client.uploads().create()` / `cancel()` / `complete()` | Done |
-| Assistants (beta) | `client.beta().assistants()` CRUD | Done |
-| Threads (beta) | `client.beta().threads()` CRUD + messages | Done |
-| Runs (beta) | `client.beta().runs(thread_id)` CRUD | Done |
-| Vector Stores (beta) | `client.beta().vector_stores()` CRUD | Done |
+| Assistants (beta) | `client.beta().assistants()` CRUD + `list_page()` / `list_auto()` | Done |
+| Threads (beta) | `client.beta().threads()` CRUD + messages `list_page()` / `list_auto()` | Done |
+| Runs (beta) | `client.beta().runs(thread_id)` CRUD + `list()` / `list_page()` / `list_auto()` | Done |
+| Vector Stores (beta) | `client.beta().vector_stores()` CRUD + `list_page()` / `list_auto()` | Done |
 | Realtime (beta) | `client.beta().realtime().sessions().create()` | Done |
 
 **Current version:** v0.7.0 on crates.io
@@ -184,10 +185,11 @@ pub trait Middleware: Send + Sync {
 // Consumer controls pace via .next().await — no internal buffering
 // Supports: ChatCompletionChunk, ResponseStreamEvent, RunStreamEvent
 
-// 4. Pagination — async iterator
-pub struct Paginator<T> { /* cursor, has_more, fetch_next() */ }
-impl<T> Stream for Paginator<T> { /* auto-fetches next page */ }
-// Usage: client.files().list_all().collect::<Vec<_>>().await
+// 4. Pagination — async iterator (IMPLEMENTED)
+pub struct Paginator<T> { /* boxed fetch closure, buffer, cursor, done */ }
+impl<T> Stream for Paginator<T> { /* auto-fetches next page via cursor */ }
+// Usage: client.files().list_auto(FileListParams::new()).collect::<Vec<_>>().await
+// Single page: client.files().list_page(FileListParams::new().limit(10)).await
 
 // 5. Resource access — zero-cost, borrows client
 // client.chat() returns Chat<'_> (borrows, no clone, no Arc)

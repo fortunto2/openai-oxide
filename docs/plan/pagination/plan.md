@@ -3,7 +3,7 @@
 **Track ID:** pagination_20260320
 **Spec:** [spec.md](./spec.md)
 **Created:** 2026-03-20
-**Status:** [ ] Not Started
+**Status:** [x] Complete
 
 ## Overview
 
@@ -59,23 +59,23 @@ Add `list_page(params)` and `list_auto(params)` to each resource.
 
 ### Tasks
 
-- [ ] Task 4.1: Update CLAUDE.md — add `pagination.rs` to architecture, add `Paginator` to implemented APIs, note `list_page()`/`list_auto()` pattern
-- [ ] Task 4.2: Update README.md — add pagination usage example showing `list_page()` with params and `list_auto()` with `StreamExt::collect()`
-- [ ] Task 4.3: Remove dead code — check for unused imports, verify no orphaned types
+- [x] Task 4.1: Update CLAUDE.md — add `pagination.rs` to architecture, add `Paginator` to implemented APIs, note `list_page()`/`list_auto()` pattern
+- [x] Task 4.2: Update README.md — add pagination usage example showing `list_page()` with params and `list_auto()` with `StreamExt::collect()`
+- [x] Task 4.3: Remove dead code — check for unused imports, verify no orphaned types
 
 ### Verification
 
-- [ ] CLAUDE.md reflects current project state
-- [ ] `cargo clippy -- -D warnings` clean
-- [ ] `cargo test` all pass
+- [x] CLAUDE.md reflects current project state
+- [x] `cargo clippy -- -D warnings` clean
+- [x] `cargo test` all pass
 
 ## Final Verification
 
-- [ ] All acceptance criteria from spec met
-- [ ] Tests pass
-- [ ] Linter clean
-- [ ] Build succeeds
-- [ ] Documentation up to date
+- [x] All acceptance criteria from spec met
+- [x] Tests pass
+- [x] Linter clean
+- [x] Build succeeds
+- [x] Documentation up to date
 
 ## Context Handoff
 

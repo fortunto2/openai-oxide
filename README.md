@@ -132,6 +132,33 @@ if let Some(images) = &resp.data {
 }
 ```
 
+## Pagination
+
+All list endpoints support automatic cursor-based pagination:
+
+```rust
+use futures_util::StreamExt;
+use openai_oxide::{OpenAI, types::file::FileListParams};
+
+#[tokio::main]
+async fn main() -> Result<(), openai_oxide::OpenAIError> {
+    let client = OpenAI::from_env()?;
+
+    // Single page with params
+    let page = client.files().list_page(
+        FileListParams::new().limit(10)
+    ).await?;
+
+    // Auto-paginate through all results
+    let mut stream = client.files().list_auto(FileListParams::new());
+    while let Some(file) = stream.next().await {
+        let file = file?;
+        println!("{}: {}", file.id, file.filename);
+    }
+    Ok(())
+}
+```
+
 ## Configuration
 
 ```rust
