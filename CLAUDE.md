@@ -103,9 +103,17 @@ cargo fmt -- --check
 
 ## Reference
 
-Study the Python SDK at https://github.com/openai/openai-python:
-- `src/openai/resources/` — one module per API resource
-- `src/openai/types/` — Pydantic models for requests/responses
+**Python SDK (LOCAL — use Read tool, NOT WebFetch):**
+`~/startups/shared/openai-python/src/openai/`
+- `resources/` — one module per API resource
+- `types/` — Pydantic models for requests/responses
+- READ these files directly before implementing anything
+
+**OpenAPI spec (in repo):** `tests/openapi.yaml`
+- Official OpenAI spec with code samples
+- Use for validation tests and fixture generation
+
+**RULE:** For EVERY type, Read the Python source first. Copy field names exactly. Do not guess.
 
 ## Don't
 
