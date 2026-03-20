@@ -200,6 +200,33 @@ data: {"id":"c2","object":"chat.completion.chunk","created":1,"model":"gpt-4o","
     }
 
     #[test]
+    fn test_parse_sse_response_stream_events() {
+        use crate::types::responses::ResponseStreamEvent;
+
+        let raw = r#"data: {"type":"response.created","response":{"id":"resp-1","object":"response","status":"in_progress"}}
+
+data: {"type":"response.output_text.delta","delta":"Hello","output_index":0,"content_index":0}
+
+data: {"type":"response.output_text.delta","delta":" world","output_index":0,"content_index":0}
+
+data: {"type":"response.completed","response":{"id":"resp-1","status":"completed"}}
+
+data: [DONE]
+"#;
+
+        let events = parse_sse_events::<ResponseStreamEvent>(raw);
+        assert_eq!(events.len(), 4);
+        assert_eq!(events[0].as_ref().unwrap().type_, "response.created");
+        assert_eq!(
+            events[1].as_ref().unwrap().type_,
+            "response.output_text.delta"
+        );
+        assert_eq!(events[1].as_ref().unwrap().data["delta"], "Hello");
+        assert_eq!(events[2].as_ref().unwrap().data["delta"], " world");
+        assert_eq!(events[3].as_ref().unwrap().type_, "response.completed");
+    }
+
+    #[test]
     fn test_parse_sse_invalid_json() {
         let raw = "data: {invalid json}\n\ndata: [DONE]\n";
         let events = parse_sse_events::<ChatCompletionChunk>(raw);

@@ -45,9 +45,17 @@ pub struct ResponseCreateRequest {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub instructions: Option<String>,
 
-    /// Tools available.
+    /// Tools available to the model.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub tools: Option<Vec<serde_json::Value>>,
+    pub tools: Option<Vec<ResponseTool>>,
+
+    /// How the model selects tools.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub tool_choice: Option<serde_json::Value>,
+
+    /// Whether to enable parallel tool calls.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub parallel_tool_calls: Option<bool>,
 
     /// Previous response ID for multi-turn.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -57,21 +65,49 @@ pub struct ResponseCreateRequest {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub temperature: Option<f64>,
 
+    /// Nucleus sampling parameter.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub top_p: Option<f64>,
+
     /// Max output tokens.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub max_output_tokens: Option<i64>,
 
-    /// Store for evals.
+    /// Truncation strategy: "auto" or "disabled".
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub truncation: Option<String>,
+
+    /// Reasoning configuration for o-series models.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub reasoning: Option<Reasoning>,
+
+    /// Store for evals/distillation.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub store: Option<bool>,
 
-    /// Metadata.
+    /// Metadata key-value pairs.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub metadata: Option<std::collections::HashMap<String, String>>,
+
+    /// Additional data to include in response.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub include: Option<Vec<String>>,
 
     /// Whether to stream.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub stream: Option<bool>,
+
+    /// Service tier.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub service_tier: Option<String>,
+
+    /// End user identifier.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub user: Option<String>,
+
+    /// Text output configuration.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub text: Option<ResponseTextConfig>,
 }
 
 impl ResponseCreateRequest {
@@ -81,14 +117,106 @@ impl ResponseCreateRequest {
             input: None,
             instructions: None,
             tools: None,
+            tool_choice: None,
+            parallel_tool_calls: None,
             previous_response_id: None,
             temperature: None,
+            top_p: None,
             max_output_tokens: None,
+            truncation: None,
+            reasoning: None,
             store: None,
             metadata: None,
+            include: None,
             stream: None,
+            service_tier: None,
+            user: None,
+            text: None,
         }
     }
+}
+
+/// Reasoning configuration for o-series models.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct Reasoning {
+    /// Effort level: "none", "minimal", "low", "medium", "high", "xhigh".
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub effort: Option<String>,
+    /// Summary mode: "auto", "concise", "detailed".
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub summary: Option<String>,
+}
+
+/// Text output configuration.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ResponseTextConfig {
+    /// Format configuration.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub format: Option<serde_json::Value>,
+}
+
+/// Tool types for the Responses API.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(tag = "type")]
+pub enum ResponseTool {
+    /// Function tool.
+    #[serde(rename = "function")]
+    Function {
+        name: String,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        description: Option<String>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        parameters: Option<serde_json::Value>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        strict: Option<bool>,
+    },
+    /// Web search tool.
+    #[serde(rename = "web_search")]
+    WebSearch {
+        #[serde(skip_serializing_if = "Option::is_none")]
+        search_context_size: Option<String>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        user_location: Option<serde_json::Value>,
+    },
+    /// File search tool.
+    #[serde(rename = "file_search")]
+    FileSearch {
+        vector_store_ids: Vec<String>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        max_num_results: Option<i64>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        ranking_options: Option<serde_json::Value>,
+    },
+    /// Code interpreter tool.
+    #[serde(rename = "code_interpreter")]
+    CodeInterpreter {
+        #[serde(skip_serializing_if = "Option::is_none")]
+        container: Option<serde_json::Value>,
+    },
+    /// Computer use tool.
+    #[serde(rename = "computer")]
+    ComputerUse {},
+    /// MCP tool.
+    #[serde(rename = "mcp")]
+    Mcp {
+        server_label: String,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        server_url: Option<String>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        allowed_tools: Option<serde_json::Value>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        require_approval: Option<serde_json::Value>,
+    },
+    /// Image generation tool.
+    #[serde(rename = "image_generation")]
+    ImageGeneration {
+        #[serde(skip_serializing_if = "Option::is_none")]
+        model: Option<String>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        quality: Option<String>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        size: Option<String>,
+    },
 }
 
 // ── Response types ──
@@ -128,6 +256,24 @@ pub struct ResponseUsage {
     pub output_tokens: Option<i64>,
     #[serde(default)]
     pub total_tokens: Option<i64>,
+    #[serde(default)]
+    pub input_tokens_details: Option<InputTokensDetails>,
+    #[serde(default)]
+    pub output_tokens_details: Option<OutputTokensDetails>,
+}
+
+/// Input token usage details.
+#[derive(Debug, Clone, Deserialize)]
+pub struct InputTokensDetails {
+    #[serde(default)]
+    pub cached_tokens: Option<i64>,
+}
+
+/// Output token usage details.
+#[derive(Debug, Clone, Deserialize)]
+pub struct OutputTokensDetails {
+    #[serde(default)]
+    pub reasoning_tokens: Option<i64>,
 }
 
 /// Response from `POST /responses`.
@@ -143,7 +289,9 @@ pub struct Response {
     #[serde(default)]
     pub error: Option<serde_json::Value>,
     #[serde(default)]
-    pub instructions: Option<String>,
+    pub incomplete_details: Option<serde_json::Value>,
+    #[serde(default)]
+    pub instructions: Option<serde_json::Value>,
     #[serde(default)]
     pub metadata: Option<std::collections::HashMap<String, String>>,
     #[serde(default)]
@@ -156,6 +304,30 @@ pub struct Response {
     pub previous_response_id: Option<String>,
     #[serde(default)]
     pub usage: Option<ResponseUsage>,
+    #[serde(default)]
+    pub tools: Option<Vec<serde_json::Value>>,
+    #[serde(default)]
+    pub tool_choice: Option<serde_json::Value>,
+    #[serde(default)]
+    pub parallel_tool_calls: Option<bool>,
+    #[serde(default)]
+    pub truncation: Option<String>,
+    #[serde(default)]
+    pub reasoning: Option<Reasoning>,
+    #[serde(default)]
+    pub service_tier: Option<String>,
+    #[serde(default)]
+    pub text: Option<serde_json::Value>,
+    #[serde(default)]
+    pub completed_at: Option<f64>,
+    #[serde(default)]
+    pub background: Option<bool>,
+    #[serde(default)]
+    pub user: Option<String>,
+    #[serde(default)]
+    pub top_logprobs: Option<i64>,
+    #[serde(default)]
+    pub max_tool_calls: Option<i64>,
 }
 
 impl Response {
@@ -177,6 +349,20 @@ impl Response {
     }
 }
 
+// ── Streaming types ──
+
+/// A streaming event from the Responses API.
+/// Events are prefixed with `event:` in SSE and have a `data:` JSON payload.
+#[derive(Debug, Clone, Deserialize)]
+pub struct ResponseStreamEvent {
+    /// Event type, e.g. "response.created", "response.output_text.delta".
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// The full payload (varies per event type).
+    #[serde(flatten)]
+    pub data: serde_json::Value,
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -188,6 +374,56 @@ mod tests {
         let json = serde_json::to_value(&req).unwrap();
         assert_eq!(json["model"], "gpt-4o");
         assert_eq!(json["input"], "Hello");
+    }
+
+    #[test]
+    fn test_serialize_request_with_tools() {
+        let mut req = ResponseCreateRequest::new("gpt-4o");
+        req.input = Some("Search for Rust tutorials".into());
+        req.tools = Some(vec![
+            ResponseTool::WebSearch {
+                search_context_size: Some("medium".into()),
+                user_location: None,
+            },
+            ResponseTool::Function {
+                name: "get_weather".into(),
+                description: Some("Get weather".into()),
+                parameters: Some(serde_json::json!({"type": "object"})),
+                strict: Some(true),
+            },
+        ]);
+        req.reasoning = Some(Reasoning {
+            effort: Some("high".into()),
+            summary: Some("auto".into()),
+        });
+        req.truncation = Some("auto".into());
+        req.include = Some(vec!["file_search_call.results".into()]);
+
+        let json = serde_json::to_value(&req).unwrap();
+        let tools = json["tools"].as_array().unwrap();
+        assert_eq!(tools.len(), 2);
+        assert_eq!(tools[0]["type"], "web_search");
+        assert_eq!(tools[1]["type"], "function");
+        assert_eq!(tools[1]["name"], "get_weather");
+        assert_eq!(tools[1]["strict"], true);
+        assert_eq!(json["reasoning"]["effort"], "high");
+        assert_eq!(json["truncation"], "auto");
+    }
+
+    #[test]
+    fn test_serialize_request_with_mcp_tool() {
+        let mut req = ResponseCreateRequest::new("gpt-4o");
+        req.input = Some("Hello".into());
+        req.tools = Some(vec![ResponseTool::Mcp {
+            server_label: "my-server".into(),
+            server_url: Some("https://example.com/mcp".into()),
+            allowed_tools: None,
+            require_approval: Some(serde_json::json!("never")),
+        }]);
+
+        let json = serde_json::to_value(&req).unwrap();
+        assert_eq!(json["tools"][0]["type"], "mcp");
+        assert_eq!(json["tools"][0]["server_label"], "my-server");
     }
 
     #[test]
@@ -222,5 +458,67 @@ mod tests {
         assert_eq!(resp.output_text(), "Hello! How can I help?");
         let usage = resp.usage.as_ref().unwrap();
         assert_eq!(usage.total_tokens, Some(16));
+    }
+
+    #[test]
+    fn test_deserialize_full_response() {
+        let json = r#"{
+            "id": "resp-abc123",
+            "object": "response",
+            "created_at": 1677610602.0,
+            "model": "o3",
+            "output": [{
+                "type": "message",
+                "id": "msg-abc123",
+                "role": "assistant",
+                "status": "completed",
+                "content": [{
+                    "type": "output_text",
+                    "text": "Result",
+                    "annotations": []
+                }]
+            }],
+            "status": "completed",
+            "service_tier": "default",
+            "truncation": "auto",
+            "reasoning": {"effort": "high", "summary": "auto"},
+            "parallel_tool_calls": true,
+            "max_output_tokens": 4096,
+            "completed_at": 1677610605.0,
+            "tools": [{"type": "web_search"}],
+            "usage": {
+                "input_tokens": 100,
+                "output_tokens": 50,
+                "total_tokens": 150,
+                "input_tokens_details": {"cached_tokens": 20},
+                "output_tokens_details": {"reasoning_tokens": 30}
+            }
+        }"#;
+
+        let resp: Response = serde_json::from_str(json).unwrap();
+        assert_eq!(resp.service_tier, Some("default".into()));
+        assert_eq!(resp.truncation, Some("auto".into()));
+        let reasoning = resp.reasoning.as_ref().unwrap();
+        assert_eq!(reasoning.effort, Some("high".into()));
+        assert_eq!(resp.parallel_tool_calls, Some(true));
+        assert_eq!(resp.completed_at, Some(1677610605.0));
+        let usage = resp.usage.as_ref().unwrap();
+        let input_details = usage.input_tokens_details.as_ref().unwrap();
+        assert_eq!(input_details.cached_tokens, Some(20));
+        let output_details = usage.output_tokens_details.as_ref().unwrap();
+        assert_eq!(output_details.reasoning_tokens, Some(30));
+    }
+
+    #[test]
+    fn test_deserialize_stream_event() {
+        let json = r#"{
+            "type": "response.output_text.delta",
+            "delta": "Hello",
+            "output_index": 0,
+            "content_index": 0
+        }"#;
+        let event: ResponseStreamEvent = serde_json::from_str(json).unwrap();
+        assert_eq!(event.type_, "response.output_text.delta");
+        assert_eq!(event.data["delta"], "Hello");
     }
 }

@@ -2,7 +2,8 @@
 
 use crate::client::OpenAI;
 use crate::error::OpenAIError;
-use crate::types::responses::{Response, ResponseCreateRequest};
+use crate::streaming::SseStream;
+use crate::types::responses::{Response, ResponseCreateRequest, ResponseStreamEvent};
 
 /// Access the Responses API endpoints.
 pub struct Responses<'a> {
@@ -19,6 +20,45 @@ impl<'a> Responses<'a> {
     /// `POST /responses`
     pub async fn create(&self, request: ResponseCreateRequest) -> Result<Response, OpenAIError> {
         self.client.post("/responses", &request).await
+    }
+
+    /// Create a streaming response.
+    ///
+    /// Returns a `Stream<Item = Result<ResponseStreamEvent>>`.
+    /// The `stream` field in the request is automatically set to `true`.
+    pub async fn create_stream(
+        &self,
+        mut request: ResponseCreateRequest,
+    ) -> Result<SseStream<ResponseStreamEvent>, OpenAIError> {
+        request.stream = Some(true);
+        let response = self
+            .client
+            .request(reqwest::Method::POST, "/responses")
+            .json(&request)
+            .send()
+            .await?;
+
+        let status = response.status();
+        if !status.is_success() {
+            let status_code = status.as_u16();
+            let body = response.text().await.unwrap_or_default();
+            if let Ok(error_resp) = serde_json::from_str::<crate::error::ErrorResponse>(&body) {
+                return Err(OpenAIError::ApiError {
+                    status: status_code,
+                    message: error_resp.error.message,
+                    type_: error_resp.error.type_,
+                    code: error_resp.error.code,
+                });
+            }
+            return Err(OpenAIError::ApiError {
+                status: status_code,
+                message: body,
+                type_: None,
+                code: None,
+            });
+        }
+
+        Ok(SseStream::new(response))
     }
 
     /// Retrieve a response by ID.
@@ -131,6 +171,38 @@ mod tests {
 
         let client = OpenAI::with_config(ClientConfig::new("sk-test").base_url(server.url()));
         let response = client.responses().retrieve("resp-abc123").await.unwrap();
+        assert_eq!(response.id, "resp-abc123");
+        mock.assert_async().await;
+    }
+
+    #[tokio::test]
+    async fn test_responses_create_with_tools() {
+        use crate::types::responses::{Reasoning, ResponseTool};
+
+        let mut server = mockito::Server::new_async().await;
+        let mock = server
+            .mock("POST", "/responses")
+            .match_header("authorization", "Bearer sk-test")
+            .with_status(200)
+            .with_header("content-type", "application/json")
+            .with_body(RESPONSE_JSON)
+            .create_async()
+            .await;
+
+        let client = OpenAI::with_config(ClientConfig::new("sk-test").base_url(server.url()));
+        let mut request = ResponseCreateRequest::new("gpt-4o");
+        request.input = Some("Search for Rust".into());
+        request.tools = Some(vec![ResponseTool::WebSearch {
+            search_context_size: Some("medium".into()),
+            user_location: None,
+        }]);
+        request.reasoning = Some(Reasoning {
+            effort: Some("high".into()),
+            summary: None,
+        });
+        request.truncation = Some("auto".into());
+
+        let response = client.responses().create(request).await.unwrap();
         assert_eq!(response.id, "resp-abc123");
         mock.assert_async().await;
     }
