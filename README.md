@@ -24,23 +24,29 @@ Benchmarked against the official Python SDK and 2 Rust alternatives. All use the
 
 | Test | oxide | Python | Speedup |
 |------|------:|-------:|--------:|
-| Streaming TTFT | **588ms** | 659ms | 11% faster |
+| Streaming TTFT | **588ms** | 659ms | **11% faster** |
+| Stream FC (early parse) | **909ms** | — | **-38% vs normal FC** |
 | Parallel 3x fan-out | **926ms** | 1462ms | **37% faster** |
-| Hedged 2x race | **893ms** | 958ms | 7% faster |
-| **WebSocket plain text** | **721ms** | — | -22% vs HTTP |
-| **WebSocket multi-turn** | **1650ms** | — | -19% vs HTTP |
+| Hedged 2x race | **893ms** | 958ms | **7% faster** |
+| WebSocket plain text | **721ms** | — | **-22% vs HTTP** |
+| WebSocket multi-turn | **1650ms** | — | **-19% vs HTTP** |
 
-**oxide wins 9/12 tests** vs Python. Biggest wins on parallelism (HTTP/2 multiplex) and streaming.
+**oxide wins 10/13 tests** vs Python. No other Rust or Python client has WebSocket mode, streaming FC early parse, hedged requests, or parallel fan-out built in.
 
-Why it's fast:
-- **HTTP/2** with keep-alive while idle — connections stay warm between requests
-- **Adaptive flow control** windows — auto-tuned per connection
-- **Parallel fan-out** — `tokio::join!` + HTTP/2 multiplex = 3 answers for the price of 1
-- **Hedged requests** — send 2 copies, take fastest; P99 reduced 50-96%
-- **Streaming TTFT** — first token in ~588ms vs ~1s for full response
-- **WebSocket mode** — persistent `wss://` connection, -40% for agent loops
-- **Fast-path retry** — no loop overhead for successful requests
-- **Zero-copy SSE** streaming parser (no external deps)
+### Why it's fast
+
+| Technique | What it does | Savings |
+|-----------|-------------|---------|
+| HTTP/2 keep-alive while idle | Connections stay warm between requests | -200ms cold start |
+| HTTP/2 adaptive windows | Auto-tuned flow control | Better throughput |
+| Parallel fan-out | `tokio::join!` + HTTP/2 multiplex | 3 answers ≈ 1 latency |
+| Hedged requests | Send 2 copies, take fastest | P99 -50-96% |
+| Streaming TTFT | First token in ~588ms | -36% vs full response |
+| Stream FC early parse | Yield function call on `arguments.done` | -38% vs `response.completed` |
+| WebSocket mode | Persistent `wss://` — no per-turn HTTP | -20-25% per request |
+| Prompt cache key | Server-side system prompt caching | Up to -80% TTFT |
+| Fast-path retry | No loop overhead for successful requests | -5-15ms |
+| gzip + from_slice | Compressed responses, zero-copy deser | Bandwidth + alloc |
 
 Run the benchmark yourself:
 ```bash
