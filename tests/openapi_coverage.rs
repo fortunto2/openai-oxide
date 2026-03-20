@@ -362,3 +362,162 @@ fn chat_request_new_fields_serialize() {
     assert_eq!(json["web_search_options"]["search_context_size"], "medium");
     assert_eq!(json["max_tokens"], 1000);
 }
+
+// ── Phase 3: New coverage tests ──
+
+#[test]
+fn file_object_status_enum_deserialize() {
+    use openai_oxide::types::file::{FilePurpose, FileStatus};
+    let json = serde_json::json!({
+        "id": "file-abc",
+        "object": "file",
+        "bytes": 100,
+        "created_at": 1700000000_i64,
+        "filename": "data.jsonl",
+        "purpose": "fine-tune",
+        "status": "processed"
+    });
+    let file: openai_oxide::types::file::FileObject = serde_json::from_value(json).unwrap();
+    assert_eq!(file.purpose, FilePurpose::FineTune);
+    assert_eq!(file.status, FileStatus::Processed);
+}
+
+#[test]
+fn batch_status_enum_deserialize() {
+    use openai_oxide::types::batch::BatchStatus;
+    let json = serde_json::json!({
+        "id": "batch_abc",
+        "object": "batch",
+        "endpoint": "/v1/chat/completions",
+        "input_file_id": "file-abc",
+        "completion_window": "24h",
+        "status": "in_progress",
+        "created_at": 1700000000_i64
+    });
+    let batch: openai_oxide::types::batch::Batch = serde_json::from_value(json).unwrap();
+    assert_eq!(batch.status, BatchStatus::InProgress);
+}
+
+#[test]
+fn upload_status_enum_deserialize() {
+    use openai_oxide::types::upload::UploadStatus;
+    let json = serde_json::json!({
+        "id": "upload_abc",
+        "object": "upload",
+        "bytes": 2000000,
+        "filename": "data.jsonl",
+        "purpose": "fine-tune",
+        "status": "completed",
+        "created_at": 1700000000_i64
+    });
+    let upload: openai_oxide::types::upload::Upload = serde_json::from_value(json).unwrap();
+    assert_eq!(upload.status, UploadStatus::Completed);
+}
+
+#[test]
+fn fine_tuning_status_enum_deserialize() {
+    use openai_oxide::types::fine_tuning::FineTuningStatus;
+    let json = serde_json::json!({
+        "id": "ftjob-abc",
+        "object": "fine_tuning.job",
+        "created_at": 1700000000_i64,
+        "model": "gpt-4o-mini",
+        "training_file": "file-abc",
+        "status": "validating_files",
+        "organization_id": "org-123",
+        "result_files": [],
+        "seed": 42
+    });
+    let job: openai_oxide::types::fine_tuning::FineTuningJob =
+        serde_json::from_value(json).unwrap();
+    assert_eq!(job.status, FineTuningStatus::ValidatingFiles);
+}
+
+#[test]
+fn image_enums_serialize() {
+    use openai_oxide::types::image::*;
+    let mut req = ImageGenerateRequest::new("test image");
+    req.quality = Some(ImageQuality::Hd);
+    req.size = Some(ImageSize::S1024x1024);
+    req.style = Some(ImageStyle::Natural);
+    req.output_format = Some(ImageOutputFormat::Webp);
+    req.background = Some(ImageBackground::Transparent);
+    req.moderation = Some(ImageModeration::Auto);
+    req.response_format = Some(ImageResponseFormat::B64Json);
+
+    let json = serde_json::to_value(&req).unwrap();
+    assert_eq!(json["quality"], "hd");
+    assert_eq!(json["size"], "1024x1024");
+    assert_eq!(json["style"], "natural");
+    assert_eq!(json["output_format"], "webp");
+    assert_eq!(json["background"], "transparent");
+    assert_eq!(json["moderation"], "auto");
+    assert_eq!(json["response_format"], "b64_json");
+}
+
+#[test]
+fn audio_voice_enum_serialize() {
+    use openai_oxide::types::audio::*;
+    let req = SpeechRequest::new("Hello", "tts-1", AudioVoice::Shimmer);
+    let json = serde_json::to_value(&req).unwrap();
+    assert_eq!(json["voice"], "shimmer");
+}
+
+#[test]
+fn encoding_format_enum_serialize() {
+    use openai_oxide::types::embedding::*;
+    let mut req = EmbeddingRequest::new("text-embedding-3-small", "hello");
+    req.encoding_format = Some(EncodingFormat::Base64);
+    let json = serde_json::to_value(&req).unwrap();
+    assert_eq!(json["encoding_format"], "base64");
+}
+
+#[test]
+fn auto_or_fixed_round_trip() {
+    use openai_oxide::types::common::AutoOrFixed;
+
+    // Auto variant
+    let auto: AutoOrFixed<i64> = serde_json::from_str(r#""auto""#).unwrap();
+    assert_eq!(auto, AutoOrFixed::Auto);
+    assert_eq!(serde_json::to_string(&auto).unwrap(), r#""auto""#);
+
+    // Fixed variant (integer)
+    let fixed: AutoOrFixed<i64> = serde_json::from_str("10").unwrap();
+    assert_eq!(fixed, AutoOrFixed::Fixed(10));
+    assert_eq!(serde_json::to_string(&fixed).unwrap(), "10");
+
+    // Fixed variant (float)
+    let fixed_f: AutoOrFixed<f64> = serde_json::from_str("0.5").unwrap();
+    assert_eq!(fixed_f, AutoOrFixed::Fixed(0.5));
+}
+
+#[test]
+fn max_response_tokens_round_trip() {
+    use openai_oxide::types::common::MaxResponseTokens;
+
+    // Inf variant
+    let inf: MaxResponseTokens = serde_json::from_str(r#""inf""#).unwrap();
+    assert_eq!(inf, MaxResponseTokens::Inf);
+    assert_eq!(serde_json::to_string(&inf).unwrap(), r#""inf""#);
+
+    // Fixed variant
+    let fixed: MaxResponseTokens = serde_json::from_str("4096").unwrap();
+    assert_eq!(fixed, MaxResponseTokens::Fixed(4096));
+    assert_eq!(serde_json::to_string(&fixed).unwrap(), "4096");
+}
+
+#[test]
+fn function_call_option_round_trip() {
+    use openai_oxide::types::chat::FunctionCallOption;
+
+    // Mode variant
+    let mode: FunctionCallOption = serde_json::from_str(r#""auto""#).unwrap();
+    assert_eq!(serde_json::to_value(&mode).unwrap(), "auto");
+
+    // Named variant
+    let named: FunctionCallOption = serde_json::from_str(r#"{"name": "get_weather"}"#).unwrap();
+    assert_eq!(
+        serde_json::to_value(&named).unwrap(),
+        serde_json::json!({"name": "get_weather"})
+    );
+}

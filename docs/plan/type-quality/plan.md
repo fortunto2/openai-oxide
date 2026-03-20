@@ -44,7 +44,7 @@ Replace Value fields with proper typed enums/structs. Group by pattern.
 
 - [x] `cargo test` — all tests pass
 - [x] `serde_json::Value` count in `src/types/` ≤ 7 (5 parameters + event data + PredictionContent.content + response stream data)
-- [ ] Deserialization round-trip tests for `AutoOrFixed`, `MaxResponseTokens`, `FunctionCallOption`
+- [x] Deserialization round-trip tests for `AutoOrFixed`, `MaxResponseTokens`, `FunctionCallOption`
 
 ## Phase 3: OpenAPI Coverage Expansion
 
@@ -52,14 +52,14 @@ Expand `tests/openapi_coverage.rs` to validate new enum fields against the spec.
 
 ### Tasks
 
-- [ ] Task 3.1: Add coverage tests for File, Batch, Upload, FineTuning schemas — validate status enum values match spec.
-- [ ] Task 3.2: Add coverage tests for Image, Audio, Embedding schemas — validate format/quality/size enum values match spec.
-- [ ] Task 3.3: Add deserialization round-trip tests for new types — `AutoOrFixed`, `MaxResponseTokens`, `FunctionCallOption`, `UserLocation`, `RankingOptions` in `tests/` or inline.
+- [x] Task 3.1: Add coverage tests for File, Batch, Upload, FineTuning schemas — validate status enum values match spec.
+- [x] Task 3.2: Add coverage tests for Image, Audio, Embedding schemas — validate format/quality/size enum values match spec.
+- [x] Task 3.3: Add deserialization round-trip tests for new types — `AutoOrFixed`, `MaxResponseTokens`, `FunctionCallOption`, `UserLocation`, `RankingOptions` in `tests/` or inline.
 
 ### Verification
 
-- [ ] OpenAPI coverage ≥8 schemas tested (up from 4)
-- [ ] All new enum variants match OpenAPI spec values
+- [x] OpenAPI coverage ≥8 schemas tested (up from 4, now 18 tests)
+- [x] All new enum variants match OpenAPI spec values
 
 ## Phase 4: Docs & Cleanup
 
