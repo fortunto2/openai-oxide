@@ -29,4 +29,18 @@ serde_yaml = "0.9"
 openapiv3 = "2"
 
 [features]
+default = ["chat", "responses", "embeddings", "images", "audio", "files", "fine-tuning", "models", "moderations", "batches", "uploads", "beta"]
+full = ["chat", "responses", "embeddings", "images", "audio", "files", "fine-tuning", "models", "moderations", "batches", "uploads", "beta"]
+chat = []
+responses = []
+embeddings = []
+images = []
+audio = []
+files = []
+fine-tuning = []
+models = []
+moderations = []
+batches = []
+uploads = []
+beta = []
 live-tests = []

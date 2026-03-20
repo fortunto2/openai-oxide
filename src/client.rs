@@ -6,21 +6,37 @@ use crate::azure::AzureConfig;
 use crate::config::ClientConfig;
 use crate::error::{ErrorResponse, OpenAIError};
 use crate::request_options::RequestOptions;
+#[cfg(feature = "audio")]
 use crate::resources::audio::Audio;
+#[cfg(feature = "batches")]
 use crate::resources::batches::Batches;
+#[cfg(feature = "beta")]
 use crate::resources::beta::assistants::Assistants;
+#[cfg(feature = "beta")]
 use crate::resources::beta::realtime::Realtime;
+#[cfg(feature = "beta")]
 use crate::resources::beta::runs::Runs;
+#[cfg(feature = "beta")]
 use crate::resources::beta::threads::Threads;
+#[cfg(feature = "beta")]
 use crate::resources::beta::vector_stores::VectorStores;
+#[cfg(feature = "chat")]
 use crate::resources::chat::Chat;
+#[cfg(feature = "embeddings")]
 use crate::resources::embeddings::Embeddings;
+#[cfg(feature = "files")]
 use crate::resources::files::Files;
+#[cfg(feature = "fine-tuning")]
 use crate::resources::fine_tuning::FineTuning;
+#[cfg(feature = "images")]
 use crate::resources::images::Images;
+#[cfg(feature = "models")]
 use crate::resources::models::Models;
+#[cfg(feature = "moderations")]
 use crate::resources::moderations::Moderations;
+#[cfg(feature = "responses")]
 use crate::resources::responses::Responses;
+#[cfg(feature = "uploads")]
 use crate::resources::uploads::Uploads;
 
 /// Status codes that trigger a retry.
@@ -115,61 +131,73 @@ impl OpenAI {
     }
 
     /// Access the Batches resource.
+    #[cfg(feature = "batches")]
     pub fn batches(&self) -> Batches<'_> {
         Batches::new(self)
     }
 
     /// Access the Uploads resource.
+    #[cfg(feature = "uploads")]
     pub fn uploads(&self) -> Uploads<'_> {
         Uploads::new(self)
     }
 
     /// Access the Beta resources (Assistants, Threads, Runs, Vector Stores).
+    #[cfg(feature = "beta")]
     pub fn beta(&self) -> Beta<'_> {
         Beta { client: self }
     }
 
     /// Access the Audio resource.
+    #[cfg(feature = "audio")]
     pub fn audio(&self) -> Audio<'_> {
         Audio::new(self)
     }
 
     /// Access the Chat resource.
+    #[cfg(feature = "chat")]
     pub fn chat(&self) -> Chat<'_> {
         Chat::new(self)
     }
 
     /// Access the Models resource.
+    #[cfg(feature = "models")]
     pub fn models(&self) -> Models<'_> {
         Models::new(self)
     }
 
     /// Access the Fine-tuning resource.
+    #[cfg(feature = "fine-tuning")]
     pub fn fine_tuning(&self) -> FineTuning<'_> {
         FineTuning::new(self)
     }
 
     /// Access the Files resource.
+    #[cfg(feature = "files")]
     pub fn files(&self) -> Files<'_> {
         Files::new(self)
     }
 
     /// Access the Images resource.
+    #[cfg(feature = "images")]
     pub fn images(&self) -> Images<'_> {
         Images::new(self)
     }
 
     /// Access the Moderations resource.
+    #[cfg(feature = "moderations")]
     pub fn moderations(&self) -> Moderations<'_> {
         Moderations::new(self)
     }
 
     /// Access the Responses resource.
+    #[cfg(feature = "responses")]
     pub fn responses(&self) -> Responses<'_> {
         Responses::new(self)
     }
 
     /// Access the Embeddings resource.
+    #[cfg(feature = "embeddings")]
     pub fn embeddings(&self) -> Embeddings<'_> {
         Embeddings::new(self)
     }
@@ -404,10 +432,12 @@ impl OpenAI {
 }
 
 /// Access beta endpoints (Assistants v2, Threads, Runs, Vector Stores).
+#[cfg(feature = "beta")]
 pub struct Beta<'a> {
     client: &'a OpenAI,
 }
 
+#[cfg(feature = "beta")]
 impl<'a> Beta<'a> {
     /// Access the Assistants resource.
     pub fn assistants(&self) -> Assistants<'_> {
