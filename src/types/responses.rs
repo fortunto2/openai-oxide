@@ -32,6 +32,27 @@ pub struct ResponseInputItem {
     pub content: serde_json::Value,
 }
 
+/// How the model selects tools in the Responses API.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(untagged)]
+#[non_exhaustive]
+pub enum ResponseToolChoice {
+    /// "none", "auto", or "required".
+    Mode(String),
+    /// Force a specific function by name.
+    Named {
+        #[serde(rename = "type")]
+        type_: String,
+        function: ResponseToolChoiceFunction,
+    },
+}
+
+/// Specifies which function to call in tool choice.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ResponseToolChoiceFunction {
+    pub name: String,
+}
+
 /// Request body for `POST /responses`.
 #[derive(Debug, Clone, Serialize)]
 pub struct ResponseCreateRequest {
@@ -52,7 +73,7 @@ pub struct ResponseCreateRequest {
 
     /// How the model selects tools.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub tool_choice: Option<serde_json::Value>,
+    pub tool_choice: Option<ResponseToolChoice>,
 
     /// Whether to enable parallel tool calls.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -154,6 +175,12 @@ impl ResponseCreateRequest {
         self
     }
 
+    /// Set how the model selects tools.
+    pub fn tool_choice(mut self, choice: ResponseToolChoice) -> Self {
+        self.tool_choice = Some(choice);
+        self
+    }
+
     /// Set previous response ID for multi-turn.
     pub fn previous_response_id(mut self, id: impl Into<String>) -> Self {
         self.previous_response_id = Some(id.into());
@@ -211,9 +238,36 @@ pub struct Reasoning {
 /// Text output configuration.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ResponseTextConfig {
-    /// Format configuration.
+    /// Format configuration (text, json_object, or json_schema).
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub format: Option<serde_json::Value>,
+    pub format: Option<ResponseTextFormat>,
+    /// Verbosity level for the response.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub verbosity: Option<String>,
+}
+
+/// Text output format for the Responses API.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(tag = "type")]
+#[non_exhaustive]
+pub enum ResponseTextFormat {
+    /// Plain text output.
+    #[serde(rename = "text")]
+    Text,
+    /// JSON object output.
+    #[serde(rename = "json_object")]
+    JsonObject,
+    /// JSON schema output with structured schema.
+    #[serde(rename = "json_schema")]
+    JsonSchema {
+        name: String,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        description: Option<String>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        schema: Option<serde_json::Value>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        strict: Option<bool>,
+    },
 }
 
 /// Tool types for the Responses API.
@@ -283,6 +337,46 @@ pub enum ResponseTool {
 
 // ── Response types ──
 
+/// An error returned when the model fails to generate a Response.
+#[derive(Debug, Clone, Deserialize)]
+pub struct ResponseError {
+    /// The error code (e.g. "server_error", "rate_limit_exceeded", "invalid_prompt").
+    pub code: String,
+    /// A human-readable description of the error.
+    pub message: String,
+}
+
+/// Details about why the response is incomplete.
+#[derive(Debug, Clone, Deserialize)]
+pub struct IncompleteDetails {
+    /// The reason: "max_output_tokens" or "content_filter".
+    #[serde(default)]
+    pub reason: Option<String>,
+}
+
+/// An annotation on response output text (e.g. URL citation, file citation).
+#[derive(Debug, Clone, Deserialize)]
+pub struct ResponseAnnotation {
+    /// Annotation type (e.g. "url_citation", "file_citation", "file_path").
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// Start index in the text.
+    #[serde(default)]
+    pub start_index: Option<i64>,
+    /// End index in the text.
+    #[serde(default)]
+    pub end_index: Option<i64>,
+    /// URL for url_citation annotations.
+    #[serde(default)]
+    pub url: Option<String>,
+    /// Title for url_citation annotations.
+    #[serde(default)]
+    pub title: Option<String>,
+    /// File ID for file_citation/file_path annotations.
+    #[serde(default)]
+    pub file_id: Option<String>,
+}
+
 /// Output item in a response.
 #[derive(Debug, Clone, Deserialize)]
 pub struct ResponseOutputItem {
@@ -306,7 +400,7 @@ pub struct ResponseOutputContent {
     #[serde(default)]
     pub text: Option<String>,
     #[serde(default)]
-    pub annotations: Option<Vec<serde_json::Value>>,
+    pub annotations: Option<Vec<ResponseAnnotation>>,
 }
 
 /// Usage for the Responses API.
@@ -349,11 +443,11 @@ pub struct Response {
     #[serde(default)]
     pub status: Option<String>,
     #[serde(default)]
-    pub error: Option<serde_json::Value>,
+    pub error: Option<ResponseError>,
     #[serde(default)]
-    pub incomplete_details: Option<serde_json::Value>,
+    pub incomplete_details: Option<IncompleteDetails>,
     #[serde(default)]
-    pub instructions: Option<serde_json::Value>,
+    pub instructions: Option<String>,
     #[serde(default)]
     pub metadata: Option<std::collections::HashMap<String, String>>,
     #[serde(default)]
@@ -367,9 +461,9 @@ pub struct Response {
     #[serde(default)]
     pub usage: Option<ResponseUsage>,
     #[serde(default)]
-    pub tools: Option<Vec<serde_json::Value>>,
+    pub tools: Option<Vec<ResponseTool>>,
     #[serde(default)]
-    pub tool_choice: Option<serde_json::Value>,
+    pub tool_choice: Option<ResponseToolChoice>,
     #[serde(default)]
     pub parallel_tool_calls: Option<bool>,
     #[serde(default)]
@@ -379,7 +473,7 @@ pub struct Response {
     #[serde(default)]
     pub service_tier: Option<String>,
     #[serde(default)]
-    pub text: Option<serde_json::Value>,
+    pub text: Option<ResponseTextConfig>,
     #[serde(default)]
     pub completed_at: Option<f64>,
     #[serde(default)]
@@ -489,6 +583,43 @@ mod tests {
     }
 
     #[test]
+    fn test_serialize_tool_choice() {
+        let mode = ResponseToolChoice::Mode("auto".into());
+        let json = serde_json::to_value(&mode).unwrap();
+        assert_eq!(json, "auto");
+
+        let named = ResponseToolChoice::Named {
+            type_: "function".into(),
+            function: ResponseToolChoiceFunction {
+                name: "get_weather".into(),
+            },
+        };
+        let json = serde_json::to_value(&named).unwrap();
+        assert_eq!(json["type"], "function");
+        assert_eq!(json["function"]["name"], "get_weather");
+    }
+
+    #[test]
+    fn test_serialize_text_format() {
+        let fmt = ResponseTextFormat::JsonSchema {
+            name: "math_result".into(),
+            description: None,
+            schema: Some(
+                serde_json::json!({"type": "object", "properties": {"answer": {"type": "number"}}}),
+            ),
+            strict: Some(true),
+        };
+        let json = serde_json::to_value(&fmt).unwrap();
+        assert_eq!(json["type"], "json_schema");
+        assert_eq!(json["name"], "math_result");
+        assert_eq!(json["strict"], true);
+
+        let text = ResponseTextFormat::Text;
+        let json = serde_json::to_value(&text).unwrap();
+        assert_eq!(json["type"], "text");
+    }
+
+    #[test]
     fn test_deserialize_response() {
         let json = r#"{
             "id": "resp-abc123",
@@ -548,6 +679,9 @@ mod tests {
             "max_output_tokens": 4096,
             "completed_at": 1677610605.0,
             "tools": [{"type": "web_search"}],
+            "tool_choice": "auto",
+            "instructions": "Be helpful",
+            "text": {"format": {"type": "text"}},
             "usage": {
                 "input_tokens": 100,
                 "output_tokens": 50,
@@ -564,11 +698,79 @@ mod tests {
         assert_eq!(reasoning.effort, Some("high".into()));
         assert_eq!(resp.parallel_tool_calls, Some(true));
         assert_eq!(resp.completed_at, Some(1677610605.0));
+        assert_eq!(resp.instructions, Some("Be helpful".into()));
+        // tool_choice echoed back as "auto"
+        assert!(resp.tool_choice.is_some());
+        // text config echoed back
+        let text = resp.text.as_ref().unwrap();
+        assert!(text.format.is_some());
         let usage = resp.usage.as_ref().unwrap();
         let input_details = usage.input_tokens_details.as_ref().unwrap();
         assert_eq!(input_details.cached_tokens, Some(20));
         let output_details = usage.output_tokens_details.as_ref().unwrap();
         assert_eq!(output_details.reasoning_tokens, Some(30));
+    }
+
+    #[test]
+    fn test_deserialize_response_with_error() {
+        let json = r#"{
+            "id": "resp-err",
+            "object": "response",
+            "created_at": 1677610602.0,
+            "model": "gpt-4o",
+            "output": [],
+            "status": "failed",
+            "error": {
+                "code": "server_error",
+                "message": "Internal server error"
+            },
+            "incomplete_details": {
+                "reason": "content_filter"
+            }
+        }"#;
+
+        let resp: Response = serde_json::from_str(json).unwrap();
+        let err = resp.error.as_ref().unwrap();
+        assert_eq!(err.code, "server_error");
+        assert_eq!(err.message, "Internal server error");
+        let details = resp.incomplete_details.as_ref().unwrap();
+        assert_eq!(details.reason, Some("content_filter".into()));
+    }
+
+    #[test]
+    fn test_deserialize_response_with_annotations() {
+        let json = r#"{
+            "id": "resp-ann",
+            "object": "response",
+            "created_at": 1677610602.0,
+            "model": "gpt-4o",
+            "output": [{
+                "type": "message",
+                "id": "msg-1",
+                "role": "assistant",
+                "status": "completed",
+                "content": [{
+                    "type": "output_text",
+                    "text": "According to [1]...",
+                    "annotations": [{
+                        "type": "url_citation",
+                        "start_index": 14,
+                        "end_index": 17,
+                        "url": "https://example.com",
+                        "title": "Example"
+                    }]
+                }]
+            }],
+            "status": "completed"
+        }"#;
+
+        let resp: Response = serde_json::from_str(json).unwrap();
+        let content = resp.output[0].content.as_ref().unwrap();
+        let annotations = content[0].annotations.as_ref().unwrap();
+        assert_eq!(annotations.len(), 1);
+        assert_eq!(annotations[0].type_, "url_citation");
+        assert_eq!(annotations[0].url, Some("https://example.com".into()));
+        assert_eq!(annotations[0].start_index, Some(14));
     }
 
     #[test]
@@ -597,6 +799,7 @@ mod tests {
             })
             .truncation("auto")
             .store(true)
+            .tool_choice(ResponseToolChoice::Mode("auto".into()))
             .previous_response_id("resp-prev");
 
         let json = serde_json::to_value(&req).unwrap();
@@ -609,6 +812,7 @@ mod tests {
         assert_eq!(json["reasoning"]["summary"], "concise");
         assert_eq!(json["truncation"], "auto");
         assert_eq!(json["store"], true);
+        assert_eq!(json["tool_choice"], "auto");
         assert_eq!(json["previous_response_id"], "resp-prev");
     }
 }
