@@ -3,7 +3,7 @@
 **Track ID:** ergonomics
 **Spec:** [spec.md](./spec.md)
 **Created:** 2026-03-20
-**Status:** [ ] Not Started
+**Status:** [~] In Progress (Phase 1 done)
 
 ## Overview
 
@@ -23,10 +23,10 @@ Gate each API resource behind an optional Cargo feature so users can minimize co
 
 ### Verification
 
-- [ ] `cargo test` (all features, default) — all 165+ tests pass
-- [ ] `cargo check --no-default-features` — compiles with zero resources
-- [ ] `cargo test --no-default-features --features chat` — chat tests pass
-- [ ] `cargo clippy -- -D warnings` clean
+- [x] `cargo test` (all features, default) — 165 tests pass <!-- verified 2026-03-20 -->
+- [x] `cargo check --no-default-features` — compiles (2 expected dead_code warnings for HTTP methods)
+- [x] `cargo test --no-default-features --features chat` — chat tests pass
+- [x] `cargo clippy -- -D warnings` clean
 
 ## Phase 2: BYOT Methods
 
@@ -34,7 +34,7 @@ Add `create_raw()` methods on key endpoints that accept any serializable request
 
 ### Tasks
 
-- [ ] Task 2.1: Add `post_json<B: Serialize>(&self, path, body) -> Result<serde_json::Value>` helper to `OpenAI` client in `src/client.rs`. Reuses `send_with_retry` logic with `serde_json::Value` as the deserialization target.
+- [~] Task 2.1: Add `post_json<B: Serialize>(&self, path, body) -> Result<serde_json::Value>` helper to `OpenAI` client in `src/client.rs`. Reuses `send_with_retry` logic with `serde_json::Value` as the deserialization target.
 - [ ] Task 2.2: Add `create_raw(&self, request: impl Serialize) -> Result<serde_json::Value>` to `Completions` in `src/resources/chat/mod.rs`. Gate behind `chat` feature.
 - [ ] Task 2.3: Add `create_raw(&self, request: impl Serialize) -> Result<serde_json::Value>` to `Responses` in `src/resources/responses.rs`. Gate behind `responses` feature.
 - [ ] Task 2.4: Add `create_raw(&self, request: impl Serialize) -> Result<serde_json::Value>` to `Embeddings` in `src/resources/embeddings.rs`. Gate behind `embeddings` feature.
