@@ -5,6 +5,7 @@ use std::time::Duration;
 use crate::config::ClientConfig;
 use crate::error::{ErrorResponse, OpenAIError};
 use crate::resources::chat::Chat;
+use crate::resources::embeddings::Embeddings;
 
 /// Status codes that trigger a retry.
 const RETRYABLE_STATUS_CODES: [u16; 4] = [429, 500, 502, 503];
@@ -39,6 +40,11 @@ impl OpenAI {
     /// Access the Chat resource.
     pub fn chat(&self) -> Chat<'_> {
         Chat::new(self)
+    }
+
+    /// Access the Embeddings resource.
+    pub fn embeddings(&self) -> Embeddings<'_> {
+        Embeddings::new(self)
     }
 
     /// Build a request with auth headers.
