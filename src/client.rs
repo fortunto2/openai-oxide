@@ -75,10 +75,18 @@ impl OpenAI {
         let options = config.initial_options();
         let http = reqwest::Client::builder()
             .timeout(Duration::from_secs(config.timeout_secs))
+            // TCP: low latency
             .tcp_nodelay(true)
             .tcp_keepalive(Some(Duration::from_secs(30)))
-            .pool_idle_timeout(Some(Duration::from_secs(90)))
+            // Connection pool: keep warm
+            .pool_idle_timeout(Some(Duration::from_secs(300)))
             .pool_max_idle_per_host(4)
+            // HTTP/2: keep connection alive even when idle (avoids TLS re-handshake)
+            .http2_keep_alive_interval(Some(Duration::from_secs(20)))
+            .http2_keep_alive_timeout(Duration::from_secs(10))
+            .http2_keep_alive_while_idle(true)
+            .http2_adaptive_window(true)
+            // Compression
             .gzip(true)
             .build()
             .expect("failed to build HTTP client");
