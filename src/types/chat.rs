@@ -272,6 +272,7 @@ impl ChatCompletionRequest {
 /// Stop sequences: either a single string or up to 4 strings.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(untagged)]
+#[non_exhaustive]
 pub enum Stop {
     Single(String),
     Multiple(Vec<String>),
@@ -342,6 +343,7 @@ pub struct ApproximateLocation {
 /// Response format constraint.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(tag = "type")]
+#[non_exhaustive]
 pub enum ResponseFormat {
     #[serde(rename = "text")]
     Text,
@@ -368,6 +370,7 @@ pub struct JsonSchema {
 /// A message in the conversation (request side).
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(tag = "role")]
+#[non_exhaustive]
 pub enum ChatCompletionMessageParam {
     #[serde(rename = "system")]
     System {
@@ -408,6 +411,7 @@ pub enum ChatCompletionMessageParam {
 /// User message content: either a plain string or a list of content parts.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(untagged)]
+#[non_exhaustive]
 pub enum UserContent {
     Text(String),
     Parts(Vec<ContentPart>),
@@ -416,6 +420,7 @@ pub enum UserContent {
 /// A content part in a multi-part user message.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(tag = "type")]
+#[non_exhaustive]
 pub enum ContentPart {
     #[serde(rename = "text")]
     Text { text: String },
@@ -465,6 +470,7 @@ pub struct FunctionDef {
 /// How the model picks tools.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(untagged)]
+#[non_exhaustive]
 pub enum ToolChoice {
     /// "none", "auto", or "required"
     Mode(String),

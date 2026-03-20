@@ -7,6 +7,7 @@ use serde::{Deserialize, Serialize};
 /// Input for the Responses API.
 #[derive(Debug, Clone, Serialize)]
 #[serde(untagged)]
+#[non_exhaustive]
 pub enum ResponseInput {
     Text(String),
     Messages(Vec<ResponseInputItem>),
@@ -218,6 +219,7 @@ pub struct ResponseTextConfig {
 /// Tool types for the Responses API.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(tag = "type")]
+#[non_exhaustive]
 pub enum ResponseTool {
     /// Function tool.
     #[serde(rename = "function")]

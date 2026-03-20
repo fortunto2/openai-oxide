@@ -7,6 +7,7 @@ use serde::{Deserialize, Serialize};
 /// Input for embeddings: a single string, array of strings, or array of token arrays.
 #[derive(Debug, Clone, Serialize)]
 #[serde(untagged)]
+#[non_exhaustive]
 pub enum EmbeddingInput {
     String(String),
     StringArray(Vec<String>),

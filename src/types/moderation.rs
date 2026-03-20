@@ -7,6 +7,7 @@ use serde::{Deserialize, Serialize};
 /// Input for moderations: a single string or array of strings.
 #[derive(Debug, Clone, Serialize)]
 #[serde(untagged)]
+#[non_exhaustive]
 pub enum ModerationInput {
     String(String),
     StringArray(Vec<String>),
