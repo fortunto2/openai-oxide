@@ -2,6 +2,95 @@
 
 use serde::{Deserialize, Serialize};
 
+// ── Tool types ──
+
+/// A tool available to an assistant or run.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(tag = "type")]
+#[non_exhaustive]
+pub enum BetaTool {
+    /// Code interpreter tool.
+    #[serde(rename = "code_interpreter")]
+    CodeInterpreter,
+    /// File search tool with optional configuration.
+    #[serde(rename = "file_search")]
+    FileSearch {
+        #[serde(skip_serializing_if = "Option::is_none")]
+        file_search: Option<FileSearchConfig>,
+    },
+    /// Function tool.
+    #[serde(rename = "function")]
+    Function { function: BetaFunctionDef },
+}
+
+/// Configuration for the file search tool.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct FileSearchConfig {
+    /// Maximum number of results (1–50).
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub max_num_results: Option<i64>,
+    /// Ranking options.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub ranking_options: Option<FileSearchRankingOptions>,
+}
+
+/// Ranking options for file search.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct FileSearchRankingOptions {
+    /// Score threshold (0.0–1.0).
+    pub score_threshold: f64,
+    /// Ranker to use: "auto" or "default_2024_08_21".
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub ranker: Option<String>,
+}
+
+/// Function definition within a beta tool.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct BetaFunctionDef {
+    pub name: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub description: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub parameters: Option<serde_json::Value>,
+}
+
+/// An annotation on message text (file citation or file path).
+#[derive(Debug, Clone, Deserialize)]
+pub struct MessageAnnotation {
+    /// Annotation type: "file_citation" or "file_path".
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// The text in the message content being annotated.
+    #[serde(default)]
+    pub text: Option<String>,
+    /// Start index of the annotation in the text.
+    #[serde(default)]
+    pub start_index: Option<i64>,
+    /// End index of the annotation in the text.
+    #[serde(default)]
+    pub end_index: Option<i64>,
+    /// File citation details (for file_citation type).
+    #[serde(default)]
+    pub file_citation: Option<FileCitation>,
+    /// File path details (for file_path type).
+    #[serde(default)]
+    pub file_path: Option<FilePath>,
+}
+
+/// File citation in an annotation.
+#[derive(Debug, Clone, Deserialize)]
+pub struct FileCitation {
+    pub file_id: String,
+    #[serde(default)]
+    pub quote: Option<String>,
+}
+
+/// File path in an annotation.
+#[derive(Debug, Clone, Deserialize)]
+pub struct FilePath {
+    pub file_id: String,
+}
+
 // ── Assistants ──
 
 /// Request body for creating an assistant.
@@ -15,7 +104,7 @@ pub struct AssistantCreateRequest {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub instructions: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub tools: Option<Vec<serde_json::Value>>,
+    pub tools: Option<Vec<BetaTool>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub metadata: Option<std::collections::HashMap<String, String>>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -53,7 +142,7 @@ pub struct Assistant {
     #[serde(default)]
     pub instructions: Option<String>,
     #[serde(default)]
-    pub tools: Vec<serde_json::Value>,
+    pub tools: Vec<BetaTool>,
     #[serde(default)]
     pub metadata: Option<std::collections::HashMap<String, String>>,
     #[serde(default)]
@@ -144,7 +233,7 @@ pub struct MessageContent {
 pub struct MessageText {
     pub value: String,
     #[serde(default)]
-    pub annotations: Vec<serde_json::Value>,
+    pub annotations: Vec<MessageAnnotation>,
 }
 
 /// Request body for creating a message.
@@ -170,7 +259,7 @@ pub struct RunCreateRequest {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub instructions: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub tools: Option<Vec<serde_json::Value>>,
+    pub tools: Option<Vec<BetaTool>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub metadata: Option<std::collections::HashMap<String, String>>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -203,7 +292,7 @@ pub struct Run {
     #[serde(default)]
     pub instructions: Option<String>,
     #[serde(default)]
-    pub tools: Vec<serde_json::Value>,
+    pub tools: Vec<BetaTool>,
     #[serde(default)]
     pub started_at: Option<i64>,
     #[serde(default)]
@@ -294,6 +383,29 @@ mod tests {
     }
 
     #[test]
+    fn test_serialize_assistant_with_tools() {
+        let mut req = AssistantCreateRequest::new("gpt-4o");
+        req.tools = Some(vec![
+            BetaTool::CodeInterpreter,
+            BetaTool::FileSearch { file_search: None },
+            BetaTool::Function {
+                function: BetaFunctionDef {
+                    name: "get_weather".into(),
+                    description: Some("Get weather".into()),
+                    parameters: Some(serde_json::json!({"type": "object"})),
+                },
+            },
+        ]);
+        let json = serde_json::to_value(&req).unwrap();
+        let tools = json["tools"].as_array().unwrap();
+        assert_eq!(tools.len(), 3);
+        assert_eq!(tools[0]["type"], "code_interpreter");
+        assert_eq!(tools[1]["type"], "file_search");
+        assert_eq!(tools[2]["type"], "function");
+        assert_eq!(tools[2]["function"]["name"], "get_weather");
+    }
+
+    #[test]
     fn test_deserialize_assistant() {
         let json = r#"{
             "id": "asst_abc123",
@@ -305,6 +417,32 @@ mod tests {
         let asst: Assistant = serde_json::from_str(json).unwrap();
         assert_eq!(asst.id, "asst_abc123");
         assert_eq!(asst.tools.len(), 1);
+        assert!(matches!(asst.tools[0], BetaTool::CodeInterpreter));
+    }
+
+    #[test]
+    fn test_deserialize_assistant_with_function_tool() {
+        let json = r#"{
+            "id": "asst_abc123",
+            "object": "assistant",
+            "created_at": 1699009709,
+            "model": "gpt-4o",
+            "tools": [{
+                "type": "function",
+                "function": {
+                    "name": "get_weather",
+                    "description": "Get current weather",
+                    "parameters": {"type": "object", "properties": {"city": {"type": "string"}}}
+                }
+            }]
+        }"#;
+        let asst: Assistant = serde_json::from_str(json).unwrap();
+        match &asst.tools[0] {
+            BetaTool::Function { function } => {
+                assert_eq!(function.name, "get_weather");
+            }
+            _ => panic!("expected function tool"),
+        }
     }
 
     #[test]
@@ -331,6 +469,63 @@ mod tests {
         }"#;
         let run: Run = serde_json::from_str(json).unwrap();
         assert_eq!(run.status, "completed");
+    }
+
+    #[test]
+    fn test_deserialize_run_with_tools() {
+        let json = r#"{
+            "id": "run_abc123",
+            "object": "thread.run",
+            "created_at": 1699012949,
+            "thread_id": "thread_abc123",
+            "assistant_id": "asst_abc123",
+            "status": "completed",
+            "tools": [
+                {"type": "code_interpreter"},
+                {"type": "file_search", "file_search": {"max_num_results": 10}}
+            ]
+        }"#;
+        let run: Run = serde_json::from_str(json).unwrap();
+        assert_eq!(run.tools.len(), 2);
+        match &run.tools[1] {
+            BetaTool::FileSearch { file_search } => {
+                assert_eq!(file_search.as_ref().unwrap().max_num_results, Some(10));
+            }
+            _ => panic!("expected file_search tool"),
+        }
+    }
+
+    #[test]
+    fn test_deserialize_message_with_annotations() {
+        let json = r#"{
+            "id": "msg_abc123",
+            "object": "thread.message",
+            "created_at": 1699012949,
+            "thread_id": "thread_abc123",
+            "role": "assistant",
+            "content": [{
+                "type": "text",
+                "text": {
+                    "value": "See file [1].",
+                    "annotations": [{
+                        "type": "file_citation",
+                        "text": "[1]",
+                        "start_index": 9,
+                        "end_index": 12,
+                        "file_citation": {
+                            "file_id": "file-abc123",
+                            "quote": "relevant text"
+                        }
+                    }]
+                }
+            }]
+        }"#;
+        let msg: Message = serde_json::from_str(json).unwrap();
+        let text = msg.content[0].text.as_ref().unwrap();
+        assert_eq!(text.annotations.len(), 1);
+        assert_eq!(text.annotations[0].type_, "file_citation");
+        let citation = text.annotations[0].file_citation.as_ref().unwrap();
+        assert_eq!(citation.file_id, "file-abc123");
     }
 
     #[test]
