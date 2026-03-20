@@ -29,6 +29,28 @@ pub struct Completions<'a> {
 }
 
 impl<'a> Completions<'a> {
+    /// Create a chat completion with a custom request type, returning raw JSON.
+    ///
+    /// Use this when you need to send fields not yet in [`ChatCompletionRequest`]
+    /// or want to work with the raw API response.
+    ///
+    /// ```ignore
+    /// use serde_json::json;
+    ///
+    /// let raw = client.chat().completions().create_raw(&json!({
+    ///     "model": "gpt-4o",
+    ///     "messages": [{"role": "user", "content": "Hi"}],
+    ///     "custom_field": true
+    /// })).await?;
+    /// println!("{}", raw["choices"][0]["message"]["content"]);
+    /// ```
+    pub async fn create_raw(
+        &self,
+        request: &impl serde::Serialize,
+    ) -> Result<serde_json::Value, crate::error::OpenAIError> {
+        self.client.post_json("/chat/completions", request).await
+    }
+
     /// Create a chat completion.
     ///
     /// `POST /chat/completions`
@@ -139,6 +161,41 @@ mod tests {
             response.choices[0].message.content.as_deref(),
             Some("Hello! How can I help?")
         );
+        mock.assert_async().await;
+    }
+
+    #[tokio::test]
+    async fn test_chat_completions_create_raw() {
+        let mut server = mockito::Server::new_async().await;
+        let mock = server
+            .mock("POST", "/chat/completions")
+            .match_header("authorization", "Bearer sk-test")
+            .match_body(mockito::Matcher::Json(serde_json::json!({
+                "model": "gpt-4o",
+                "messages": [{"role": "user", "content": "Hi"}],
+                "custom_field": true
+            })))
+            .with_status(200)
+            .with_header("content-type", "application/json")
+            .with_body(r#"{"id":"chatcmpl-raw","object":"chat.completion","custom_resp":42}"#)
+            .create_async()
+            .await;
+
+        let client = OpenAI::with_config(ClientConfig::new("sk-test").base_url(server.url()));
+
+        let raw = client
+            .chat()
+            .completions()
+            .create_raw(&serde_json::json!({
+                "model": "gpt-4o",
+                "messages": [{"role": "user", "content": "Hi"}],
+                "custom_field": true
+            }))
+            .await
+            .unwrap();
+
+        assert_eq!(raw["id"], "chatcmpl-raw");
+        assert_eq!(raw["custom_resp"], 42);
         mock.assert_async().await;
     }
 

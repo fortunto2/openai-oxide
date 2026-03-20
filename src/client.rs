@@ -262,7 +262,6 @@ impl OpenAI {
     /// This is the backbone for BYOT (bring your own types) `create_raw()` methods:
     /// accepts any `Serialize` request and returns `serde_json::Value` instead of a
     /// typed response, letting advanced users work with custom or untyped payloads.
-    #[allow(dead_code)]
     pub(crate) async fn post_json<B: serde::Serialize>(
         &self,
         path: &str,

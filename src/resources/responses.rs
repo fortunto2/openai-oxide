@@ -15,6 +15,28 @@ impl<'a> Responses<'a> {
         Self { client }
     }
 
+    /// Create a response with a custom request type, returning raw JSON.
+    ///
+    /// Use this when you need to send fields not yet in [`ResponseCreateRequest`]
+    /// or want to work with the raw API response.
+    ///
+    /// ```ignore
+    /// use serde_json::json;
+    ///
+    /// let raw = client.responses().create_raw(&json!({
+    ///     "model": "gpt-4o",
+    ///     "input": "Hello",
+    ///     "custom_field": true
+    /// })).await?;
+    /// println!("{}", raw["output"][0]["content"][0]["text"]);
+    /// ```
+    pub async fn create_raw(
+        &self,
+        request: &impl serde::Serialize,
+    ) -> Result<serde_json::Value, OpenAIError> {
+        self.client.post_json("/responses", request).await
+    }
+
     /// Create a response.
     ///
     /// `POST /responses`
@@ -155,6 +177,40 @@ mod tests {
         let response = client.responses().create(request).await.unwrap();
         assert_eq!(response.id, "resp-abc123");
         assert_eq!(response.output_text(), "Hello!");
+        mock.assert_async().await;
+    }
+
+    #[tokio::test]
+    async fn test_responses_create_raw() {
+        let mut server = mockito::Server::new_async().await;
+        let mock = server
+            .mock("POST", "/responses")
+            .match_header("authorization", "Bearer sk-test")
+            .match_body(mockito::Matcher::Json(serde_json::json!({
+                "model": "gpt-4o",
+                "input": "Hello",
+                "custom_field": "extra"
+            })))
+            .with_status(200)
+            .with_header("content-type", "application/json")
+            .with_body(r#"{"id":"resp-raw","object":"response","custom_resp":99}"#)
+            .create_async()
+            .await;
+
+        let client = OpenAI::with_config(ClientConfig::new("sk-test").base_url(server.url()));
+
+        let raw = client
+            .responses()
+            .create_raw(&serde_json::json!({
+                "model": "gpt-4o",
+                "input": "Hello",
+                "custom_field": "extra"
+            }))
+            .await
+            .unwrap();
+
+        assert_eq!(raw["id"], "resp-raw");
+        assert_eq!(raw["custom_resp"], 99);
         mock.assert_async().await;
     }
 

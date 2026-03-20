@@ -34,17 +34,17 @@ Add `create_raw()` methods on key endpoints that accept any serializable request
 
 ### Tasks
 
-- [~] Task 2.1: Add `post_json<B: Serialize>(&self, path, body) -> Result<serde_json::Value>` helper to `OpenAI` client in `src/client.rs`. Reuses `send_with_retry` logic with `serde_json::Value` as the deserialization target.
-- [ ] Task 2.2: Add `create_raw(&self, request: impl Serialize) -> Result<serde_json::Value>` to `Completions` in `src/resources/chat/mod.rs`. Gate behind `chat` feature.
-- [ ] Task 2.3: Add `create_raw(&self, request: impl Serialize) -> Result<serde_json::Value>` to `Responses` in `src/resources/responses.rs`. Gate behind `responses` feature.
-- [ ] Task 2.4: Add `create_raw(&self, request: impl Serialize) -> Result<serde_json::Value>` to `Embeddings` in `src/resources/embeddings.rs`. Gate behind `embeddings` feature.
-- [ ] Task 2.5: Add mockito tests for all three `create_raw()` methods — verify custom request fields pass through and raw JSON response is returned.
+- [x] Task 2.1: Add `post_json<B: Serialize>(&self, path, body) -> Result<serde_json::Value>` helper to `OpenAI` client in `src/client.rs`. Reuses `send_with_retry` logic with `serde_json::Value` as the deserialization target. <!-- sha:8549379 -->
+- [x] Task 2.2: Add `create_raw(&self, request: impl Serialize) -> Result<serde_json::Value>` to `Completions` in `src/resources/chat/mod.rs`. Gate behind `chat` feature.
+- [x] Task 2.3: Add `create_raw(&self, request: impl Serialize) -> Result<serde_json::Value>` to `Responses` in `src/resources/responses.rs`. Gate behind `responses` feature.
+- [x] Task 2.4: Add `create_raw(&self, request: impl Serialize) -> Result<serde_json::Value>` to `Embeddings` in `src/resources/embeddings.rs`. Gate behind `embeddings` feature.
+- [x] Task 2.5: Add mockito tests for all three `create_raw()` methods — verify custom request fields pass through and raw JSON response is returned.
 
 ### Verification
 
-- [ ] BYOT methods accept arbitrary JSON and return raw response
-- [ ] Existing typed methods still work unchanged
-- [ ] Tests pass for all three endpoints
+- [x] BYOT methods accept arbitrary JSON and return raw response
+- [x] Existing typed methods still work unchanged
+- [x] Tests pass for all three endpoints
 
 ## Phase 3: Image Save Helper
 
