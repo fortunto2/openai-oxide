@@ -75,6 +75,7 @@ src/
 | Chat Completions | `client.chat().completions().create()` | Done |
 | Chat Completions (streaming) | `client.chat().completions().create_stream()` | Done |
 | Responses | `client.responses().create()` / `retrieve()` / `delete()` | Done |
+| Responses (streaming) | `client.responses().create_stream()` | Done |
 | Embeddings | `client.embeddings().create()` | Done |
 | Models | `client.models().list()` / `retrieve()` / `delete()` | Done |
 | Images | `client.images().generate()` / `edit()` / `create_variation()` | Done |
@@ -88,6 +89,9 @@ src/
 | Threads (beta) | `client.beta().threads()` CRUD + messages | Done |
 | Runs (beta) | `client.beta().runs(thread_id)` CRUD | Done |
 | Vector Stores (beta) | `client.beta().vector_stores()` CRUD | Done |
+| Realtime (beta) | `client.beta().realtime().sessions().create()` | Done |
+
+**Current version:** v0.3.0 on crates.io
 
 Remaining (experimental/newer): Evals, Skills, Videos, Containers, legacy Completions.
 
