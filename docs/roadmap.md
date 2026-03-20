@@ -1,52 +1,65 @@
 # openai-oxide — Roadmap
 
-Goal: 100% parity with openai-python SDK. Always WebFetch Python source as reference.
+Goal: production-grade OpenAI Rust client. Beat async-openai (1.8K★) on type safety and ergonomics.
+
+Reference: https://github.com/64bit/async-openai (competitor), ~/startups/shared/openai-python/ (source of truth)
 
 ## Done
-- [x] Core client (config, auth, retries, error handling)
-- [x] Chat Completions (create, streaming, tool calling)
-- [x] Embeddings
-- [x] Models (list, retrieve, delete)
-- [x] Moderations
-- [x] Images (generate, edit, variations)
-- [x] Audio (transcriptions, translations, speech)
-- [x] Files (CRUD + content)
-- [x] Fine-tuning (jobs CRUD + events)
-- [x] Responses API (basic create)
-- [x] Assistants (CRUD)
-- [x] Threads + Messages
-- [x] Runs + submit_tool_outputs
-- [x] Vector Stores
-- [x] Batches
-- [x] Uploads
+- [x] Core client (config, auth, retries with backoff, error handling)
+- [x] Chat Completions (create, streaming, tool calling, all fields 100%)
+- [x] Responses API (create, retrieve, delete, streaming, all tool types)
+- [x] Embeddings, Models, Moderations, Images, Audio, Files
+- [x] Fine-tuning, Batches, Uploads
+- [x] Assistants, Threads + Messages, Runs, Vector Stores
+- [x] Realtime API (session creation + ephemeral token)
+- [x] Predicted outputs, prompt caching, reasoning effort
+- [x] Structured outputs with strict mode
+- [x] OpenAPI coverage tests (88% overall)
+- [x] Builder pattern for ChatCompletionRequest and ResponseCreateRequest
+- [x] Pre-commit: tests + OpenAPI coverage + clippy + quality checks
 
-## Priority 1: Advanced Features (current)
-- [ ] OpenAPI spec validation tests — fetch openapi.yaml, auto-generate test fixtures, validate all types deserialize correctly
-- [ ] Chat Completions: add ALL missing fields from Python SDK (prediction, reasoning_effort, audio, modalities, seed, logprobs, logit_bias, n, presence/frequency_penalty, service_tier, store)
-- [ ] Chat Completions: Usage details (cached_tokens, reasoning_tokens, audio_tokens, prediction_tokens)
-- [ ] Responses API: full tool types (web_search, file_search, code_interpreter, computer_use, mcp)
-- [ ] Responses API: streaming with all event types
-- [ ] Responses API: conversation chaining (previous_response_id)
-- [ ] Structured Outputs: strict mode for response_format and tools
-- [ ] Realtime API: session creation + ephemeral token
-- [ ] Builder pattern for ChatCompletionRequest and ResponseCreateRequest
+## Priority 1: Type Quality (current — make Knuth proud)
+- [ ] Replace ALL `serde_json::Value` in public types with typed structs/enums (currently 27 → target 0)
+- [ ] Replace `String` with enums where appropriate (Role, Status, FinishReason, Object type)
+- [ ] Add `#[non_exhaustive]` to all public enums
+- [ ] Doc comments on every public field
+- [ ] OpenAPI coverage ≥95% (currently 88%, Images at 57%)
 
-## Priority 2: Quality
-- [ ] OpenAPI fixture tests for every endpoint (deserialize real response JSON)
-- [ ] Field coverage report: auto-compare Python SDK vs Rust types
-- [ ] Integration test suite (behind live-tests feature flag)
-- [ ] Examples: tool_calling, structured_output, responses_api, multi-turn chat
+## Priority 2: Ergonomics (match async-openai)
+- [ ] Per-request customization: `.query()`, `.header()`, `.headers()` on resource groups
+- [ ] `dyn Config` trait for provider-agnostic code (OpenAI, Azure, custom)
+- [ ] Azure OpenAI support (different base URL + API version header + AD auth)
+- [ ] Granular feature flags: `chat-types`, `response-types`, `embedding-types` (compile-time savings)
+- [ ] BYOT (bring your own types): `_byot` methods accepting `impl Serialize` / `DeserializeOwned`
+- [ ] Image save helper: `response.save("./output").await`
 
-## Priority 3: Ecosystem
-- [ ] Middleware/interceptor support (logging, metrics, custom headers)
-- [ ] Rate limit tracking from response headers
-- [ ] Automatic pagination for list endpoints
-- [ ] Retry with jitter
+## Priority 3: Production Hardening
+- [ ] Middleware/interceptor trait: logging, metrics, custom headers, rate limit tracking
+- [ ] Rate limit info from headers: `x-ratelimit-remaining`, `x-ratelimit-reset`
+- [ ] Automatic pagination for list endpoints (cursor-based iterator)
+- [ ] Retry with jitter (currently fixed backoff)
 - [ ] Timeout per-request override
-- [ ] Azure OpenAI support (different base URL + auth)
+- [ ] Webhook signature verification (for Responses API webhooks)
+- [ ] Request ID tracking (`x-request-id` header)
+
+## Priority 4: Ecosystem
+- [ ] `openai-oxide-macros`: derive macro for function tool definitions
+- [ ] WASM support (feature-gated, no tokio — use wasm-bindgen-futures)
+- [ ] OpenRouter / Ollama / vLLM compatibility (custom base URL + model mapping)
+- [ ] Integration test suite with real API (behind `live-tests` feature)
+- [ ] Benchmarks vs async-openai (request/response overhead, streaming latency)
+- [ ] Published docs on docs.rs with comprehensive examples
+
+## Competitive Edge vs async-openai
+| Area | async-openai | openai-oxide (target) |
+|------|-------------|----------------------|
+| Types | Generated from spec | Hand-crafted from Python SDK + OpenAPI validation |
+| Value fields | Some `serde_json::Value` | Zero — fully typed |
+| Python parity | No | Yes — same field names, same behavior |
+| OpenAPI tests | No | Auto-validates against spec on every commit |
+| Pre-commit | No | Tests + coverage + clippy + quality audit |
 
 ## Method
 
-For EVERY item: WebFetch the Python SDK source first, copy field names exactly. Do not guess.
-Reference: https://github.com/openai/openai-python/tree/main/src/openai
-OpenAPI spec: https://raw.githubusercontent.com/openai/openai-openapi/master/openapi.yaml
+Read Python SDK source from `~/startups/shared/openai-python/src/openai/` for exact types.
+Validate against `tests/openapi.yaml` on every commit.
