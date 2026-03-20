@@ -29,7 +29,7 @@
 - [x] Task 0.3: Fix examples/chat_stream.rs — replace `use openai_rust::` → `use openai_oxide::` <!-- sha:f8eff0e -->
 - [x] Task 0.4: Fix README.md — replace all `openai-rust`/`openai_rust` → `openai-oxide`/`openai_oxide`, update Cargo.toml dep to `openai-oxide = "0.1"`, fix Configuration example <!-- sha:f8eff0e -->
 - [x] Task 0.5: Run `cargo test` (all tests including doc-tests and examples) — must pass 30/30 <!-- sha:f8eff0e -->
-- [ ] Task 0.6: Publish `openai-oxide` v0.1.1 with fixes to crates.io
+- [x] Task 0.6: Publish `openai-oxide` v0.1.1 with fixes to crates.io <!-- sha:c16a5be -->
 
 ---
 
