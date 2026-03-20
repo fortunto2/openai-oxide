@@ -1,5 +1,5 @@
 [package]
-name = "openai-rust"
+name = "openai-oxide"
 version = "0.1.0"
 edition = "2021"
 description = "Idiomatic Rust client for the OpenAI API — 1:1 parity with the official Python SDK"
