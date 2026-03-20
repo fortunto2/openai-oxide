@@ -2,6 +2,10 @@
 
 use std::env;
 
+use reqwest::header::HeaderMap;
+
+use crate::request_options::RequestOptions;
+
 const DEFAULT_BASE_URL: &str = "https://api.openai.com/v1";
 const DEFAULT_TIMEOUT_SECS: u64 = 600;
 const DEFAULT_MAX_RETRIES: u32 = 2;
@@ -15,6 +19,10 @@ pub struct ClientConfig {
     pub project: Option<String>,
     pub timeout_secs: u64,
     pub max_retries: u32,
+    /// Default headers sent with every request.
+    pub default_headers: Option<HeaderMap>,
+    /// Default query parameters appended to every request URL.
+    pub default_query: Option<Vec<(String, String)>>,
 }
 
 impl ClientConfig {
@@ -27,6 +35,8 @@ impl ClientConfig {
             project: None,
             timeout_secs: DEFAULT_TIMEOUT_SECS,
             max_retries: DEFAULT_MAX_RETRIES,
+            default_headers: None,
+            default_query: None,
         }
     }
 
@@ -63,5 +73,29 @@ impl ClientConfig {
     pub fn max_retries(mut self, retries: u32) -> Self {
         self.max_retries = retries;
         self
+    }
+
+    /// Set default headers sent with every request.
+    pub fn default_headers(mut self, headers: HeaderMap) -> Self {
+        self.default_headers = Some(headers);
+        self
+    }
+
+    /// Set default query parameters appended to every request URL.
+    pub fn default_query(mut self, query: Vec<(String, String)>) -> Self {
+        self.default_query = Some(query);
+        self
+    }
+
+    /// Build the initial `RequestOptions` from config-level defaults.
+    pub(crate) fn initial_options(&self) -> RequestOptions {
+        let mut opts = RequestOptions::new();
+        if let Some(ref h) = self.default_headers {
+            opts.headers = Some(h.clone());
+        }
+        if let Some(ref q) = self.default_query {
+            opts.query = Some(q.clone());
+        }
+        opts
     }
 }

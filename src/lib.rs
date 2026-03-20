@@ -34,6 +34,7 @@
 pub mod client;
 pub mod config;
 pub mod error;
+pub mod request_options;
 pub mod resources;
 pub mod streaming;
 pub mod types;
@@ -41,4 +42,5 @@ pub mod types;
 pub use client::OpenAI;
 pub use config::ClientConfig;
 pub use error::OpenAIError;
+pub use request_options::RequestOptions;
 pub use streaming::SseStream;

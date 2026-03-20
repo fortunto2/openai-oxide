@@ -4,6 +4,7 @@ use std::time::Duration;
 
 use crate::config::ClientConfig;
 use crate::error::{ErrorResponse, OpenAIError};
+use crate::request_options::RequestOptions;
 use crate::resources::audio::Audio;
 use crate::resources::batches::Batches;
 use crate::resources::beta::assistants::Assistants;
@@ -25,10 +26,25 @@ use crate::resources::uploads::Uploads;
 const RETRYABLE_STATUS_CODES: [u16; 4] = [429, 500, 502, 503];
 
 /// The main OpenAI client.
+///
+/// Use [`with_options()`](Self::with_options) to create a cheap clone with
+/// per-request customization (extra headers, query params, timeout):
+///
+/// ```ignore
+/// use openai_oxide::RequestOptions;
+/// use std::time::Duration;
+///
+/// let custom = client.with_options(
+///     RequestOptions::new()
+///         .header("X-Custom", "value")
+///         .timeout(Duration::from_secs(30))
+/// );
+/// ```
 #[derive(Debug, Clone)]
 pub struct OpenAI {
     pub(crate) http: reqwest::Client,
     pub(crate) config: ClientConfig,
+    pub(crate) options: RequestOptions,
 }
 
 impl OpenAI {
@@ -39,11 +55,39 @@ impl OpenAI {
 
     /// Create a client from a full config.
     pub fn with_config(config: ClientConfig) -> Self {
+        let options = config.initial_options();
         let http = reqwest::Client::builder()
             .timeout(Duration::from_secs(config.timeout_secs))
             .build()
             .expect("failed to build HTTP client");
-        Self { http, config }
+        Self {
+            http,
+            config,
+            options,
+        }
+    }
+
+    /// Create a cheap clone of this client with additional request options.
+    ///
+    /// The returned client shares the same HTTP connection pool (`reqwest::Client`
+    /// uses `Arc` internally) but applies the merged options to every request.
+    ///
+    /// ```ignore
+    /// use openai_oxide::RequestOptions;
+    ///
+    /// let custom = client.with_options(
+    ///     RequestOptions::new().header("X-Custom", "value")
+    /// );
+    /// // All requests through `custom` will include the X-Custom header.
+    /// let resp = custom.chat().completions().create(req).await?;
+    /// ```
+    #[must_use]
+    pub fn with_options(&self, options: RequestOptions) -> Self {
+        Self {
+            http: self.http.clone(),
+            config: self.config.clone(),
+            options: self.options.merge(&options),
+        }
     }
 
     /// Create a client using the `OPENAI_API_KEY` environment variable.
@@ -111,7 +155,7 @@ impl OpenAI {
         Embeddings::new(self)
     }
 
-    /// Build a request with auth headers.
+    /// Build a request with auth headers and client-level options applied.
     pub(crate) fn request(&self, method: reqwest::Method, path: &str) -> reqwest::RequestBuilder {
         let url = format!("{}{}", self.config.base_url, path);
         let mut req = self
@@ -124,6 +168,19 @@ impl OpenAI {
         }
         if let Some(ref project) = self.config.project {
             req = req.header("OpenAI-Project", project);
+        }
+
+        // Apply client-level options
+        if let Some(ref headers) = self.options.headers {
+            for (key, value) in headers.iter() {
+                req = req.header(key.clone(), value.clone());
+            }
+        }
+        if let Some(ref query) = self.options.query {
+            req = req.query(query);
+        }
+        if let Some(timeout) = self.options.timeout {
+            req = req.timeout(timeout);
         }
 
         req
@@ -181,11 +238,13 @@ impl OpenAI {
         path: &str,
         body: &B,
     ) -> Result<bytes::Bytes, OpenAIError> {
-        let response = self
-            .request(reqwest::Method::POST, path)
-            .json(body)
-            .send()
-            .await?;
+        let mut req = self.request(reqwest::Method::POST, path);
+        if self.options.extra_body.is_some() {
+            req = req.json(&self.merge_body_json(body)?);
+        } else {
+            req = req.json(body);
+        }
+        let response = req.send().await?;
 
         let status = response.status();
         if status.is_success() {
@@ -205,6 +264,23 @@ impl OpenAI {
             .await
     }
 
+    /// Serialize body to JSON and merge extra_body fields if set.
+    fn merge_body_json<B: serde::Serialize>(
+        &self,
+        body: &B,
+    ) -> Result<serde_json::Value, OpenAIError> {
+        let mut value = serde_json::to_value(body)?;
+        if let Some(ref extra) = self.options.extra_body
+            && let serde_json::Value::Object(map) = &mut value
+            && let serde_json::Value::Object(extra_map) = extra.clone()
+        {
+            for (k, v) in extra_map {
+                map.insert(k, v);
+            }
+        }
+        Ok(value)
+    }
+
     /// Send a request with retry logic for transient errors.
     async fn send_with_retry<B: serde::Serialize, T: serde::de::DeserializeOwned>(
         &self,
@@ -218,7 +294,11 @@ impl OpenAI {
         for attempt in 0..=max_retries {
             let mut req = self.request(method.clone(), path);
             if let Some(b) = body {
-                req = req.json(b);
+                if self.options.extra_body.is_some() {
+                    req = req.json(&self.merge_body_json(b)?);
+                } else {
+                    req = req.json(b);
+                }
             }
 
             let response = match req.send().await {
