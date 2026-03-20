@@ -108,7 +108,7 @@ impl<'a> Files<'a> {
 mod tests {
     use crate::OpenAI;
     use crate::config::ClientConfig;
-    use crate::types::file::FileUploadParams;
+    use crate::types::file::{FileListParams, FileUploadParams};
 
     #[tokio::test]
     async fn test_files_create() {
@@ -217,6 +217,108 @@ mod tests {
         let resp = client.files().delete("file-abc123").await.unwrap();
         assert!(resp.deleted);
         mock.assert_async().await;
+    }
+
+    #[tokio::test]
+    async fn test_files_list_page_with_params() {
+        let mut server = mockito::Server::new_async().await;
+        let mock = server
+            .mock("GET", "/files")
+            .match_query(mockito::Matcher::AllOf(vec![
+                mockito::Matcher::UrlEncoded("limit".into(), "2".into()),
+                mockito::Matcher::UrlEncoded("after".into(), "file-cursor".into()),
+            ]))
+            .with_status(200)
+            .with_header("content-type", "application/json")
+            .with_body(
+                r#"{
+                    "object": "list",
+                    "data": [{
+                        "id": "file-page2",
+                        "object": "file",
+                        "bytes": 100,
+                        "created_at": 1677610602,
+                        "filename": "test.jsonl",
+                        "purpose": "fine-tune",
+                        "status": "processed"
+                    }],
+                    "has_more": false,
+                    "first_id": "file-page2",
+                    "last_id": "file-page2"
+                }"#,
+            )
+            .create_async()
+            .await;
+
+        let client = OpenAI::with_config(ClientConfig::new("sk-test").base_url(server.url()));
+        let params = FileListParams::new().limit(2).after("file-cursor");
+        let response = client.files().list_page(params).await.unwrap();
+        assert_eq!(response.data.len(), 1);
+        assert_eq!(response.has_more, Some(false));
+        assert_eq!(response.last_id.as_deref(), Some("file-page2"));
+        mock.assert_async().await;
+    }
+
+    #[tokio::test]
+    async fn test_files_list_auto_multi_page() {
+        use futures_util::StreamExt;
+
+        let mut server = mockito::Server::new_async().await;
+
+        // Page 1: has_more=true
+        let _mock_p1 = server
+            .mock("GET", "/files")
+            .match_query(mockito::Matcher::Missing)
+            .with_status(200)
+            .with_header("content-type", "application/json")
+            .with_body(
+                r#"{
+                    "object": "list",
+                    "data": [
+                        {"id": "file-1", "object": "file", "bytes": 100, "created_at": 1, "filename": "a.jsonl", "purpose": "fine-tune", "status": "processed"},
+                        {"id": "file-2", "object": "file", "bytes": 200, "created_at": 2, "filename": "b.jsonl", "purpose": "fine-tune", "status": "processed"}
+                    ],
+                    "has_more": true,
+                    "last_id": "file-2"
+                }"#,
+            )
+            .create_async()
+            .await;
+
+        // Page 2: has_more=false
+        let _mock_p2 = server
+            .mock("GET", "/files")
+            .match_query(mockito::Matcher::AllOf(vec![
+                mockito::Matcher::UrlEncoded("after".into(), "file-2".into()),
+            ]))
+            .with_status(200)
+            .with_header("content-type", "application/json")
+            .with_body(
+                r#"{
+                    "object": "list",
+                    "data": [
+                        {"id": "file-3", "object": "file", "bytes": 300, "created_at": 3, "filename": "c.jsonl", "purpose": "fine-tune", "status": "processed"}
+                    ],
+                    "has_more": false,
+                    "last_id": "file-3"
+                }"#,
+            )
+            .create_async()
+            .await;
+
+        let client = OpenAI::with_config(ClientConfig::new("sk-test").base_url(server.url()));
+        let stream = client.files().list_auto(FileListParams::new());
+        let files: Vec<_> = stream
+            .collect::<Vec<_>>()
+            .await
+            .into_iter()
+            .map(|r| r.unwrap())
+            .collect();
+
+        assert_eq!(files.len(), 3);
+        assert_eq!(files[0].id, "file-1");
+        assert_eq!(files[1].id, "file-2");
+        assert_eq!(files[2].id, "file-3");
     }
 
     #[tokio::test]

@@ -46,14 +46,14 @@ Add `list_page(params)` and `list_auto(params)` to each resource.
 
 ### Tasks
 
-- [ ] Task 3.1: Unit tests for `Paginator<T>` in `src/pagination.rs` — test single-page (has_more=false), multi-page (2-3 pages), empty page, error propagation
-- [ ] Task 3.2: Mockito integration tests for `list_page()` and `list_auto()` — test files and batches with multi-page responses, verify correct `after` query param is sent, verify all items collected
-- [ ] Task 3.3: Update OpenAPI coverage tests — add pagination fields (has_more, first_id, last_id) to list response coverage in `tests/openapi_coverage.rs`
+- [x] Task 3.1: Unit tests for `Paginator<T>` in `src/pagination.rs` — test single-page (has_more=false), multi-page (2-3 pages), empty page, error propagation
+- [x] Task 3.2: Mockito integration tests for `list_page()` and `list_auto()` — test files and batches with multi-page responses, verify correct `after` query param is sent, verify all items collected
+- [x] Task 3.3: Update OpenAPI coverage tests — add pagination fields (has_more, first_id, last_id) to list response coverage in `tests/openapi_coverage.rs`
 
 ### Verification
 
-- [ ] `cargo test` all pass
-- [ ] `cargo test --test openapi_coverage -- --nocapture` shows no regression
+- [x] `cargo test` all pass
+- [x] `cargo test --test openapi_coverage -- --nocapture` shows no regression
 
 ## Phase 4: Docs & Cleanup
 

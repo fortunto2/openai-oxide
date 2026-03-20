@@ -92,7 +92,7 @@ impl<'a> Batches<'a> {
 mod tests {
     use crate::OpenAI;
     use crate::config::ClientConfig;
-    use crate::types::batch::BatchCreateRequest;
+    use crate::types::batch::{BatchCreateRequest, BatchListParams};
 
     const BATCH_JSON: &str = r#"{
         "id": "batch_abc123",
@@ -167,5 +167,64 @@ mod tests {
         let batch = client.batches().cancel("batch_abc123").await.unwrap();
         assert_eq!(batch.status, crate::types::batch::BatchStatus::Cancelling);
         mock.assert_async().await;
+    }
+
+    #[tokio::test]
+    async fn test_batches_list_auto_multi_page() {
+        use futures_util::StreamExt;
+
+        let mut server = mockito::Server::new_async().await;
+
+        let _mock_p1 = server
+            .mock("GET", "/batches")
+            .match_query(mockito::Matcher::Missing)
+            .with_status(200)
+            .with_header("content-type", "application/json")
+            .with_body(
+                r#"{
+                    "object": "list",
+                    "data": [
+                        {"id": "batch_1", "object": "batch", "endpoint": "/v1/chat/completions", "input_file_id": "file-1", "completion_window": "24h", "status": "completed", "created_at": 1},
+                        {"id": "batch_2", "object": "batch", "endpoint": "/v1/chat/completions", "input_file_id": "file-2", "completion_window": "24h", "status": "completed", "created_at": 2}
+                    ],
+                    "has_more": true,
+                    "last_id": "batch_2"
+                }"#,
+            )
+            .create_async()
+            .await;
+
+        let _mock_p2 = server
+            .mock("GET", "/batches")
+            .match_query(mockito::Matcher::AllOf(vec![
+                mockito::Matcher::UrlEncoded("after".into(), "batch_2".into()),
+            ]))
+            .with_status(200)
+            .with_header("content-type", "application/json")
+            .with_body(
+                r#"{
+                    "object": "list",
+                    "data": [
+                        {"id": "batch_3", "object": "batch", "endpoint": "/v1/chat/completions", "input_file_id": "file-3", "completion_window": "24h", "status": "completed", "created_at": 3}
+                    ],
+                    "has_more": false,
+                    "last_id": "batch_3"
+                }"#,
+            )
+            .create_async()
+            .await;
+
+        let client = OpenAI::with_config(ClientConfig::new("sk-test").base_url(server.url()));
+        let stream = client.batches().list_auto(BatchListParams::new());
+        let batches: Vec<_> = stream
+            .collect::<Vec<_>>()
+            .await
+            .into_iter()
+            .map(|r| r.unwrap())
+            .collect();
+
+        assert_eq!(batches.len(), 3);
+        assert_eq!(batches[0].id, "batch_1");
+        assert_eq!(batches[2].id, "batch_3");
     }
 }
