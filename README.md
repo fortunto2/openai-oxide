@@ -17,7 +17,7 @@ Add to `Cargo.toml`:
 
 ```toml
 [dependencies]
-openai-oxide = "0.1"
+openai-oxide = "0.2"
 tokio = { version = "1", features = ["full"] }
 ```
 
