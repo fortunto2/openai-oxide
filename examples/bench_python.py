@@ -74,5 +74,60 @@ med, p95, mn, mx = bench(lambda: client.responses.create(
     tools=[{"type": "web_search", "search_context_size": "low"}]))
 print(f"{'Web search':<25} {med:>6}ms {p95:>6}ms {mn:>6}ms {mx:>6}ms")
 
+# Test 6: Nested structured output
+complex_schema = {
+    "type": "object",
+    "properties": {
+        "company": {"type": "object", "properties": {
+            "name": {"type": "string"}, "founded": {"type": "integer"}, "ceo": {"type": "string"},
+            "products": {"type": "array", "items": {"type": "object", "properties": {
+                "name": {"type": "string"},
+                "category": {"type": "string", "enum": ["hardware", "software", "service"]},
+                "revenue_billions": {"type": "number"}, "active": {"type": "boolean"}},
+                "required": ["name", "category", "revenue_billions", "active"], "additionalProperties": False}}},
+            "required": ["name", "founded", "ceo", "products"], "additionalProperties": False},
+        "competitors": {"type": "array", "items": {"type": "string"}},
+        "summary": {"type": "string"}},
+    "required": ["company", "competitors", "summary"], "additionalProperties": False}
+
+med, p95, mn, mx = bench(lambda: json.loads(client.responses.create(
+    model=MODEL, input="Analyze Apple Inc: products with revenue, competitors, summary.",
+    max_output_tokens=800,
+    text={"format": {"type": "json_schema", "name": "company_analysis", "strict": True,
+        "schema": complex_schema}}).output_text))
+print(f"{'Nested structured':<25} {med:>6}ms {p95:>6}ms {mn:>6}ms {mx:>6}ms")
+
+# Test 7: Agent loop (2-step: FC → result → structured)
+def agent_loop():
+    step1 = client.responses.create(
+        model=MODEL, input="What's the weather in Tokyo and what should I wear?",
+        store=True,
+        tools=[{"type": "function", "name": "get_weather", "description": "Get weather",
+            "parameters": {"type": "object",
+                "properties": {"city": {"type": "string"}, "unit": {"type": "string", "enum": ["celsius", "fahrenheit"]}},
+                "required": ["city", "unit"], "additionalProperties": False}}])
+    call_id = next((item.call_id for item in step1.output if item.type == "function_call"), "call_1")
+    client.responses.create(
+        model=MODEL, previous_response_id=step1.id, max_output_tokens=200,
+        input=[{"type": "function_call_output", "call_id": call_id,
+            "output": '{"temp":22,"condition":"sunny","humidity":45}'}],
+        text={"format": {"type": "json_schema", "name": "recommendation", "strict": True,
+            "schema": {"type": "object", "properties": {
+                "outfit": {"type": "string"},
+                "accessories": {"type": "array", "items": {"type": "string"}},
+                "warning": {"type": "string"}},
+                "required": ["outfit", "accessories", "warning"], "additionalProperties": False}}})
+
+med, p95, mn, mx = bench(agent_loop)
+print(f"{'Agent loop (2-step)':<25} {med:>6}ms {p95:>6}ms {mn:>6}ms {mx:>6}ms")
+
+# Test 8: Rapid-fire (5 sequential calls)
+def rapid_fire():
+    for i in range(1, 6):
+        client.responses.create(model=MODEL, input=f"What is {i}+{i}? Reply with just the number.", max_output_tokens=16)
+
+med, p95, mn, mx = bench(rapid_fire)
+print(f"{'Rapid-fire (5 calls)':<25} {med:>6}ms {p95:>6}ms {mn:>6}ms {mx:>6}ms")
+
 print(f"\n{ITERATIONS} iterations per test. All times include full HTTP round-trip.")
-print(f"Client: openai-python v{__import__('openai').__version__}, httpx, HTTP/2.")
+print(f"Client: openai-python v{__import__('openai').__version__}, httpx.")

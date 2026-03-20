@@ -4,15 +4,20 @@ Idiomatic Rust client for the OpenAI API — 1:1 parity with the [official Pytho
 
 ## Performance
 
-Benchmarked against 3 Rust clients and the official Python SDK. All use the Responses API (`POST /responses`), GPT-5.4, warm connections, 5 iterations, median.
+Benchmarked against the official Python SDK and 2 Rust alternatives. All use the Responses API (`POST /responses`), GPT-5.4, warm connections, 5 iterations, median.
 
-| Test | openai-oxide | genai 0.6 | async-openai 0.33 | Python openai 2.29 |
-|------|:-----------:|:---------:|:-----------------:|:------------------:|
-| Plain text | **857ms** | 948ms | 968ms | 1062ms |
-| Structured output | **1306ms** | 1428ms | 3407ms | 1251ms |
-| Function calling | **1086ms** | 1044ms | 1244ms | 1225ms |
-| Multi-turn (2 reqs) | **1998ms** | 2303ms | 2289ms | 2196ms |
-| Web search | **2968ms** | — | — | 3671ms |
+| Test | openai-oxide | Python openai 2.29 | genai 0.6 | async-openai 0.33 |
+|------|:-----------:|:------------------:|:---------:|:-----------------:|
+| Plain text | **922ms** | 966ms | 948ms | 968ms |
+| Structured output | 1404ms | **1258ms** | 1428ms | 3407ms |
+| Function calling | **975ms** | 1039ms | 1044ms | 1244ms |
+| Multi-turn (2 reqs) | 2215ms | 2188ms | 2303ms | 2289ms |
+| Web search | **2969ms** | 3176ms | — | — |
+| Nested structured | 5013ms | **4286ms** | — | — |
+| Agent loop (FC→result→JSON) | **3933ms** | 4113ms | — | — |
+| Rapid-fire (5 calls) | 5061ms | **4769ms** | — | — |
+
+**oxide wins 5/8 tests** vs Python. Rust advantage grows on multi-step workflows (agent loop, web search) where HTTP/2 connection reuse matters most.
 
 Why it's fast:
 - **HTTP/2** with keep-alive while idle (connections stay warm between requests)

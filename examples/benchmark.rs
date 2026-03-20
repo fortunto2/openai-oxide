@@ -180,6 +180,165 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         "Web search", med, p95, min, max
     );
 
+    // ── Test 6: Complex structured output (nested schema) ──
+    let mut times = Vec::new();
+    let complex_schema = serde_json::json!({
+        "type": "object",
+        "properties": {
+            "company": {
+                "type": "object",
+                "properties": {
+                    "name": {"type": "string"},
+                    "founded": {"type": "integer"},
+                    "ceo": {"type": "string"},
+                    "products": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "name": {"type": "string"},
+                                "category": {"type": "string", "enum": ["hardware", "software", "service"]},
+                                "revenue_billions": {"type": "number"},
+                                "active": {"type": "boolean"}
+                            },
+                            "required": ["name", "category", "revenue_billions", "active"],
+                            "additionalProperties": false
+                        }
+                    }
+                },
+                "required": ["name", "founded", "ceo", "products"],
+                "additionalProperties": false
+            },
+            "competitors": {
+                "type": "array",
+                "items": {"type": "string"}
+            },
+            "summary": {"type": "string"}
+        },
+        "required": ["company", "competitors", "summary"],
+        "additionalProperties": false
+    });
+    for _ in 0..ITERATIONS {
+        let req = ResponseCreateRequest::new(MODEL)
+            .input("Analyze Apple Inc: products with revenue, competitors, summary.")
+            .text(ResponseTextConfig {
+                format: Some(ResponseTextFormat::JsonSchema {
+                    name: "company_analysis".into(),
+                    description: None,
+                    schema: Some(complex_schema.clone()),
+                    strict: Some(true),
+                }),
+                verbosity: None,
+            })
+            .max_output_tokens(800);
+        let t0 = Instant::now();
+        let resp = client.responses().create(req).await?;
+        // Parse to verify correctness
+        let _: serde_json::Value = serde_json::from_str(&resp.output_text())?;
+        times.push(t0.elapsed().as_millis());
+    }
+    let (med, p95, min, max) = stats(&mut times);
+    println!(
+        "{:<25} {:>6}ms {:>6}ms {:>6}ms {:>6}ms",
+        "Nested structured", med, p95, min, max
+    );
+
+    // ── Test 7: Agent loop (3-step: FC → result → structured response) ──
+    let mut times = Vec::new();
+    for _ in 0..ITERATIONS {
+        let t0 = Instant::now();
+
+        // Step 1: Model calls function
+        let step1 = client
+            .responses()
+            .create(
+                ResponseCreateRequest::new(MODEL)
+                    .input("What's the weather in Tokyo and what should I wear?")
+                    .tools(vec![ResponseTool::Function {
+                        name: "get_weather".into(),
+                        description: Some("Get weather for a city".into()),
+                        parameters: Some(serde_json::json!({
+                            "type": "object",
+                            "properties": {
+                                "city": {"type": "string"},
+                                "unit": {"type": "string", "enum": ["celsius", "fahrenheit"]}
+                            },
+                            "required": ["city", "unit"],
+                            "additionalProperties": false
+                        })),
+                        strict: None,
+                    }])
+                    .store(true),
+            )
+            .await?;
+
+        // Step 2: Extract real call_id, provide tool result via raw API
+        let call_id = step1
+            .function_calls()
+            .first()
+            .map(|fc| fc.call_id.clone())
+            .unwrap_or_else(|| "call_1".into());
+        let _step2: serde_json::Value = client
+            .responses()
+            .create_raw(&serde_json::json!({
+                "model": MODEL,
+                "previous_response_id": step1.id,
+                "max_output_tokens": 200,
+                "input": [{
+                    "type": "function_call_output",
+                    "call_id": call_id,
+                    "output": "{\"temp\":22,\"condition\":\"sunny\",\"humidity\":45}"
+                }],
+                "text": {
+                    "format": {
+                        "type": "json_schema",
+                        "name": "recommendation",
+                        "strict": true,
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "outfit": {"type": "string"},
+                                "accessories": {"type": "array", "items": {"type": "string"}},
+                                "warning": {"type": "string"}
+                            },
+                            "required": ["outfit", "accessories", "warning"],
+                            "additionalProperties": false
+                        }
+                    }
+                }
+            }))
+            .await?;
+
+        times.push(t0.elapsed().as_millis());
+    }
+    let (med, p95, min, max) = stats(&mut times);
+    println!(
+        "{:<25} {:>6}ms {:>6}ms {:>6}ms {:>6}ms",
+        "Agent loop (2-step)", med, p95, min, max
+    );
+
+    // ── Test 8: Rapid-fire (5 sequential simple calls) ──
+    let mut times = Vec::new();
+    for _ in 0..ITERATIONS {
+        let t0 = Instant::now();
+        for i in 1..=5 {
+            let _ = client
+                .responses()
+                .create(
+                    ResponseCreateRequest::new(MODEL)
+                        .input(format!("What is {i}+{i}? Reply with just the number."))
+                        .max_output_tokens(16),
+                )
+                .await?;
+        }
+        times.push(t0.elapsed().as_millis());
+    }
+    let (med, p95, min, max) = stats(&mut times);
+    println!(
+        "{:<25} {:>6}ms {:>6}ms {:>6}ms {:>6}ms",
+        "Rapid-fire (5 calls)", med, p95, min, max
+    );
+
     println!("\n{ITERATIONS} iterations per test. All times include full HTTP round-trip.");
     println!("Client: openai-oxide with reqwest 0.13, gzip, HTTP/2, tcp_nodelay.");
     Ok(())

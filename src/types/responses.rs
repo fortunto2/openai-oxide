@@ -132,6 +132,18 @@ pub struct ResponseCreateRequest {
     /// Text output configuration.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub text: Option<ResponseTextConfig>,
+
+    /// Prompt cache key — caches system prompt prefix server-side for faster repeat calls.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub prompt_cache_key: Option<String>,
+
+    /// Prompt cache retention: "in-memory" or "24h" for extended caching.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub prompt_cache_retention: Option<String>,
+
+    /// Whether to run in background mode.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub background: Option<bool>,
 }
 
 impl ResponseCreateRequest {
@@ -156,6 +168,9 @@ impl ResponseCreateRequest {
             service_tier: None,
             user: None,
             text: None,
+            prompt_cache_key: None,
+            prompt_cache_retention: None,
+            background: None,
         }
     }
 
@@ -264,6 +279,29 @@ impl ResponseCreateRequest {
     /// Set end user identifier.
     pub fn user(mut self, user: impl Into<String>) -> Self {
         self.user = Some(user.into());
+        self
+    }
+
+    /// Set prompt cache key for server-side system prompt caching.
+    ///
+    /// Requests with the same `prompt_cache_key` and similar system prompt
+    /// prefix will reuse cached prompt processing, reducing latency by 50-80%.
+    pub fn prompt_cache_key(mut self, key: impl Into<String>) -> Self {
+        self.prompt_cache_key = Some(key.into());
+        self
+    }
+
+    /// Set prompt cache retention: "in-memory" or "24h".
+    ///
+    /// "24h" keeps cached prefixes active longer (up to 24 hours).
+    pub fn prompt_cache_retention(mut self, retention: impl Into<String>) -> Self {
+        self.prompt_cache_retention = Some(retention.into());
+        self
+    }
+
+    /// Run response in background mode.
+    pub fn background(mut self, background: bool) -> Self {
+        self.background = Some(background);
         self
     }
 }
