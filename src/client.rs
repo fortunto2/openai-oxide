@@ -4,6 +4,7 @@ use std::time::Duration;
 
 use crate::config::ClientConfig;
 use crate::error::{ErrorResponse, OpenAIError};
+use crate::resources::audio::Audio;
 use crate::resources::chat::Chat;
 use crate::resources::embeddings::Embeddings;
 use crate::resources::images::Images;
@@ -38,6 +39,11 @@ impl OpenAI {
     /// Create a client using the `OPENAI_API_KEY` environment variable.
     pub fn from_env() -> Result<Self, OpenAIError> {
         Ok(Self::with_config(ClientConfig::from_env()?))
+    }
+
+    /// Access the Audio resource.
+    pub fn audio(&self) -> Audio<'_> {
+        Audio::new(self)
     }
 
     /// Access the Chat resource.
@@ -115,6 +121,26 @@ impl OpenAI {
             .send()
             .await?;
         Self::handle_response(response).await
+    }
+
+    /// Send a POST request with JSON body and return raw bytes (for binary responses like audio).
+    pub(crate) async fn post_raw<B: serde::Serialize>(
+        &self,
+        path: &str,
+        body: &B,
+    ) -> Result<bytes::Bytes, OpenAIError> {
+        let response = self
+            .request(reqwest::Method::POST, path)
+            .json(body)
+            .send()
+            .await?;
+
+        let status = response.status();
+        if status.is_success() {
+            Ok(response.bytes().await?)
+        } else {
+            Err(Self::extract_error(status.as_u16(), response).await)
+        }
     }
 
     /// Send a DELETE request and deserialize the response.
