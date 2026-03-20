@@ -1,6 +1,6 @@
 # openai-sdk — Remaining Endpoints
 
-**Status:** [ ] Not Started
+**Status:** [~] In Progress
 **Track:** remaining
 
 ## Context Handoff
@@ -22,7 +22,18 @@
 
 ---
 
-- [ ] Task 1.1: Rename crate to `openai-sdk` in Cargo.toml. Update lib.rs doc comment and README.
+## Phase 0: Review Fix Tasks (from review 2026-03-20)
+
+- [ ] Task 0.1: Fix lib.rs doc comment — replace all `openai_rust` → `openai_oxide` in the doc example
+- [ ] Task 0.2: Fix examples/chat.rs — replace `use openai_rust::` → `use openai_oxide::`
+- [ ] Task 0.3: Fix examples/chat_stream.rs — replace `use openai_rust::` → `use openai_oxide::`
+- [ ] Task 0.4: Fix README.md — replace all `openai-rust`/`openai_rust` → `openai-oxide`/`openai_oxide`, update Cargo.toml dep to `openai-oxide = "0.1"`, fix Configuration example (wrong API signatures: `ClientConfig::new()` should take api_key, `.timeout(30)` → `.timeout_secs(30)`, `OpenAI::with_config("sk-...", config)` → `OpenAI::with_config(config)`)
+- [ ] Task 0.5: Run `cargo test` (all tests including doc-tests and examples) — must pass 30/30
+- [ ] Task 0.6: Publish `openai-oxide` v0.1.1 with fixes to crates.io
+
+---
+
+- [x] Task 1.1: Rename crate to `openai-oxide` in Cargo.toml. <!-- done via deploy -->
 - [ ] Task 1.2: WebFetch Python `resources/embeddings.py` + `types/embedding.py`. Implement `src/types/embedding.rs` + `src/resources/embeddings.rs`. Methods: `client.embeddings().create(model, input)`. Mockito test.
 - [ ] Task 1.3: WebFetch Python `resources/models.py` + `types/model.py`. Implement `src/types/model.rs` + `src/resources/models.rs`. Methods: `list()`, `retrieve(id)`, `delete(id)`. Mockito tests.
 - [ ] Task 1.4: WebFetch Python `resources/moderations.py` + `types/moderation.py`. Implement `src/types/moderation.rs` + `src/resources/moderations.rs`. Method: `create(input)`. Mockito test.
