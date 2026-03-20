@@ -24,10 +24,10 @@
 
 ## Phase 0: Review Fix Tasks (from review 2026-03-20)
 
-- [ ] Task 0.1: Fix lib.rs doc comment — replace all `openai_rust` → `openai_oxide` in the doc example
-- [ ] Task 0.2: Fix examples/chat.rs — replace `use openai_rust::` → `use openai_oxide::`
-- [ ] Task 0.3: Fix examples/chat_stream.rs — replace `use openai_rust::` → `use openai_oxide::`
-- [ ] Task 0.4: Fix README.md — replace all `openai-rust`/`openai_rust` → `openai-oxide`/`openai_oxide`, update Cargo.toml dep to `openai-oxide = "0.1"`, fix Configuration example (wrong API signatures: `ClientConfig::new()` should take api_key, `.timeout(30)` → `.timeout_secs(30)`, `OpenAI::with_config("sk-...", config)` → `OpenAI::with_config(config)`)
+- [x] Task 0.1: Fix lib.rs doc comment — replace all `openai_rust` → `openai_oxide` in the doc example
+- [x] Task 0.2: Fix examples/chat.rs — replace `use openai_rust::` → `use openai_oxide::`
+- [x] Task 0.3: Fix examples/chat_stream.rs — replace `use openai_rust::` → `use openai_oxide::`
+- [x] Task 0.4: Fix README.md — replace all `openai-rust`/`openai_rust` → `openai-oxide`/`openai_oxide`, update Cargo.toml dep to `openai-oxide = "0.1"`, fix Configuration example (wrong API signatures: `ClientConfig::new()` should take api_key, `.timeout(30)` → `.timeout_secs(30)`, `OpenAI::with_config("sk-...", config)` → `OpenAI::with_config(config)`)
 - [ ] Task 0.5: Run `cargo test` (all tests including doc-tests and examples) — must pass 30/30
 - [ ] Task 0.6: Publish `openai-oxide` v0.1.1 with fixes to crates.io
 

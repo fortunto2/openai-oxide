@@ -2,8 +2,8 @@
 //!
 //! Run with: `OPENAI_API_KEY=sk-... cargo run --example chat`
 
-use openai_rust::types::chat::*;
-use openai_rust::OpenAI;
+use openai_oxide::types::chat::*;
+use openai_oxide::OpenAI;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {

@@ -1,14 +1,14 @@
-//! # openai-rust
+//! # openai-oxide
 //!
 //! Idiomatic Rust client for the OpenAI API — 1:1 parity with the official Python SDK.
 //!
 //! ## Quick Start
 //!
 //! ```no_run
-//! use openai_rust::{OpenAI, types::chat::*};
+//! use openai_oxide::{OpenAI, types::chat::*};
 //!
 //! #[tokio::main]
-//! async fn main() -> Result<(), openai_rust::OpenAIError> {
+//! async fn main() -> Result<(), openai_oxide::OpenAIError> {
 //!     let client = OpenAI::from_env()?;
 //!
 //!     let request = ChatCompletionRequest::new(

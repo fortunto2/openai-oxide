@@ -1,4 +1,4 @@
-# openai-rust
+# openai-oxide
 
 Idiomatic Rust client for the OpenAI API — 1:1 parity with the [official Python SDK](https://github.com/openai/openai-python).
 
@@ -17,15 +17,15 @@ Add to `Cargo.toml`:
 
 ```toml
 [dependencies]
-openai-rust = { git = "https://github.com/fortunto2/openai-rust" }
+openai-oxide = "0.1"
 tokio = { version = "1", features = ["full"] }
 ```
 
 ```rust
-use openai_rust::{OpenAI, types::chat::*};
+use openai_oxide::{OpenAI, types::chat::*};
 
 #[tokio::main]
-async fn main() -> Result<(), openai_rust::OpenAIError> {
+async fn main() -> Result<(), openai_oxide::OpenAIError> {
     let client = OpenAI::from_env()?;
 
     let request = ChatCompletionRequest::new(
@@ -52,10 +52,10 @@ async fn main() -> Result<(), openai_rust::OpenAIError> {
 
 ```rust
 use futures_util::StreamExt;
-use openai_rust::{OpenAI, types::chat::*};
+use openai_oxide::{OpenAI, types::chat::*};
 
 #[tokio::main]
-async fn main() -> Result<(), openai_rust::OpenAIError> {
+async fn main() -> Result<(), openai_oxide::OpenAIError> {
     let client = OpenAI::from_env()?;
 
     let request = ChatCompletionRequest::new(
@@ -80,7 +80,7 @@ async fn main() -> Result<(), openai_rust::OpenAIError> {
 ## Configuration
 
 ```rust
-use openai_rust::{OpenAI, ClientConfig};
+use openai_oxide::{OpenAI, ClientConfig};
 
 // From environment variable OPENAI_API_KEY
 let client = OpenAI::from_env()?;
@@ -89,11 +89,11 @@ let client = OpenAI::from_env()?;
 let client = OpenAI::new("sk-...");
 
 // Full configuration
-let config = ClientConfig::new()
+let config = ClientConfig::new("sk-...")
     .base_url("https://api.openai.com/v1")
-    .timeout(30)
+    .timeout_secs(30)
     .max_retries(3);
-let client = OpenAI::with_config("sk-...", config);
+let client = OpenAI::with_config(config);
 ```
 
 ## Implemented APIs
