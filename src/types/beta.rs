@@ -2,7 +2,7 @@
 
 use serde::{Deserialize, Serialize};
 
-use super::common::Role;
+use super::common::{Role, SortOrder};
 
 /// Status of a thread run.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -184,6 +184,15 @@ pub struct Assistant {
 pub struct AssistantList {
     pub object: String,
     pub data: Vec<Assistant>,
+    /// Whether there are more results available.
+    #[serde(default)]
+    pub has_more: Option<bool>,
+    /// ID of the first object in the list.
+    #[serde(default)]
+    pub first_id: Option<String>,
+    /// ID of the last object in the list.
+    #[serde(default)]
+    pub last_id: Option<String>,
 }
 
 /// Deleted assistant response.
@@ -276,6 +285,15 @@ pub struct MessageCreateRequest {
 pub struct MessageList {
     pub object: String,
     pub data: Vec<Message>,
+    /// Whether there are more results available.
+    #[serde(default)]
+    pub has_more: Option<bool>,
+    /// ID of the first object in the list.
+    #[serde(default)]
+    pub first_id: Option<String>,
+    /// ID of the last object in the list.
+    #[serde(default)]
+    pub last_id: Option<String>,
 }
 
 // ── Runs ──
@@ -389,6 +407,15 @@ pub struct VectorStoreFileCounts {
 pub struct VectorStoreList {
     pub object: String,
     pub data: Vec<VectorStore>,
+    /// Whether there are more results available.
+    #[serde(default)]
+    pub has_more: Option<bool>,
+    /// ID of the first object in the list.
+    #[serde(default)]
+    pub first_id: Option<String>,
+    /// ID of the last object in the list.
+    #[serde(default)]
+    pub last_id: Option<String>,
 }
 
 /// Deleted vector store response.
@@ -397,6 +424,208 @@ pub struct VectorStoreDeleted {
     pub id: String,
     pub deleted: bool,
     pub object: String,
+}
+
+/// Parameters for listing assistants with pagination.
+#[derive(Debug, Clone, Default)]
+pub struct AssistantListParams {
+    /// Cursor for pagination — fetch results after this assistant ID.
+    pub after: Option<String>,
+    /// Cursor for backward pagination — fetch results before this assistant ID.
+    pub before: Option<String>,
+    /// Maximum number of results per page (1–100).
+    pub limit: Option<i64>,
+    /// Sort order by `created_at`.
+    pub order: Option<SortOrder>,
+}
+
+impl AssistantListParams {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn after(mut self, after: impl Into<String>) -> Self {
+        self.after = Some(after.into());
+        self
+    }
+
+    pub fn before(mut self, before: impl Into<String>) -> Self {
+        self.before = Some(before.into());
+        self
+    }
+
+    pub fn limit(mut self, limit: i64) -> Self {
+        self.limit = Some(limit);
+        self
+    }
+
+    pub fn order(mut self, order: SortOrder) -> Self {
+        self.order = Some(order);
+        self
+    }
+
+    /// Convert to query parameter pairs for the HTTP request.
+    pub fn to_query(&self) -> Vec<(String, String)> {
+        let mut q = Vec::new();
+        if let Some(ref after) = self.after {
+            q.push(("after".into(), after.clone()));
+        }
+        if let Some(ref before) = self.before {
+            q.push(("before".into(), before.clone()));
+        }
+        if let Some(limit) = self.limit {
+            q.push(("limit".into(), limit.to_string()));
+        }
+        if let Some(ref order) = self.order {
+            q.push((
+                "order".into(),
+                serde_json::to_value(order)
+                    .unwrap()
+                    .as_str()
+                    .unwrap()
+                    .to_string(),
+            ));
+        }
+        q
+    }
+}
+
+/// Parameters for listing messages with pagination.
+#[derive(Debug, Clone, Default)]
+pub struct MessageListParams {
+    /// Cursor for pagination — fetch results after this message ID.
+    pub after: Option<String>,
+    /// Cursor for backward pagination — fetch results before this message ID.
+    pub before: Option<String>,
+    /// Maximum number of results per page (1–100).
+    pub limit: Option<i64>,
+    /// Sort order by `created_at`.
+    pub order: Option<SortOrder>,
+    /// Filter by run ID.
+    pub run_id: Option<String>,
+}
+
+impl MessageListParams {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn after(mut self, after: impl Into<String>) -> Self {
+        self.after = Some(after.into());
+        self
+    }
+
+    pub fn before(mut self, before: impl Into<String>) -> Self {
+        self.before = Some(before.into());
+        self
+    }
+
+    pub fn limit(mut self, limit: i64) -> Self {
+        self.limit = Some(limit);
+        self
+    }
+
+    pub fn order(mut self, order: SortOrder) -> Self {
+        self.order = Some(order);
+        self
+    }
+
+    pub fn run_id(mut self, run_id: impl Into<String>) -> Self {
+        self.run_id = Some(run_id.into());
+        self
+    }
+
+    /// Convert to query parameter pairs for the HTTP request.
+    pub fn to_query(&self) -> Vec<(String, String)> {
+        let mut q = Vec::new();
+        if let Some(ref after) = self.after {
+            q.push(("after".into(), after.clone()));
+        }
+        if let Some(ref before) = self.before {
+            q.push(("before".into(), before.clone()));
+        }
+        if let Some(limit) = self.limit {
+            q.push(("limit".into(), limit.to_string()));
+        }
+        if let Some(ref order) = self.order {
+            q.push((
+                "order".into(),
+                serde_json::to_value(order)
+                    .unwrap()
+                    .as_str()
+                    .unwrap()
+                    .to_string(),
+            ));
+        }
+        if let Some(ref run_id) = self.run_id {
+            q.push(("run_id".into(), run_id.clone()));
+        }
+        q
+    }
+}
+
+/// Parameters for listing vector stores with pagination.
+#[derive(Debug, Clone, Default)]
+pub struct VectorStoreListParams {
+    /// Cursor for pagination — fetch results after this vector store ID.
+    pub after: Option<String>,
+    /// Cursor for backward pagination — fetch results before this vector store ID.
+    pub before: Option<String>,
+    /// Maximum number of results per page (1–100).
+    pub limit: Option<i64>,
+    /// Sort order by `created_at`.
+    pub order: Option<SortOrder>,
+}
+
+impl VectorStoreListParams {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn after(mut self, after: impl Into<String>) -> Self {
+        self.after = Some(after.into());
+        self
+    }
+
+    pub fn before(mut self, before: impl Into<String>) -> Self {
+        self.before = Some(before.into());
+        self
+    }
+
+    pub fn limit(mut self, limit: i64) -> Self {
+        self.limit = Some(limit);
+        self
+    }
+
+    pub fn order(mut self, order: SortOrder) -> Self {
+        self.order = Some(order);
+        self
+    }
+
+    /// Convert to query parameter pairs for the HTTP request.
+    pub fn to_query(&self) -> Vec<(String, String)> {
+        let mut q = Vec::new();
+        if let Some(ref after) = self.after {
+            q.push(("after".into(), after.clone()));
+        }
+        if let Some(ref before) = self.before {
+            q.push(("before".into(), before.clone()));
+        }
+        if let Some(limit) = self.limit {
+            q.push(("limit".into(), limit.to_string()));
+        }
+        if let Some(ref order) = self.order {
+            q.push((
+                "order".into(),
+                serde_json::to_value(order)
+                    .unwrap()
+                    .as_str()
+                    .unwrap()
+                    .to_string(),
+            ));
+        }
+        q
+    }
 }
 
 #[cfg(test)]

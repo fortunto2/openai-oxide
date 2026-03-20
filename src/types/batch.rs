@@ -92,8 +92,52 @@ pub struct BatchRequestCounts {
 pub struct BatchList {
     pub object: String,
     pub data: Vec<Batch>,
+    /// Whether there are more results available.
     #[serde(default)]
-    pub has_more: bool,
+    pub has_more: Option<bool>,
+    /// ID of the first object in the list.
+    #[serde(default)]
+    pub first_id: Option<String>,
+    /// ID of the last object in the list.
+    #[serde(default)]
+    pub last_id: Option<String>,
+}
+
+/// Parameters for listing batches with pagination.
+#[derive(Debug, Clone, Default)]
+pub struct BatchListParams {
+    /// Cursor for pagination — fetch results after this batch ID.
+    pub after: Option<String>,
+    /// Maximum number of results per page (1–100).
+    pub limit: Option<i64>,
+}
+
+impl BatchListParams {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn after(mut self, after: impl Into<String>) -> Self {
+        self.after = Some(after.into());
+        self
+    }
+
+    pub fn limit(mut self, limit: i64) -> Self {
+        self.limit = Some(limit);
+        self
+    }
+
+    /// Convert to query parameter pairs for the HTTP request.
+    pub fn to_query(&self) -> Vec<(String, String)> {
+        let mut q = Vec::new();
+        if let Some(ref after) = self.after {
+            q.push(("after".into(), after.clone()));
+        }
+        if let Some(limit) = self.limit {
+            q.push(("limit".into(), limit.to_string()));
+        }
+        q
+    }
 }
 
 #[cfg(test)]

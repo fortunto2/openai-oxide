@@ -2,6 +2,8 @@
 
 use serde::{Deserialize, Serialize};
 
+use super::common::SortOrder;
+
 /// The intended purpose of an uploaded file.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[non_exhaustive]
@@ -55,6 +57,15 @@ pub struct FileObject {
 pub struct FileList {
     pub object: String,
     pub data: Vec<FileObject>,
+    /// Whether there are more results available.
+    #[serde(default)]
+    pub has_more: Option<bool>,
+    /// ID of the first object in the list.
+    #[serde(default)]
+    pub first_id: Option<String>,
+    /// ID of the last object in the list.
+    #[serde(default)]
+    pub last_id: Option<String>,
 }
 
 /// Response from deleting a file.
@@ -80,6 +91,77 @@ impl FileUploadParams {
             filename: filename.into(),
             purpose,
         }
+    }
+}
+
+/// Parameters for listing files with pagination.
+#[derive(Debug, Clone, Default)]
+pub struct FileListParams {
+    /// Cursor for pagination — fetch results after this file ID.
+    pub after: Option<String>,
+    /// Maximum number of results per page (1–10000).
+    pub limit: Option<i64>,
+    /// Sort order by `created_at`.
+    pub order: Option<SortOrder>,
+    /// Filter by file purpose.
+    pub purpose: Option<FilePurpose>,
+}
+
+impl FileListParams {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn after(mut self, after: impl Into<String>) -> Self {
+        self.after = Some(after.into());
+        self
+    }
+
+    pub fn limit(mut self, limit: i64) -> Self {
+        self.limit = Some(limit);
+        self
+    }
+
+    pub fn order(mut self, order: SortOrder) -> Self {
+        self.order = Some(order);
+        self
+    }
+
+    pub fn purpose(mut self, purpose: FilePurpose) -> Self {
+        self.purpose = Some(purpose);
+        self
+    }
+
+    /// Convert to query parameter pairs for the HTTP request.
+    pub fn to_query(&self) -> Vec<(String, String)> {
+        let mut q = Vec::new();
+        if let Some(ref after) = self.after {
+            q.push(("after".into(), after.clone()));
+        }
+        if let Some(limit) = self.limit {
+            q.push(("limit".into(), limit.to_string()));
+        }
+        if let Some(ref order) = self.order {
+            q.push((
+                "order".into(),
+                serde_json::to_value(order)
+                    .unwrap()
+                    .as_str()
+                    .unwrap()
+                    .to_string(),
+            ));
+        }
+        if let Some(ref purpose) = self.purpose {
+            q.push((
+                "purpose".into(),
+                serde_json::to_value(purpose)
+                    .unwrap()
+                    .as_str()
+                    .unwrap()
+                    .to_string(),
+            ));
+        }
+        q
     }
 }
 

@@ -122,8 +122,9 @@ pub struct FineTuningJob {
 pub struct FineTuningJobList {
     pub object: String,
     pub data: Vec<FineTuningJob>,
+    /// Whether there are more results available.
     #[serde(default)]
-    pub has_more: bool,
+    pub has_more: Option<bool>,
 }
 
 /// A fine-tuning job event.
@@ -147,8 +148,83 @@ pub struct FineTuningJobEvent {
 pub struct FineTuningJobEventList {
     pub object: String,
     pub data: Vec<FineTuningJobEvent>,
+    /// Whether there are more results available.
     #[serde(default)]
-    pub has_more: bool,
+    pub has_more: Option<bool>,
+}
+
+/// Parameters for listing fine-tuning jobs with pagination.
+#[derive(Debug, Clone, Default)]
+pub struct FineTuningJobListParams {
+    /// Cursor for pagination — fetch results after this job ID.
+    pub after: Option<String>,
+    /// Maximum number of results per page (1–100).
+    pub limit: Option<i64>,
+}
+
+impl FineTuningJobListParams {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn after(mut self, after: impl Into<String>) -> Self {
+        self.after = Some(after.into());
+        self
+    }
+
+    pub fn limit(mut self, limit: i64) -> Self {
+        self.limit = Some(limit);
+        self
+    }
+
+    /// Convert to query parameter pairs for the HTTP request.
+    pub fn to_query(&self) -> Vec<(String, String)> {
+        let mut q = Vec::new();
+        if let Some(ref after) = self.after {
+            q.push(("after".into(), after.clone()));
+        }
+        if let Some(limit) = self.limit {
+            q.push(("limit".into(), limit.to_string()));
+        }
+        q
+    }
+}
+
+/// Parameters for listing fine-tuning job events with pagination.
+#[derive(Debug, Clone, Default)]
+pub struct FineTuningEventListParams {
+    /// Cursor for pagination — fetch results after this event ID.
+    pub after: Option<String>,
+    /// Maximum number of results per page (1–100).
+    pub limit: Option<i64>,
+}
+
+impl FineTuningEventListParams {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn after(mut self, after: impl Into<String>) -> Self {
+        self.after = Some(after.into());
+        self
+    }
+
+    pub fn limit(mut self, limit: i64) -> Self {
+        self.limit = Some(limit);
+        self
+    }
+
+    /// Convert to query parameter pairs for the HTTP request.
+    pub fn to_query(&self) -> Vec<(String, String)> {
+        let mut q = Vec::new();
+        if let Some(ref after) = self.after {
+            q.push(("after".into(), after.clone()));
+        }
+        if let Some(limit) = self.limit {
+            q.push(("limit".into(), limit.to_string()));
+        }
+        q
+    }
 }
 
 #[cfg(test)]

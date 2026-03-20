@@ -157,6 +157,15 @@ impl<'de> Deserialize<'de> for MaxResponseTokens {
     }
 }
 
+/// Sort order for paginated list endpoints.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+#[non_exhaustive]
+pub enum SortOrder {
+    Asc,
+    Desc,
+}
+
 /// Detailed breakdown of completion token usage.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CompletionTokensDetails {

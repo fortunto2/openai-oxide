@@ -247,6 +247,21 @@ impl OpenAI {
             .await
     }
 
+    /// Send a GET request with query parameters and deserialize the response.
+    #[allow(dead_code)]
+    pub(crate) async fn get_with_query<T: serde::de::DeserializeOwned>(
+        &self,
+        path: &str,
+        query: &[(String, String)],
+    ) -> Result<T, OpenAIError> {
+        let mut req = self.request(reqwest::Method::GET, path);
+        if !query.is_empty() {
+            req = req.query(query);
+        }
+        let response = req.send().await?;
+        Self::handle_response(response).await
+    }
+
     /// Send a POST request with a JSON body and deserialize the response.
     pub(crate) async fn post<B: serde::Serialize, T: serde::de::DeserializeOwned>(
         &self,
