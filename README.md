@@ -102,8 +102,22 @@ let client = OpenAI::with_config(config);
 |-----|--------|--------|
 | Chat Completions | `client.chat().completions().create()` | Done |
 | Chat Completions (streaming) | `client.chat().completions().create_stream()` | Done |
-
-More endpoints coming soon: Embeddings, Images, Audio, Files, Models, Fine-tuning, Moderations, Responses.
+| Responses | `client.responses().create()` | Done |
+| Embeddings | `client.embeddings().create()` | Done |
+| Models | `client.models().list()` / `retrieve()` / `delete()` | Done |
+| Images | `client.images().generate()` / `edit()` / `create_variation()` | Done |
+| Audio Transcription | `client.audio().transcriptions().create()` | Done |
+| Audio Translation | `client.audio().translations().create()` | Done |
+| Audio Speech (TTS) | `client.audio().speech().create()` | Done |
+| Files | `client.files().create()` / `list()` / `retrieve()` / `delete()` / `content()` | Done |
+| Fine-tuning | `client.fine_tuning().jobs().create()` / `list()` / `cancel()` / `list_events()` | Done |
+| Moderations | `client.moderations().create()` | Done |
+| Batches | `client.batches().create()` / `list()` / `retrieve()` / `cancel()` | Done |
+| Uploads | `client.uploads().create()` / `cancel()` / `complete()` | Done |
+| Assistants (beta) | `client.beta().assistants().create()` / `list()` / `retrieve()` / `delete()` | Done |
+| Threads (beta) | `client.beta().threads().create()` / `retrieve()` / `delete()` / `messages()` | Done |
+| Runs (beta) | `client.beta().runs(thread_id).create()` / `retrieve()` / `cancel()` | Done |
+| Vector Stores (beta) | `client.beta().vector_stores().create()` / `list()` / `retrieve()` / `delete()` | Done |
 
 ## Development
 
