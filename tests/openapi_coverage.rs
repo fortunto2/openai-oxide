@@ -341,7 +341,7 @@ fn chat_request_new_fields_serialize() {
     req.modalities = Some(vec!["text".into(), "audio".into()]);
     req.audio = Some(ChatCompletionAudioParam {
         format: "mp3".into(),
-        voice: "alloy".into(),
+        voice: openai_oxide::types::audio::AudioVoice::Alloy,
     });
     req.prediction = Some(PredictionContent {
         type_: "content".into(),

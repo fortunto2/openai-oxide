@@ -2,6 +2,15 @@
 
 use serde::{Deserialize, Serialize};
 
+/// Encoding format for embedding output.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+#[non_exhaustive]
+pub enum EncodingFormat {
+    Float,
+    Base64,
+}
+
 // ── Request types ──
 
 /// Input for embeddings: a single string, array of strings, or array of token arrays.
@@ -45,9 +54,9 @@ pub struct EmbeddingRequest {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub dimensions: Option<i64>,
 
-    /// Encoding format: "float" or "base64".
+    /// Encoding format.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub encoding_format: Option<String>,
+    pub encoding_format: Option<EncodingFormat>,
 
     /// End user identifier.
     #[serde(skip_serializing_if = "Option::is_none")]

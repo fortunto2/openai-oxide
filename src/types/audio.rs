@@ -2,6 +2,58 @@
 
 use serde::{Deserialize, Serialize};
 
+/// Response format for audio transcription/translation.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+#[non_exhaustive]
+pub enum AudioResponseFormat {
+    Json,
+    Text,
+    Srt,
+    VerboseJson,
+    Vtt,
+    DiarizedJson,
+}
+
+/// Audio format for speech output.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+#[non_exhaustive]
+pub enum SpeechResponseFormat {
+    Mp3,
+    Opus,
+    Aac,
+    Flac,
+    Wav,
+    Pcm,
+}
+
+/// Voice for text-to-speech.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+#[non_exhaustive]
+pub enum AudioVoice {
+    Alloy,
+    Ash,
+    Ballad,
+    Coral,
+    Echo,
+    Sage,
+    Shimmer,
+    Verse,
+    Marin,
+    Cedar,
+}
+
+/// Input audio format in content parts.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+#[non_exhaustive]
+pub enum InputAudioFormat {
+    Wav,
+    Mp3,
+}
+
 // ── Transcription request (multipart) ──
 
 /// Parameters for audio transcription (multipart upload).
@@ -12,7 +64,7 @@ pub struct TranscriptionParams {
     pub model: String,
     pub language: Option<String>,
     pub prompt: Option<String>,
-    pub response_format: Option<String>,
+    pub response_format: Option<AudioResponseFormat>,
     pub temperature: Option<f64>,
 }
 
@@ -47,7 +99,7 @@ pub struct TranslationParams {
     pub filename: String,
     pub model: String,
     pub prompt: Option<String>,
-    pub response_format: Option<String>,
+    pub response_format: Option<AudioResponseFormat>,
     pub temperature: Option<f64>,
 }
 
@@ -81,12 +133,12 @@ pub struct SpeechRequest {
     /// TTS model (e.g. "tts-1", "tts-1-hd").
     pub model: String,
 
-    /// Voice: "alloy", "echo", "fable", "onyx", "nova", "shimmer".
-    pub voice: String,
+    /// Voice for audio output.
+    pub voice: AudioVoice,
 
     /// Audio format.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub response_format: Option<String>,
+    pub response_format: Option<SpeechResponseFormat>,
 
     /// Playback speed (0.25 to 4.0).
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -94,15 +146,11 @@ pub struct SpeechRequest {
 }
 
 impl SpeechRequest {
-    pub fn new(
-        input: impl Into<String>,
-        model: impl Into<String>,
-        voice: impl Into<String>,
-    ) -> Self {
+    pub fn new(input: impl Into<String>, model: impl Into<String>, voice: AudioVoice) -> Self {
         Self {
             input: input.into(),
             model: model.into(),
-            voice: voice.into(),
+            voice,
             response_format: None,
             speed: None,
         }
@@ -115,7 +163,7 @@ mod tests {
 
     #[test]
     fn test_serialize_speech_request() {
-        let req = SpeechRequest::new("Hello world", "tts-1", "alloy");
+        let req = SpeechRequest::new("Hello world", "tts-1", AudioVoice::Alloy);
         let json = serde_json::to_value(&req).unwrap();
         assert_eq!(json["input"], "Hello world");
         assert_eq!(json["model"], "tts-1");

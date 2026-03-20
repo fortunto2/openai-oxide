@@ -62,7 +62,14 @@ impl<'a> Transcriptions<'a> {
             form = form.text("prompt", prompt);
         }
         if let Some(fmt) = params.response_format {
-            form = form.text("response_format", fmt);
+            form = form.text(
+                "response_format",
+                serde_json::to_value(&fmt)
+                    .unwrap()
+                    .as_str()
+                    .unwrap()
+                    .to_string(),
+            );
         }
         if let Some(temp) = params.temperature {
             form = form.text("temperature", temp.to_string());
@@ -95,7 +102,14 @@ impl<'a> Translations<'a> {
             form = form.text("prompt", prompt);
         }
         if let Some(fmt) = params.response_format {
-            form = form.text("response_format", fmt);
+            form = form.text(
+                "response_format",
+                serde_json::to_value(&fmt)
+                    .unwrap()
+                    .as_str()
+                    .unwrap()
+                    .to_string(),
+            );
         }
         if let Some(temp) = params.temperature {
             form = form.text("temperature", temp.to_string());
@@ -193,7 +207,11 @@ mod tests {
             .await;
 
         let client = OpenAI::with_config(ClientConfig::new("sk-test").base_url(server.url()));
-        let request = SpeechRequest::new("Hello world", "tts-1", "alloy");
+        let request = SpeechRequest::new(
+            "Hello world",
+            "tts-1",
+            crate::types::audio::AudioVoice::Alloy,
+        );
 
         let response = client.audio().speech().create(request).await.unwrap();
         assert_eq!(response.as_ref(), audio_bytes.as_slice());

@@ -2,6 +2,36 @@
 
 use serde::{Deserialize, Serialize};
 
+/// Audio format for realtime API.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+#[non_exhaustive]
+pub enum RealtimeAudioFormat {
+    Pcm16,
+    G711Ulaw,
+    G711Alaw,
+}
+
+/// Turn detection type.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+#[non_exhaustive]
+pub enum TurnDetectionType {
+    ServerVad,
+    SemanticVad,
+}
+
+/// Eagerness level for semantic VAD.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+#[non_exhaustive]
+pub enum Eagerness {
+    Low,
+    Medium,
+    High,
+    Auto,
+}
+
 // ── Request types ──
 
 /// Request body for `POST /realtime/sessions`.
@@ -19,13 +49,13 @@ pub struct SessionCreateRequest {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub instructions: Option<String>,
 
-    /// The format of input audio: "pcm16", "g711_ulaw", "g711_alaw".
+    /// The format of input audio.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub input_audio_format: Option<String>,
+    pub input_audio_format: Option<RealtimeAudioFormat>,
 
-    /// The format of output audio: "pcm16", "g711_ulaw", "g711_alaw".
+    /// The format of output audio.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub output_audio_format: Option<String>,
+    pub output_audio_format: Option<RealtimeAudioFormat>,
 
     /// Modalities: ["text"], ["audio"], or ["text", "audio"].
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -125,9 +155,9 @@ pub struct RealtimeTool {
 /// Turn detection configuration.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct TurnDetection {
-    /// Type: "server_vad" or "semantic_vad".
+    /// Turn detection type.
     #[serde(rename = "type")]
-    pub type_: String,
+    pub type_: TurnDetectionType,
     /// VAD activation threshold (0.0–1.0, server_vad only).
     #[serde(skip_serializing_if = "Option::is_none")]
     pub threshold: Option<f64>,
@@ -145,7 +175,7 @@ pub struct TurnDetection {
     pub interrupt_response: Option<bool>,
     /// Eagerness level for semantic VAD.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub eagerness: Option<String>,
+    pub eagerness: Option<Eagerness>,
 }
 
 /// Input audio transcription configuration.
@@ -188,9 +218,9 @@ pub struct SessionCreateResponse {
     #[serde(default)]
     pub max_response_output_tokens: Option<serde_json::Value>,
     #[serde(default)]
-    pub input_audio_format: Option<String>,
+    pub input_audio_format: Option<RealtimeAudioFormat>,
     #[serde(default)]
-    pub output_audio_format: Option<String>,
+    pub output_audio_format: Option<RealtimeAudioFormat>,
     #[serde(default)]
     pub tools: Option<Vec<RealtimeTool>>,
     #[serde(default)]
@@ -235,7 +265,7 @@ mod tests {
             })),
         }]);
         req.turn_detection = Some(TurnDetection {
-            type_: "server_vad".into(),
+            type_: TurnDetectionType::ServerVad,
             threshold: Some(0.5),
             prefix_padding_ms: Some(300),
             silence_duration_ms: Some(500),
@@ -286,7 +316,7 @@ mod tests {
         let tools = resp.tools.unwrap();
         assert_eq!(tools[0].name, "get_weather");
         let turn = resp.turn_detection.unwrap();
-        assert_eq!(turn.type_, "server_vad");
+        assert_eq!(turn.type_, TurnDetectionType::ServerVad);
         assert_eq!(turn.threshold, Some(0.5));
     }
 }

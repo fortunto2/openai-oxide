@@ -2,6 +2,88 @@
 
 use serde::{Deserialize, Serialize};
 
+/// Image quality level.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+#[non_exhaustive]
+pub enum ImageQuality {
+    Standard,
+    Hd,
+    Low,
+    Medium,
+    High,
+    Auto,
+}
+
+/// Image dimensions.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[non_exhaustive]
+pub enum ImageSize {
+    #[serde(rename = "auto")]
+    Auto,
+    #[serde(rename = "1024x1024")]
+    S1024x1024,
+    #[serde(rename = "1536x1024")]
+    S1536x1024,
+    #[serde(rename = "1024x1536")]
+    S1024x1536,
+    #[serde(rename = "256x256")]
+    S256x256,
+    #[serde(rename = "512x512")]
+    S512x512,
+    #[serde(rename = "1792x1024")]
+    S1792x1024,
+    #[serde(rename = "1024x1792")]
+    S1024x1792,
+}
+
+/// Image style (dall-e-3 only).
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+#[non_exhaustive]
+pub enum ImageStyle {
+    Vivid,
+    Natural,
+}
+
+/// Output format for generated images (GPT image models).
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+#[non_exhaustive]
+pub enum ImageOutputFormat {
+    Png,
+    Jpeg,
+    Webp,
+}
+
+/// Response format for images.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+#[non_exhaustive]
+pub enum ImageResponseFormat {
+    Url,
+    B64Json,
+}
+
+/// Background transparency for generated images (GPT image models).
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+#[non_exhaustive]
+pub enum ImageBackground {
+    Transparent,
+    Opaque,
+    Auto,
+}
+
+/// Content moderation level for image generation.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+#[non_exhaustive]
+pub enum ImageModeration {
+    Low,
+    Auto,
+}
+
 // ── Request types ──
 
 /// Request body for `POST /images/generations`.
@@ -20,39 +102,39 @@ pub struct ImageGenerateRequest {
 
     /// Image quality.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub quality: Option<String>,
+    pub quality: Option<ImageQuality>,
 
-    /// Response format: "url" or "b64_json".
+    /// Response format: url or b64_json.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub response_format: Option<String>,
+    pub response_format: Option<ImageResponseFormat>,
 
     /// Image dimensions.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub size: Option<String>,
+    pub size: Option<ImageSize>,
 
-    /// Image style: "vivid" or "natural" (dall-e-3 only).
+    /// Image style (dall-e-3 only).
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub style: Option<String>,
+    pub style: Option<ImageStyle>,
 
     /// End user identifier.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub user: Option<String>,
 
-    /// Output format: "png", "jpeg", or "webp" (GPT image models only).
+    /// Output format (GPT image models only).
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub output_format: Option<String>,
+    pub output_format: Option<ImageOutputFormat>,
 
     /// Compression level 0–100 for webp/jpeg output (GPT image models only).
     #[serde(skip_serializing_if = "Option::is_none")]
     pub output_compression: Option<i64>,
 
-    /// Background transparency: "transparent", "opaque", or "auto" (GPT image models only).
+    /// Background transparency (GPT image models only).
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub background: Option<String>,
+    pub background: Option<ImageBackground>,
 
-    /// Content moderation level: "low" or "auto" (GPT image models only).
+    /// Content moderation level (GPT image models only).
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub moderation: Option<String>,
+    pub moderation: Option<ImageModeration>,
 
     /// Number of partial images for streaming (0–3, GPT image models only).
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -93,7 +175,7 @@ pub struct ImageEditParams {
     pub model: Option<String>,
     pub mask: Option<(Vec<u8>, String)>,
     pub n: Option<i64>,
-    pub size: Option<String>,
+    pub size: Option<ImageSize>,
 }
 
 impl ImageEditParams {
@@ -121,7 +203,7 @@ pub struct ImageVariationParams {
     pub image_filename: String,
     pub model: Option<String>,
     pub n: Option<i64>,
-    pub size: Option<String>,
+    pub size: Option<ImageSize>,
 }
 
 impl ImageVariationParams {
@@ -178,10 +260,10 @@ mod tests {
     fn test_serialize_image_generate_gpt_image_fields() {
         let mut req = ImageGenerateRequest::new("A futuristic city");
         req.model = Some("gpt-image-1".into());
-        req.output_format = Some("webp".into());
+        req.output_format = Some(ImageOutputFormat::Webp);
         req.output_compression = Some(80);
-        req.background = Some("transparent".into());
-        req.moderation = Some("low".into());
+        req.background = Some(ImageBackground::Transparent);
+        req.moderation = Some(ImageModeration::Low);
         req.partial_images = Some(2);
         req.stream = Some(true);
 

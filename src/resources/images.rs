@@ -50,7 +50,14 @@ impl<'a> Images<'a> {
             form = form.text("n", n.to_string());
         }
         if let Some(s) = params.size {
-            form = form.text("size", s);
+            form = form.text(
+                "size",
+                serde_json::to_value(&s)
+                    .unwrap()
+                    .as_str()
+                    .unwrap()
+                    .to_string(),
+            );
         }
 
         self.client.post_multipart("/images/edits", form).await
@@ -75,7 +82,14 @@ impl<'a> Images<'a> {
             form = form.text("n", n.to_string());
         }
         if let Some(s) = params.size {
-            form = form.text("size", s);
+            form = form.text(
+                "size",
+                serde_json::to_value(&s)
+                    .unwrap()
+                    .as_str()
+                    .unwrap()
+                    .to_string(),
+            );
         }
 
         self.client.post_multipart("/images/variations", form).await

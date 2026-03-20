@@ -292,7 +292,7 @@ pub struct ChatCompletionAudioParam {
     /// Audio output format.
     pub format: String,
     /// Voice to use for audio output.
-    pub voice: String,
+    pub voice: crate::types::audio::AudioVoice,
 }
 
 /// Predicted output content for the Predicted Outputs feature.
@@ -430,12 +430,22 @@ pub enum ContentPart {
     InputAudio { input_audio: InputAudio },
 }
 
+/// Image detail level for vision.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+#[non_exhaustive]
+pub enum ImageDetail {
+    Auto,
+    Low,
+    High,
+}
+
 /// Image URL reference in a content part.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ImageUrl {
     pub url: String,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub detail: Option<String>,
+    pub detail: Option<ImageDetail>,
 }
 
 /// Audio input in a content part.
@@ -811,7 +821,7 @@ mod tests {
                 ContentPart::ImageUrl {
                     image_url: ImageUrl {
                         url: "https://example.com/image.png".into(),
-                        detail: Some("high".into()),
+                        detail: Some(ImageDetail::High),
                     },
                 },
             ]),
