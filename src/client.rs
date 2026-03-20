@@ -12,6 +12,7 @@ use crate::resources::fine_tuning::FineTuning;
 use crate::resources::images::Images;
 use crate::resources::models::Models;
 use crate::resources::moderations::Moderations;
+use crate::resources::responses::Responses;
 
 /// Status codes that trigger a retry.
 const RETRYABLE_STATUS_CODES: [u16; 4] = [429, 500, 502, 503];
@@ -76,6 +77,11 @@ impl OpenAI {
     /// Access the Moderations resource.
     pub fn moderations(&self) -> Moderations<'_> {
         Moderations::new(self)
+    }
+
+    /// Access the Responses resource.
+    pub fn responses(&self) -> Responses<'_> {
+        Responses::new(self)
     }
 
     /// Access the Embeddings resource.
