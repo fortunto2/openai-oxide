@@ -94,7 +94,7 @@ src/
 | Vector Stores (beta) | `client.beta().vector_stores()` CRUD | Done |
 | Realtime (beta) | `client.beta().realtime().sessions().create()` | Done |
 
-**Current version:** v0.5.0 on crates.io
+**Current version:** v0.6.0 on crates.io
 
 Remaining (experimental/newer): Evals, Skills, Videos, Containers, legacy Completions.
 
