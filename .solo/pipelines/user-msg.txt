@@ -1,0 +1,1 @@
+Назови крейт "openai-client" — если занято, попробуй "openai-sdk". Это прямой порт openai-python на Rust.

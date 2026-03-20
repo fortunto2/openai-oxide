@@ -1,0 +1,93 @@
+2026-03-19T23:32:05.882108Z ERROR codex_core::auth: Failed to refresh token: 401 Unauthorized: {
+  "error": {
+    "message": "Your refresh token has already been used to generate a new access token. Please try signing in again.",
+    "type": "invalid_request_error",
+    "param": null,
+    "code": "refresh_token_reused"
+  }
+}
+2026-03-19T23:32:05.882463Z ERROR codex_core::auth: Failed to refresh token: Your access token could not be refreshed because your refresh token was already used. Please log out and sign in again.
+2026-03-19T23:32:06.246858Z ERROR codex_core::models_manager::manager: failed to refresh available models: unexpected status 401 Unauthorized: Provided authentication token is expired. Please try signing in again., url: https://chatgpt.com/backend-api/codex/models?client_version=0.111.0, cf-ray: 9df04641def5de3c-IST, request id: 7346b01a-6553-447c-96eb-231ca583b6fd
+2026-03-19T23:32:06.448521Z ERROR codex_core::auth: Failed to refresh token: 401 Unauthorized: {
+  "error": {
+    "message": "Your refresh token has already been used to generate a new access token. Please try signing in again.",
+    "type": "invalid_request_error",
+    "param": null,
+    "code": "refresh_token_reused"
+  }
+}
+2026-03-19T23:32:06.448565Z ERROR codex_core::auth: Failed to refresh token: Your access token could not be refreshed because your refresh token was already used. Please log out and sign in again.
+OpenAI Codex v0.111.0 (research preview)
+--------
+workdir: /Users/rustam/startups/solopreneur/solo-factory
+model: gpt-5.4
+provider: openai
+approval: never
+sandbox: workspace-write [workdir, /tmp, $TMPDIR, /Users/rustam/.codex/memories, /Users/rustam/.solo]
+reasoning effort: medium
+reasoning summaries: none
+session id: 019d0871-25eb-78d3-b8b3-fe30ba47e06e
+--------
+user
+You are a factory critic. Evaluate the solo-factory pipeline tools that just built project 'openai-rust'.
+
+Read these artifacts:
+- /Users/rustam/startups/active/openai-rust/.solo/pipelines/pipeline.log (pipeline execution log — parse STAGE/SIGNAL/ITER/CHECK lines)
+- /Users/rustam/startups/active/openai-rust/docs/retro/2026-03-20-retro.md (retro report with failure patterns)
+- scripts/solo-dev.sh (pipeline runner)
+- Look at skills/ directory — read SKILL.md files for stages that had failures
+
+Your job: find defects in the FACTORY (skills, scripts, pipeline logic), NOT in the project code.
+
+For each defect found, output a structured block:
+DEFECT: <severity: critical|high|medium|low>
+SKILL: <skill or script name>
+FILE: <path relative to solo-factory>
+ISSUE: <what went wrong>
+FIX: <concrete change needed>
+
+Also note what worked well.
+
+After analysis, append your findings to /Users/rustam/.solo/evolution.md in this format:
+## 2026-03-20 | openai-rust | Codex Factory Critique
+<your structured findings>
+
+Rules:
+- Be brutally honest
+- Every defect must have a concrete fix
+- Do NOT modify any solo-factory files — only write to /Users/rustam/.solo/evolution.md
+- Keep it compact (under 2000 chars)
+mcp: pencil starting
+mcp: codex_apps starting
+mcp: pencil ready
+2026-03-19T23:32:06.659351Z ERROR rmcp::transport::common::reqwest::streamable_http_client: unexpected content type: Some("text/plain")
+2026-03-19T23:32:06.659651Z ERROR rmcp::transport::worker: worker quit with fatal: Transport channel closed, when UnexpectedContentType(Some("text/plain"))
+mcp: codex_apps failed: MCP client for `codex_apps` failed to start: MCP startup failed: handshaking with MCP server failed: Send message error Transport [rmcp::transport::worker::WorkerTransport<rmcp::transport::streamable_http_client::StreamableHttpClientWorker<reqwest::async_impl::client::Client>>] error: Unexpected content type: Some("text/plain"), when send initialize request
+mcp startup: ready: pencil; failed: codex_apps
+2026-03-19T23:32:06.732514Z ERROR codex_core::auth: Failed to refresh token: 401 Unauthorized: {
+  "error": {
+    "message": "Your refresh token has already been used to generate a new access token. Please try signing in again.",
+    "type": "invalid_request_error",
+    "param": null,
+    "code": "refresh_token_reused"
+  }
+}
+2026-03-19T23:32:06.732534Z ERROR codex_core::auth: Failed to refresh token: Your access token could not be refreshed because your refresh token was already used. Please log out and sign in again.
+2026-03-19T23:32:07.401487Z ERROR codex_core::auth: Failed to refresh token: 401 Unauthorized: {
+  "error": {
+    "message": "Your refresh token has already been used to generate a new access token. Please try signing in again.",
+    "type": "invalid_request_error",
+    "param": null,
+    "code": "refresh_token_reused"
+  }
+}
+2026-03-19T23:32:07.401553Z ERROR codex_core::auth: Failed to refresh token: Your access token could not be refreshed because your refresh token was already used. Please log out and sign in again.
+2026-03-19T23:32:07.832168Z ERROR codex_core::auth: Failed to refresh token: 401 Unauthorized: {
+  "error": {
+    "message": "Your refresh token has already been used to generate a new access token. Please try signing in again.",
+    "type": "invalid_request_error",
+    "param": null,
+    "code": "refresh_token_reused"
+  }
+}
+ERROR: Your access token could not be refreshed because your refresh token was already used. Please log out and sign in again.
