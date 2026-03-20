@@ -56,7 +56,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut stream_times = Vec::new();
     for _ in 0..5 {
         let t0 = Instant::now();
-        let (mut rx, _id_rx) = client
+        let mut handle = client
             .responses()
             .create_stream_fc(
                 ResponseCreateRequest::new("gpt-5.4")
@@ -65,7 +65,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             )
             .await?;
         // Time to FIRST function call
-        if let Some(fc) = rx.recv().await {
+        if let Some(fc) = handle.recv().await {
             let ms = t0.elapsed().as_millis();
             stream_times.push(ms);
             let _ = fc; // would start tool execution here

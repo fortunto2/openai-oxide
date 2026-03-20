@@ -5,6 +5,53 @@ use crate::error::OpenAIError;
 use crate::streaming::SseStream;
 use crate::types::responses::{Response, ResponseCreateRequest, ResponseStreamEvent};
 
+/// Metadata from a streaming FC session.
+#[derive(Debug, Clone, Default)]
+pub struct StreamFcMeta {
+    /// Response ID (set after `response.created` event).
+    pub response_id: Option<String>,
+    /// Error message if the stream ended with `response.failed` or a timeout.
+    pub error: Option<String>,
+}
+
+/// Handle returned by [`Responses::create_stream_fc`].
+///
+/// Provides early access to function calls as they complete streaming,
+/// plus metadata (response_id, errors) via a separate channel.
+pub struct StreamFcHandle {
+    rx: tokio::sync::mpsc::Receiver<crate::types::responses::FunctionCall>,
+    meta: tokio::sync::watch::Receiver<StreamFcMeta>,
+}
+
+impl StreamFcHandle {
+    /// Receive the next completed function call.
+    ///
+    /// Returns `None` when the stream ends (either `response.completed` or error).
+    pub async fn recv(&mut self) -> Option<crate::types::responses::FunctionCall> {
+        self.rx.recv().await
+    }
+
+    /// Get the response ID (available after the first event).
+    pub fn response_id(&self) -> Option<String> {
+        self.meta.borrow().response_id.clone()
+    }
+
+    /// Check if the stream ended with an error.
+    ///
+    /// Call after `recv()` returns `None` to distinguish between
+    /// successful completion and failure.
+    pub async fn error(&mut self) -> Option<String> {
+        // Wait for final meta update
+        let _ = self.meta.changed().await;
+        self.meta.borrow().error.clone()
+    }
+
+    /// Check current error without waiting (non-blocking).
+    pub fn error_now(&self) -> Option<String> {
+        self.meta.borrow().error.clone()
+    }
+}
+
 /// Access the Responses API endpoints.
 pub struct Responses<'a> {
     client: &'a OpenAI,
@@ -83,71 +130,90 @@ impl<'a> Responses<'a> {
         Ok(SseStream::new(response))
     }
 
-    /// Stream a response and yield function calls as soon as their arguments are complete.
+    /// Stream a response and yield function calls as soon as arguments are complete.
     ///
-    /// Returns a channel receiver that emits [`FunctionCall`](crate::types::responses::FunctionCall)
-    /// items as each one finishes streaming (on `response.function_call_arguments.done`),
-    /// WITHOUT waiting for `response.completed`.
+    /// Emits each [`FunctionCall`](crate::types::responses::FunctionCall) on the
+    /// `response.function_call_arguments.done` event — typically 200-500ms before
+    /// `response.completed`. Safe: the event guarantees complete, valid JSON arguments.
     ///
-    /// This lets you start executing tools ~200-500ms earlier per call in agent loops.
-    ///
-    /// Also returns the response_id (available after `response.created`).
+    /// Returns [`StreamFcHandle`] which provides:
+    /// - `recv()` — next function call (None when stream ends)
+    /// - `response_id()` — the response ID (available after first event)
+    /// - `error()` — check if the stream ended with an error
     ///
     /// ```ignore
-    /// let (mut rx, response_id) = client.responses()
+    /// let mut handle = client.responses()
     ///     .create_stream_fc(request)
     ///     .await?;
     ///
-    /// while let Some(fc) = rx.recv().await {
-    ///     // Start executing tool immediately — don't wait for response.completed
+    /// while let Some(fc) = handle.recv().await {
     ///     let result = execute_tool(&fc.name, &fc.arguments).await;
+    /// }
+    /// // Check for API errors after stream ends
+    /// if let Some(err) = handle.error().await {
+    ///     eprintln!("API error: {err}");
     /// }
     /// ```
     pub async fn create_stream_fc(
         &self,
         request: ResponseCreateRequest,
-    ) -> Result<
-        (
-            tokio::sync::mpsc::Receiver<crate::types::responses::FunctionCall>,
-            tokio::sync::watch::Receiver<Option<String>>,
-        ),
-        OpenAIError,
-    > {
+    ) -> Result<StreamFcHandle, OpenAIError> {
         use futures_util::StreamExt;
 
         let mut stream = self.create_stream(request).await?;
 
         let (fc_tx, fc_rx) = tokio::sync::mpsc::channel(16);
-        let (id_tx, id_rx) = tokio::sync::watch::channel(None);
+        let (meta_tx, meta_rx) = tokio::sync::watch::channel(StreamFcMeta::default());
 
-        // Track in-flight function calls by output_index
         tokio::spawn(async move {
             let mut pending_name: std::collections::HashMap<i64, String> = Default::default();
             let mut pending_call_id: std::collections::HashMap<i64, String> = Default::default();
+            let mut response_id: Option<String> = None;
 
-            while let Some(event) = stream.next().await {
-                let ev = match event {
-                    Ok(ev) => ev,
-                    Err(_) => break,
+            loop {
+                // Timeout per event — if server stops sending, don't hang forever
+                let event =
+                    tokio::time::timeout(std::time::Duration::from_secs(60), stream.next()).await;
+
+                let event = match event {
+                    Ok(Some(Ok(ev))) => ev,
+                    Ok(Some(Err(e))) => {
+                        let _ = meta_tx.send(StreamFcMeta {
+                            response_id: response_id.clone(),
+                            error: Some(format!("stream error: {e}")),
+                        });
+                        break;
+                    }
+                    Ok(None) => break, // stream ended normally
+                    Err(_) => {
+                        let _ = meta_tx.send(StreamFcMeta {
+                            response_id: response_id.clone(),
+                            error: Some("timeout: no event for 60s".into()),
+                        });
+                        break;
+                    }
                 };
 
-                match ev.type_.as_str() {
+                match event.type_.as_str() {
                     "response.created" => {
-                        if let Some(id) = ev
+                        if let Some(id) = event
                             .data
                             .get("response")
                             .and_then(|r| r.get("id"))
                             .and_then(|id| id.as_str())
                         {
-                            let _ = id_tx.send(Some(id.to_string()));
+                            response_id = Some(id.to_string());
+                            let _ = meta_tx.send(StreamFcMeta {
+                                response_id: response_id.clone(),
+                                error: None,
+                            });
                         }
                     }
                     "response.output_item.added" => {
-                        // Track new function_call items
-                        if let Some(item) = ev.data.get("item")
+                        if let Some(item) = event.data.get("item")
                             && item.get("type").and_then(|t| t.as_str()) == Some("function_call")
                         {
-                            let idx = ev
+                            let idx = event
                                 .data
                                 .get("output_index")
                                 .and_then(|i| i.as_i64())
@@ -161,15 +227,14 @@ impl<'a> Responses<'a> {
                         }
                     }
                     "response.function_call_arguments.done" => {
-                        // Arguments are complete — emit FunctionCall immediately
-                        let idx = ev
+                        let idx = event
                             .data
                             .get("output_index")
                             .and_then(|i| i.as_i64())
                             .unwrap_or(-1);
                         let name = pending_name.remove(&idx).unwrap_or_default();
                         let call_id = pending_call_id.remove(&idx).unwrap_or_default();
-                        let arguments = ev
+                        let arguments = event
                             .data
                             .get("arguments")
                             .and_then(|a| a.as_str())
@@ -186,13 +251,37 @@ impl<'a> Responses<'a> {
                             break; // receiver dropped
                         }
                     }
-                    "response.completed" | "response.failed" => break,
+                    "response.failed" => {
+                        let msg = event
+                            .data
+                            .get("response")
+                            .and_then(|r| r.get("error"))
+                            .and_then(|e| e.get("message"))
+                            .and_then(|m| m.as_str())
+                            .unwrap_or("response.failed")
+                            .to_string();
+                        let _ = meta_tx.send(StreamFcMeta {
+                            response_id: response_id.clone(),
+                            error: Some(msg),
+                        });
+                        break;
+                    }
+                    "response.completed" => {
+                        let _ = meta_tx.send(StreamFcMeta {
+                            response_id: response_id.clone(),
+                            error: None,
+                        });
+                        break;
+                    }
                     _ => {}
                 }
             }
         });
 
-        Ok((fc_rx, id_rx))
+        Ok(StreamFcHandle {
+            rx: fc_rx,
+            meta: meta_rx,
+        })
     }
 
     /// Retrieve a response by ID.
