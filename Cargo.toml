@@ -24,6 +24,8 @@ pin-project-lite = "0.2"
 [dev-dependencies]
 mockito = "1"
 tokio = { version = "1", features = ["rt-multi-thread", "macros"] }
+serde_yaml = "0.9"
+openapiv3 = "2"
 
 [features]
 live-tests = []

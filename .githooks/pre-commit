@@ -1,0 +1,16 @@
+#!/bin/sh
+set -e
+
+echo "Running tests..."
+cargo test --quiet
+
+echo "Running OpenAPI coverage..."
+cargo test --test openapi_coverage --quiet
+
+echo "Running clippy..."
+cargo clippy -- -D warnings
+
+echo "Checking format..."
+cargo fmt -- --check
+
+echo "All checks passed."
