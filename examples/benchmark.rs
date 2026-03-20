@@ -339,6 +339,42 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         "Rapid-fire (5 calls)", med, p95, min, max
     );
 
+    // ── Test 9: Prompt cache (repeated system prompt with cache key) ──
+    // First call: seed the cache. Subsequent calls: use cached prefix.
+    let system_prompt = "You are a senior software architect with 20 years of experience in distributed systems, microservices, and cloud-native architectures. Always provide specific, actionable advice with code examples where relevant. Consider scalability, maintainability, and security in every recommendation.";
+    let _ = client
+        .responses()
+        .create(
+            ResponseCreateRequest::new(MODEL)
+                .instructions(system_prompt)
+                .input("ping")
+                .prompt_cache_key("bench-architect")
+                .max_output_tokens(16),
+        )
+        .await?;
+    // Now measure cached calls
+    let mut times = Vec::new();
+    for _ in 0..ITERATIONS {
+        let t0 = Instant::now();
+        let _ = client
+            .responses()
+            .create(
+                ResponseCreateRequest::new(MODEL)
+                    .instructions(system_prompt)
+                    .input("How should I design a rate limiter for an API gateway?")
+                    .prompt_cache_key("bench-architect")
+                    .prompt_cache_retention("24h")
+                    .max_output_tokens(200),
+            )
+            .await?;
+        times.push(t0.elapsed().as_millis());
+    }
+    let (med, p95, min, max) = stats(&mut times);
+    println!(
+        "{:<25} {:>6}ms {:>6}ms {:>6}ms {:>6}ms",
+        "Prompt-cached", med, p95, min, max
+    );
+
     println!("\n{ITERATIONS} iterations per test. All times include full HTTP round-trip.");
     println!("Client: openai-oxide with reqwest 0.13, gzip, HTTP/2, tcp_nodelay.");
     Ok(())

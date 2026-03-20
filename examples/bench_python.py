@@ -129,5 +129,16 @@ def rapid_fire():
 med, p95, mn, mx = bench(rapid_fire)
 print(f"{'Rapid-fire (5 calls)':<25} {med:>6}ms {p95:>6}ms {mn:>6}ms {mx:>6}ms")
 
+# Test 9: Prompt-cached (repeated system prompt with cache key)
+system_prompt = "You are a senior software architect with 20 years of experience in distributed systems, microservices, and cloud-native architectures. Always provide specific, actionable advice with code examples where relevant. Consider scalability, maintainability, and security in every recommendation."
+client.responses.create(model=MODEL, instructions=system_prompt, input="ping",
+    prompt_cache_key="bench-architect", max_output_tokens=16)
+med, p95, mn, mx = bench(lambda: client.responses.create(
+    model=MODEL, instructions=system_prompt,
+    input="How should I design a rate limiter for an API gateway?",
+    prompt_cache_key="bench-architect", prompt_cache_retention="24h",
+    max_output_tokens=200))
+print(f"{'Prompt-cached':<25} {med:>6}ms {p95:>6}ms {mn:>6}ms {mx:>6}ms")
+
 print(f"\n{ITERATIONS} iterations per test. All times include full HTTP round-trip.")
 print(f"Client: openai-python v{__import__('openai').__version__}, httpx.")
