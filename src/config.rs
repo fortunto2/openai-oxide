@@ -23,6 +23,9 @@ pub struct ClientConfig {
     pub default_headers: Option<HeaderMap>,
     /// Default query parameters appended to every request URL.
     pub default_query: Option<Vec<(String, String)>>,
+    /// When true, use `api-key` header instead of `Authorization: Bearer` for auth.
+    /// This is used by Azure OpenAI deployments.
+    pub(crate) use_azure_api_key_header: bool,
 }
 
 impl ClientConfig {
@@ -37,6 +40,7 @@ impl ClientConfig {
             max_retries: DEFAULT_MAX_RETRIES,
             default_headers: None,
             default_query: None,
+            use_azure_api_key_header: false,
         }
     }
 
@@ -84,6 +88,12 @@ impl ClientConfig {
     /// Set default query parameters appended to every request URL.
     pub fn default_query(mut self, query: Vec<(String, String)>) -> Self {
         self.default_query = Some(query);
+        self
+    }
+
+    /// Use Azure `api-key` header instead of `Authorization: Bearer` for auth.
+    pub(crate) fn use_azure_api_key_header(mut self, enabled: bool) -> Self {
+        self.use_azure_api_key_header = enabled;
         self
     }
 

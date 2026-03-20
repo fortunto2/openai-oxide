@@ -2,6 +2,7 @@
 
 use std::time::Duration;
 
+use crate::azure::AzureConfig;
 use crate::config::ClientConfig;
 use crate::error::{ErrorResponse, OpenAIError};
 use crate::request_options::RequestOptions;
@@ -95,6 +96,24 @@ impl OpenAI {
         Ok(Self::with_config(ClientConfig::from_env()?))
     }
 
+    /// Create a client configured for Azure OpenAI.
+    ///
+    /// # Examples
+    ///
+    /// ```ignore
+    /// use openai_oxide::{OpenAI, AzureConfig};
+    ///
+    /// let client = OpenAI::azure(
+    ///     AzureConfig::new()
+    ///         .azure_endpoint("https://my-resource.openai.azure.com")
+    ///         .azure_deployment("gpt-4")
+    ///         .api_key("my-azure-key")
+    /// )?;
+    /// ```
+    pub fn azure(config: AzureConfig) -> Result<Self, OpenAIError> {
+        config.build()
+    }
+
     /// Access the Batches resource.
     pub fn batches(&self) -> Batches<'_> {
         Batches::new(self)
@@ -158,10 +177,14 @@ impl OpenAI {
     /// Build a request with auth headers and client-level options applied.
     pub(crate) fn request(&self, method: reqwest::Method, path: &str) -> reqwest::RequestBuilder {
         let url = format!("{}{}", self.config.base_url, path);
-        let mut req = self
-            .http
-            .request(method, &url)
-            .bearer_auth(&self.config.api_key);
+        let mut req = self.http.request(method, &url);
+
+        // Azure uses `api-key` header; standard OpenAI uses `Authorization: Bearer`
+        if self.config.use_azure_api_key_header {
+            req = req.header("api-key", &self.config.api_key);
+        } else {
+            req = req.bearer_auth(&self.config.api_key);
+        }
 
         if let Some(ref org) = self.config.organization {
             req = req.header("OpenAI-Organization", org);

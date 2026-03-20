@@ -31,6 +31,7 @@
 //! }
 //! ```
 
+pub mod azure;
 pub mod client;
 pub mod config;
 pub mod error;
@@ -39,6 +40,7 @@ pub mod resources;
 pub mod streaming;
 pub mod types;
 
+pub use azure::AzureConfig;
 pub use client::OpenAI;
 pub use config::ClientConfig;
 pub use error::OpenAIError;
