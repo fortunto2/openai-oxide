@@ -396,7 +396,7 @@ impl OpenAI {
         Ok(value)
     }
 
-    /// WASM: simple send without retry (no tokio::time available).
+    /// WASM: retry with cross-platform sleep.
     #[cfg(target_arch = "wasm32")]
     async fn send_with_retry<B: serde::Serialize, T: serde::de::DeserializeOwned>(
         &self,
@@ -404,16 +404,38 @@ impl OpenAI {
         path: &str,
         body: Option<&B>,
     ) -> Result<T, OpenAIError> {
-        let mut req = self.request(method, path);
-        if let Some(b) = body {
-            if self.options.extra_body.is_some() {
-                req = req.json(&self.merge_body_json(b)?);
-            } else {
-                req = req.json(b);
+        let body_value = match body {
+            Some(b) if self.options.extra_body.is_some() => Some(self.merge_body_json(b)?),
+            Some(b) => Some(serde_json::to_value(b)?),
+            None => None,
+        };
+
+        for attempt in 0..=self.config.max_retries {
+            let mut req = self.request(method.clone(), path);
+            if let Some(ref val) = body_value {
+                req = req.json(val);
             }
+
+            let response = match req.send().await {
+                Ok(resp) => resp,
+                Err(e) if attempt == self.config.max_retries => {
+                    return Err(OpenAIError::RequestError(e));
+                }
+                Err(_) => {
+                    crate::runtime::sleep(crate::runtime::backoff_ms(attempt)).await;
+                    continue;
+                }
+            };
+
+            let status = response.status().as_u16();
+            if !RETRYABLE_STATUS_CODES.contains(&status) || attempt == self.config.max_retries {
+                return Self::handle_response(response).await;
+            }
+
+            crate::runtime::sleep(crate::runtime::backoff_ms(attempt)).await;
         }
-        let response = req.send().await?;
-        Self::handle_response(response).await
+
+        Err(OpenAIError::InvalidArgument("retry exhausted".into()))
     }
 
     /// Send a request with retry logic for transient errors.

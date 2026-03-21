@@ -32,6 +32,8 @@ reqwest = { version = "0.13", default-features = false, features = ["json", "str
 tokio = { version = "1", features = ["rt", "macros", "sync"] }
 wasm-bindgen-futures = "0.4"
 gloo-timers = { version = "0.3", features = ["futures"] }
+gloo-net = { version = "0.6", features = ["websocket"], optional = true }
+web-sys = { version = "0.3", optional = true }
 
 [dev-dependencies]
 mockito = "1"
@@ -57,6 +59,7 @@ beta = []
 live-tests = []
 simd = ["dep:simd-json"]
 websocket = ["dep:tokio-tungstenite"]
+websocket-wasm = ["dep:gloo-net", "dep:web-sys"]
 
 [[example]]
 name = "chat"

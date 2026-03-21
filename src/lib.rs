@@ -40,6 +40,7 @@ pub mod hedged;
 pub mod pagination;
 pub mod request_options;
 pub mod resources;
+pub(crate) mod runtime;
 pub mod streaming;
 pub mod types;
 #[cfg(feature = "websocket")]

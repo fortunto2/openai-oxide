@@ -15,16 +15,8 @@ use std::time::Duration;
 
 use crate::OpenAI;
 use crate::error::OpenAIError;
+use crate::runtime::sleep;
 use crate::types::responses::{Response, ResponseCreateRequest};
-
-/// Cross-platform sleep — tokio on native, gloo-timers on WASM.
-async fn sleep(duration: Duration) {
-    #[cfg(not(target_arch = "wasm32"))]
-    tokio::time::sleep(duration).await;
-
-    #[cfg(target_arch = "wasm32")]
-    gloo_timers::future::TimeoutFuture::new(duration.as_millis() as u32).await;
-}
 
 /// Send the same request to OpenAI twice with a hedge delay.
 /// Returns the first successful response.

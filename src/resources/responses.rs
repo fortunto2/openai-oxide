@@ -172,12 +172,9 @@ impl<'a> Responses<'a> {
             let mut response_id: Option<String> = None;
 
             loop {
-                // On native: timeout after 60s. On WASM: no timeout (browser handles it).
-                #[cfg(not(target_arch = "wasm32"))]
                 let event =
-                    tokio::time::timeout(std::time::Duration::from_secs(60), stream.next()).await;
-                #[cfg(target_arch = "wasm32")]
-                let event: Result<Option<Result<_, _>>, ()> = Ok(stream.next().await);
+                    crate::runtime::timeout(std::time::Duration::from_secs(60), stream.next())
+                        .await;
 
                 let event = match event {
                     Ok(Some(Ok(ev))) => ev,
@@ -189,7 +186,6 @@ impl<'a> Responses<'a> {
                         break;
                     }
                     Ok(None) => break,
-                    #[cfg(not(target_arch = "wasm32"))]
                     Err(_) => {
                         let _ = meta_tx.send(StreamFcMeta {
                             response_id: response_id.clone(),
@@ -197,8 +193,6 @@ impl<'a> Responses<'a> {
                         });
                         break;
                     }
-                    #[cfg(target_arch = "wasm32")]
-                    Err(_) => break,
                 };
 
                 match event.type_.as_str() {
@@ -285,11 +279,7 @@ impl<'a> Responses<'a> {
             }
         };
 
-        #[cfg(not(target_arch = "wasm32"))]
-        tokio::spawn(spawn_future);
-
-        #[cfg(target_arch = "wasm32")]
-        wasm_bindgen_futures::spawn_local(spawn_future);
+        crate::runtime::spawn(spawn_future);
 
         Ok(StreamFcHandle {
             rx: fc_rx,
