@@ -30,13 +30,19 @@ pub fn App() -> Element {
         storage.get_item("openai_api_key").unwrap().unwrap_or_default()
     });
     let mut connected = use_signal(|| false);
+    
+    // Stats
+    let mut ttft = use_signal(|| 0.0);
+    let mut speed = use_signal(|| 0.0);
+    let mut token_count = use_signal(|| 0);
+    let mut stream_start_time = use_signal(|| 0.0);
+    let mut last_chunk_time = use_signal(|| 0.0);
 
     let ws_task = use_coroutine(|mut rx: UnboundedReceiver<String>| async move {
         let host = web_sys::window().unwrap().location().host().unwrap();
         let protocol = web_sys::window().unwrap().location().protocol().unwrap();
         let ws_protocol = if protocol == "https:" { "wss:" } else { "ws:" };
         
-        // Wait for key
         let mut key = String::new();
         while let Some(msg) = rx.next().await {
             if msg.starts_with("CONNECT:") {
@@ -76,13 +82,29 @@ pub fn App() -> Element {
                             tracing::error!("WS send error: {:?}", e);
                             break;
                         }
+                        
+                        let now = web_sys::window().unwrap().performance().unwrap().now();
+                        stream_start_time.set(now);
+                        ttft.set(0.0);
+                        speed.set(0.0);
+                        token_count.set(0);
                     }
                 }
                 Some(ws_msg) = read.next() => {
                     if let Ok(Message::Text(text)) = ws_msg {
                         if let Ok(incoming) = serde_json::from_str::<WsMessage>(&text) {
+                            let now = web_sys::window().unwrap().performance().unwrap().now();
+                            
                             if incoming.action == "chunk" {
                                 if let Some(chunk) = incoming.content {
+                                    if *ttft.read() == 0.0 {
+                                        ttft.set(now - *stream_start_time.read());
+                                    }
+                                    
+                                    let current_count = *token_count.read();
+                                    token_count.set(current_count + 1); // rough estimate
+                                    last_chunk_time.set(now);
+                                    
                                     let mut msgs = messages.read().clone();
                                     if let Some(last) = msgs.last_mut() {
                                         if last.role == "assistant" {
@@ -96,6 +118,10 @@ pub fn App() -> Element {
                                     messages.set(msgs);
                                 }
                             } else if incoming.action == "done" {
+                                let total_time = (*last_chunk_time.read() - *stream_start_time.read()) / 1000.0;
+                                if total_time > 0.0 {
+                                    speed.set((*token_count.read() as f64) / total_time);
+                                }
                                 tracing::info!("Stream done");
                             }
                         }
@@ -138,29 +164,36 @@ pub fn App() -> Element {
             h1 { "OpenAI Oxide + Rust WASM + Durable Objects" }
             
             div {
-                style: "margin-bottom: 20px; padding: 10px; background-color: #f8f9fa; border-radius: 5px;",
-                label {
-                    style: "margin-right: 10px;",
-                    "OpenAI API Key (optional if set on server): "
+                style: "margin-bottom: 20px; padding: 10px; background-color: #f8f9fa; border-radius: 5px; display: flex; justify-content: space-between; align-items: center;",
+                div {
+                    label {
+                        style: "margin-right: 10px;",
+                        "OpenAI API Key: "
+                    }
+                    input {
+                        "type": "password",
+                        value: "{api_key}",
+                        oninput: move |e| api_key.set(e.value()),
+                        placeholder: "sk-...",
+                        style: "margin-right: 10px; padding: 5px; width: 250px;"
+                    }
+                    button {
+                        onclick: move |_| connect_ws(),
+                        disabled: connected(),
+                        style: "padding: 5px 15px; cursor: pointer;",
+                        "Connect"
+                    }
                 }
-                input {
-                    "type": "password",
-                    value: "{api_key}",
-                    oninput: move |e| api_key.set(e.value()),
-                    placeholder: "sk-...",
-                    style: "margin-right: 10px; padding: 5px; width: 250px;"
-                }
-                button {
-                    onclick: move |_| connect_ws(),
-                    disabled: connected(),
-                    style: "padding: 5px 15px; cursor: pointer;",
-                    "Connect"
+                div {
+                    style: "color: {status_color}; font-weight: bold;",
+                    "{status_text}"
                 }
             }
 
             div {
-                style: "margin-bottom: 20px; color: {status_color}; font-weight: bold;",
-                "{status_text}"
+                style: "margin-bottom: 20px; padding: 10px; background-color: #e9ecef; border-radius: 5px; font-family: monospace; font-size: 14px;",
+                span { style: "margin-right: 20px;", "TTFT: {ttft():.0}ms" }
+                span { "Speed: {speed():.1} tokens/sec" }
             }
             
             div {

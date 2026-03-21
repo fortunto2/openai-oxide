@@ -7,7 +7,7 @@ edition = "2021"
 dioxus = { version = "0.5.0", features = ["web"] }
 dioxus-logger = "0.5.0"
 tracing = "0.1"
-web-sys = { version = "0.3", features = ["Window", "Location", "Storage"] }
+web-sys = { version = "0.3", features = ["Window", "Location", "Storage", "Performance"] }
 gloo-net = { version = "0.3", features = ["websocket"] }
 async-channel = "2.3.1"
 futures-util = { version = "0.3", features = ["sink"] }
