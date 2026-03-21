@@ -5,12 +5,14 @@
   </p>
   <p align="center">
     <a href="https://crates.io/crates/openai-oxide"><img src="https://img.shields.io/crates/v/openai-oxide.svg" alt="crates.io"></a>
+    <a href="https://crates.io/crates/openai-oxide"><img src="https://img.shields.io/crates/d/openai-oxide.svg" alt="downloads"></a>
     <a href="https://docs.rs/openai-oxide"><img src="https://docs.rs/openai-oxide/badge.svg" alt="docs.rs"></a>
     <a href="https://github.com/fortunto2/openai-rust/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="MIT"></a>
+    <a href="https://github.com/fortunto2/openai-rust"><img src="https://img.shields.io/github/stars/fortunto2/openai-rust?style=social" alt="GitHub stars"></a>
   </p>
 </p>
 
-Full Responses API + Chat Completions + 20 endpoints. WebSocket mode, hedged requests, streaming FC early parse — features no other client has.
+Full [Responses API](https://platform.openai.com/docs/api-reference/responses) + [Chat Completions](https://platform.openai.com/docs/api-reference/chat) + 20 endpoints. [WebSocket mode](https://platform.openai.com/docs/guides/websocket-mode), hedged requests, streaming FC early parse — features no other client has.
 
 ```toml
 [dependencies]
@@ -54,7 +56,7 @@ All clients use the Responses API, GPT-5.4, warm connections, 5 iterations, medi
 
 ### 4 clients compared
 
-| Test | openai-oxide | genai 0.6 | async-openai 0.33 | Python 2.29 |
+| Test | openai-oxide | [genai](https://crates.io/crates/genai) 0.6 | [async-openai](https://crates.io/crates/async-openai) 0.33 | [Python openai](https://pypi.org/project/openai/) 2.29 |
 |------|:-----------:|:---------:|:-----------------:|:-----------:|
 | Plain text | **922ms** | 948ms | 968ms | 966ms |
 | Structured output | 1404ms | 1428ms | 3407ms | **1258ms** |
@@ -96,20 +98,20 @@ All clients use the Responses API, GPT-5.4, warm connections, 5 iterations, medi
 
 ## Features
 
-- **Async-first** — tokio + reqwest 0.13, HTTP/2
-- **Strongly typed** — serde, every field documented
+- **Async-first** — [tokio](https://tokio.rs/) + [reqwest](https://crates.io/crates/reqwest) 0.13, HTTP/2
+- **Strongly typed** — [serde](https://serde.rs/), every field documented
 - **Streaming** — SSE with zero-copy parser (no external deps)
-- **WebSocket** — persistent `wss://` for agent loops (opt-in: `websocket` feature)
-- **Hedged requests** — `hedged_request()`, `hedged_request_n()`, `speculative()`
-- **Responses API** — create, stream, retrieve, delete, tools (WebSearch, FileSearch, MCP, Function, CodeInterpreter, ComputerUse, ImageGeneration)
-- **Chat Completions** — full parity with Python SDK
-- **Structured outputs** — JSON Schema with strict mode
-- **Reasoning models** — o-series (effort, summary)
+- **[WebSocket](https://platform.openai.com/docs/guides/websocket-mode)** — persistent `wss://` for agent loops (opt-in: `websocket` feature)
+- **Hedged requests** — inspired by [Google's "The Tail at Scale"](https://research.google/pubs/the-tail-at-scale/)
+- **[Responses API](https://platform.openai.com/docs/api-reference/responses)** — create, stream, retrieve, delete, tools (WebSearch, FileSearch, MCP, Function, CodeInterpreter, ComputerUse, ImageGeneration)
+- **[Chat Completions](https://platform.openai.com/docs/api-reference/chat)** — full parity with [Python SDK](https://github.com/openai/openai-python)
+- **[Structured outputs](https://platform.openai.com/docs/guides/structured-outputs)** — JSON Schema with strict mode
+- **Reasoning models** — [o-series](https://platform.openai.com/docs/guides/reasoning) (effort, summary)
 - **BYOT** — `create_raw()` for custom types / raw JSON
 - **Pagination** — auto cursor-based streaming
 - **Retries** — exponential backoff with Retry-After
-- **Azure** — full Azure OpenAI support
-- **195 tests** — unit + integration + OpenAPI coverage
+- **[Azure](https://learn.microsoft.com/en-us/azure/ai-services/openai/)** — full Azure OpenAI support
+- **195 tests** — unit + integration + [OpenAPI](https://github.com/openai/openai-openapi) coverage
 
 ## Feature Flags
 
@@ -255,8 +257,15 @@ python3 examples/bench_python.py                                # Python compari
 
 ## Used in
 
-- **[sgr-agent](https://github.com/fortunto2/rust-code)** — LLM agent framework with structured output, function calling, agent loops, and 3-backend support (oxide / genai / async-openai). `openai-oxide` is the default backend for OpenAI models via `Llm::new()`.
+- **[sgr-agent](https://github.com/fortunto2/rust-code)** — LLM agent framework with structured output, function calling, agent loops, and 3-backend support (oxide / genai / async-openai). `openai-oxide` is the default backend for OpenAI models via `Llm::new()`. [![crates.io](https://img.shields.io/crates/v/sgr-agent.svg)](https://crates.io/crates/sgr-agent)
+- **[rust-code](https://github.com/fortunto2/rust-code)** — AI-powered TUI coding agent. Uses `sgr-agent` + `openai-oxide` for GPT models.
+
+## See also
+
+- [openai-python](https://github.com/openai/openai-python) — Official Python SDK (our benchmark baseline)
+- [async-openai](https://github.com/64bit/async-openai) — Alternative Rust client (mature, 1800+ stars)
+- [genai](https://github.com/jeremychone/rust-genai) — Multi-provider Rust client (Gemini, Anthropic, OpenAI)
 
 ## License
 
-MIT
+[MIT](LICENSE)
