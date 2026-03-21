@@ -132,6 +132,9 @@ impl<'a> Responses<'a> {
 
     /// Stream a response and yield function calls as soon as arguments are complete.
     ///
+    /// Not available on WASM (requires tokio::time + tokio::spawn).
+    #[cfg(not(target_arch = "wasm32"))]
+    ///
     /// Emits each [`FunctionCall`](crate::types::responses::FunctionCall) on the
     /// `response.function_call_arguments.done` event — typically 200-500ms before
     /// `response.completed`. Safe: the event guarantees complete, valid JSON arguments.

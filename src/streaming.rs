@@ -11,7 +11,10 @@ use crate::error::OpenAIError;
 ///
 /// Wraps a byte stream from reqwest and yields deserialized items.
 pub struct SseStream<T> {
+    #[cfg(not(target_arch = "wasm32"))]
     inner: Pin<Box<dyn Stream<Item = Result<bytes::Bytes, reqwest::Error>> + Send>>,
+    #[cfg(target_arch = "wasm32")]
+    inner: Pin<Box<dyn Stream<Item = Result<bytes::Bytes, reqwest::Error>>>>,
     buffer: String,
     done: bool,
     _phantom: std::marker::PhantomData<T>,

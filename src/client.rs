@@ -73,23 +73,24 @@ impl OpenAI {
     /// Create a client from a full config.
     pub fn with_config(config: ClientConfig) -> Self {
         let options = config.initial_options();
+
+        #[cfg(not(target_arch = "wasm32"))]
         let http = reqwest::Client::builder()
             .timeout(Duration::from_secs(config.timeout_secs))
-            // TCP: low latency
             .tcp_nodelay(true)
             .tcp_keepalive(Some(Duration::from_secs(30)))
-            // Connection pool: keep warm
             .pool_idle_timeout(Some(Duration::from_secs(300)))
             .pool_max_idle_per_host(4)
-            // HTTP/2: keep connection alive even when idle (avoids TLS re-handshake)
             .http2_keep_alive_interval(Some(Duration::from_secs(20)))
             .http2_keep_alive_timeout(Duration::from_secs(10))
             .http2_keep_alive_while_idle(true)
             .http2_adaptive_window(true)
-            // Compression
             .gzip(true)
             .build()
             .expect("failed to build HTTP client");
+
+        #[cfg(target_arch = "wasm32")]
+        let http = reqwest::Client::new();
         Self {
             http,
             config,
@@ -258,9 +259,11 @@ impl OpenAI {
                 req = req.header(key.clone(), value.clone());
             }
         }
+        #[cfg(not(target_arch = "wasm32"))]
         if let Some(ref query) = self.options.query {
             req = req.query(query);
         }
+        #[cfg(not(target_arch = "wasm32"))]
         if let Some(timeout) = self.options.timeout {
             req = req.timeout(timeout);
         }
@@ -280,6 +283,7 @@ impl OpenAI {
 
     /// Send a GET request with query parameters and deserialize the response.
     #[allow(dead_code)]
+    #[cfg(not(target_arch = "wasm32"))]
     pub(crate) async fn get_with_query<T: serde::de::DeserializeOwned>(
         &self,
         path: &str,
@@ -317,6 +321,7 @@ impl OpenAI {
     }
 
     /// Send a POST request with a multipart form body and deserialize the response.
+    #[cfg(not(target_arch = "wasm32"))]
     pub(crate) async fn post_multipart<T: serde::de::DeserializeOwned>(
         &self,
         path: &str,
@@ -391,10 +396,31 @@ impl OpenAI {
         Ok(value)
     }
 
+    /// WASM: simple send without retry (no tokio::time available).
+    #[cfg(target_arch = "wasm32")]
+    async fn send_with_retry<B: serde::Serialize, T: serde::de::DeserializeOwned>(
+        &self,
+        method: reqwest::Method,
+        path: &str,
+        body: Option<&B>,
+    ) -> Result<T, OpenAIError> {
+        let mut req = self.request(method, path);
+        if let Some(b) = body {
+            if self.options.extra_body.is_some() {
+                req = req.json(&self.merge_body_json(b)?);
+            } else {
+                req = req.json(b);
+            }
+        }
+        let response = req.send().await?;
+        Self::handle_response(response).await
+    }
+
     /// Send a request with retry logic for transient errors.
     ///
     /// Fast path: first attempt avoids loop overhead and method clone.
     /// Only enters retry loop on transient errors (429, 5xx).
+    #[cfg(not(target_arch = "wasm32"))]
     async fn send_with_retry<B: serde::Serialize, T: serde::de::DeserializeOwned>(
         &self,
         method: reqwest::Method,
@@ -445,6 +471,7 @@ impl OpenAI {
     }
 
     /// Retry loop — only called when first attempt fails with a transient error.
+    #[cfg(not(target_arch = "wasm32"))]
     async fn retry_loop<T: serde::de::DeserializeOwned>(
         &self,
         method: reqwest::Method,
@@ -492,6 +519,7 @@ impl OpenAI {
     }
 
     /// Calculate backoff delay: max(retry_after, 0.5 * 2^attempt) seconds.
+    #[cfg(not(target_arch = "wasm32"))]
     fn backoff_delay(attempt: u32, retry_after_secs: Option<f64>) -> Duration {
         let exponential = 0.5 * 2.0_f64.powi(attempt as i32);
         let secs = match retry_after_secs {
