@@ -95,6 +95,8 @@ impl ChatDurableObject {
                 }
             };
 
+            let is_openai = base_url.contains("api.openai.com");
+
             // Connect to OpenAI Responses API via WebSocket
             let mut headers = Headers::new();
             headers.set("Upgrade", "websocket")?;
@@ -104,13 +106,27 @@ impl ChatDurableObject {
             init.with_method(Method::Get);
             init.with_headers(headers);
 
-            let req_url = format!("{}/responses", base_url);
+            // OpenRouter doesn't support the /responses endpoint WSS yet.
+            // If it's not OpenAI, we cannot establish a native WSS session. We'd have to use standard HTTP /chat/completions.
+            // BUT, since this is a pure WebSocket example built on `Responses API`, we'll try to use the WSS endpoint.
+            // If the user provided OpenRouter, they likely mean standard HTTP streaming.
+            // But Cloudflare worker websocket() requires a 101 Switching Protocols.
+            
+            let req_url = if is_openai {
+                format!("{}/responses", base_url)
+            } else {
+                // For non-OpenAI, we assume they support WSS on the base URL, or just fail for now.
+                // We will attempt to connect to WSS. If it fails, we gracefully close.
+                // We'll append /chat/completions just in case some support WS there.
+                format!("{}/chat/completions", base_url)
+            };
+
             let openai_req = Request::new_with_init(&req_url, &init)?;
             let openai_res = match Fetch::Request(openai_req).send().await {
                 Ok(res) => res,
                 Err(e) => {
-                    console_log!("Failed to fetch OpenAI: {:?}", e);
-                    browser_ws.close(Some(1011), Some("Failed to connect to OpenAI"))?;
+                    console_log!("Failed to fetch Upstream: {:?}", e);
+                    browser_ws.close(Some(1011), Some("Failed to connect to Upstream"))?;
                     return Response::from_websocket(client);
                 }
             };
@@ -119,8 +135,10 @@ impl ChatDurableObject {
             let openai_ws = match openai_res.websocket() {
                 Some(ws) => ws,
                 None => {
-                    console_log!("OpenAI did not return a WebSocket. Status: {}", openai_status);
-                    browser_ws.close(None, Some("Failed to connect to OpenAI"))?;
+                    console_log!("Upstream did not return a WebSocket. Status: {}. URL: {}", openai_status, req_url);
+                    // OpenRouter/etc don't support WSS for this natively in the same way.
+                    let error_msg = format!("Upstream does not support WebSocket Responses API (Status: {})", openai_status);
+                    browser_ws.close(Some(1011), Some(&error_msg))?;
                     return Response::from_websocket(client);
                 }
             };
@@ -154,10 +172,14 @@ impl ChatDurableObject {
                                                 }).collect::<Vec<_>>();
                                                 
                                                 // We use prompt caching feature!
-                                                let o_req = ResponseCreateRequest::new(model)
-                                                    .input(ResponseInput::Messages(input_items))
-                                                    .prompt_cache_key("oxide-dioxus-chat")
-                                                    .prompt_cache_retention("24h");
+                                                let mut o_req = ResponseCreateRequest::new(model)
+                                                    .input(ResponseInput::Messages(input_items));
+                                                    
+                                                // Only add prompt caching for native OpenAI as others might reject it
+                                                if is_openai {
+                                                    o_req = o_req.prompt_cache_key("oxide-dioxus-chat")
+                                                                 .prompt_cache_retention("24h");
+                                                }
                                                 
                                                 let mut value = serde_json::to_value(&o_req).unwrap();
                                                 if let serde_json::Value::Object(ref mut map) = value {
