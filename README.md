@@ -20,9 +20,26 @@ We built `openai-oxide` to squeeze every millisecond out of the OpenAI API.
 
 - **Zero-Overhead Streaming:** Uses a custom zero-copy SSE parser. By enforcing strict `Accept: text/event-stream` and `Cache-Control: no-cache` headers, it prevents reverse-proxy buffering, achieving Time-To-First-Token (TTFT) in ~670ms.
 - **WebSocket Mode:** Maintains a persistent `wss://` connection for the Responses API. By bypassing per-request TLS handshakes, it reduces multi-turn agent loop latency by up to 37%.
-- **Hedged Requests:** Send redundant requests and cancel the slower ones. Costs 2-7% extra tokens but reliably reduces P99 tail latency by 50-96% (inspired by Google's "The Tail at Scale").
 - **Stream FC Early Parse:** Yields function calls the exact moment `arguments.done` is emitted, allowing you to start executing local tools ~400ms before the overall response finishes.
+- **Hardware-Accelerated JSON (`simd`):** Opt-in AVX2/NEON vector instructions for parsing massive agent histories and complex tool calls in microseconds.
+- **Hedged Requests:** Send redundant requests and cancel the slower ones. Costs 2-7% extra tokens but reliably reduces P99 tail latency by 50-96% (inspired by Google's "The Tail at Scale").
 - **WASM First-Class:** Compiles to `wasm32-unknown-unknown` without dropping features. Unlike other clients, streaming, retries, and early-parsing work flawlessly in Cloudflare Workers and browsers.
+
+### The Agentic Multiplier Effect
+
+In complex agent loops (e.g. coding agents, researchers) where a model calls dozens of tools sequentially, HTTP overhead adds up to tens of wasted seconds. `openai-oxide` collapses this latency through pipelining:
+
+```text
+Standard Client (HTTP/REST)
+Request 1 (ls)   : [TLS Handshake] -> [Req] -> [Wait TTFT] -> [Parse JSON at end] -> [Exec Tool]
+Request 2 (cat)  : [TLS Handshake] -> [Req] -> [Wait TTFT] -> [Parse JSON at end] -> [Exec Tool]
+
+openai-oxide (WebSockets + Early Parse + SIMD)
+Connection       : [TLS Handshake] (Done once)
+Request 1 (ls)   : [Req] -> [Wait TTFT] -> [Exec Tool Early!]
+Request 2 (cat)  :                      [Req] -> [Wait TTFT] -> [Exec Tool Early!]
+```
+*Result: An agent performing 10 tool calls completes its task up to 50% faster.*
 
 ---
 
