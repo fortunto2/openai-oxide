@@ -3,6 +3,7 @@ use serde::{Deserialize, Serialize};
 use worker::*;
 use openai_oxide::types::common::Role;
 use openai_oxide::types::responses::{ResponseCreateRequest, ResponseStreamEvent, ResponseInputItem, ResponseInput};
+use openai_oxide::types::chat::{ChatCompletionRequestMessage, ChatCompletionMessageParam, UserContent, ChatCompletionRequest};
 
 #[derive(Clone, Serialize, Deserialize, Debug)]
 struct ChatMessage {
@@ -77,14 +78,10 @@ impl ChatDurableObject {
                 .filter(|k| !k.is_empty())
                 .unwrap_or_else(|| "https://api.openai.com/v1".to_string());
                 
-            // OpenAI Responses API is only available on WSS. If the custom base URL is HTTP/S, we need to adapt it,
-            // or just use it if it's WSS. But `fetch` works with https:// for upgrading.
-            // But we actually use `fetch` with https://, so base_url should be https://
             if !base_url.starts_with("http") {
                 base_url = format!("https://{}", base_url);
             }
-            // remove trailing slash
-            let base_url = base_url.trim_end_matches('/');
+            let base_url = base_url.trim_end_matches('/').to_string();
 
             let api_key = match api_key {
                 Some(k) => k,
@@ -97,7 +94,102 @@ impl ChatDurableObject {
 
             let is_openai = base_url.contains("api.openai.com");
 
-            // Connect to OpenAI Responses API via WebSocket
+            if !is_openai {
+                // FALLBACK: Hybrid mode for OpenRouter / non-WSS compatible APIs
+                // We use HTTP Server-Sent Events from standard /chat/completions
+                // And pump it into the browser WebSocket
+                
+                wasm_bindgen_futures::spawn_local(async move {
+                    let mut browser_events = browser_ws.events().expect("Failed to get browser events");
+                    let mut client_config = openai_oxide::ClientConfig::new(&api_key);
+                    client_config.base_url = base_url.clone();
+                    let http_client = openai_oxide::Client::new_with_config(client_config);
+
+                    while let Some(event) = browser_events.next().await {
+                        if let Ok(worker::WebsocketEvent::Message(msg)) = event {
+                            if let Some(text) = msg.text() {
+                                if let Ok(ws_msg) = serde_json::from_str::<WsMessage>(&text) {
+                                    if ws_msg.action == "send" {
+                                        if let Some(msgs) = ws_msg.messages {
+                                            let model = ws_msg.model.unwrap_or_else(|| "minimax/minimax-m2.5".to_string());
+                                            
+                                            let input_items = msgs.into_iter().map(|m| {
+                                                match m.role.as_str() {
+                                                    "system" => ChatCompletionMessageParam::System { content: m.content, name: None },
+                                                    "assistant" => ChatCompletionMessageParam::Assistant { content: Some(m.content), name: None, tool_calls: None, refusal: None },
+                                                    _ => ChatCompletionMessageParam::User { content: UserContent::Text(m.content), name: None },
+                                                }
+                                            }).collect::<Vec<_>>();
+                                            
+                                            let req = ChatCompletionRequest::new(model, input_items);
+                                            
+                                            match http_client.chat().completions().create_stream(req).await {
+                                                Ok(mut stream) => {
+                                                    while let Some(chunk_res) = stream.next().await {
+                                                        if let Ok(chunk) = chunk_res {
+                                                            if let Some(content) = chunk.choices.first().and_then(|c| c.delta.content.clone()) {
+                                                                let reply = WsMessage {
+                                                                    action: "chunk".into(),
+                                                                    content: Some(content),
+                                                                    messages: None,
+                                                                    model: None,
+                                                                    base_url: None,
+                                                                };
+                                                                if let Ok(json) = serde_json::to_string(&reply) {
+                                                                    let _ = browser_ws.send_with_str(json);
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                    
+                                                    let done_msg = WsMessage {
+                                                        action: "done".into(),
+                                                        content: None,
+                                                        messages: None,
+                                                        model: None,
+                                                        base_url: None,
+                                                    };
+                                                    if let Ok(json) = serde_json::to_string(&done_msg) {
+                                                        let _ = browser_ws.send_with_str(json);
+                                                    }
+                                                }
+                                                Err(e) => {
+                                                    let err_msg = WsMessage {
+                                                        action: "chunk".into(),
+                                                        content: Some(format!("\n[Error from upstream: {}]", e)),
+                                                        messages: None,
+                                                        model: None,
+                                                        base_url: None,
+                                                    };
+                                                    if let Ok(json) = serde_json::to_string(&err_msg) {
+                                                        let _ = browser_ws.send_with_str(json);
+                                                    }
+                                                    let done_msg = WsMessage {
+                                                        action: "done".into(),
+                                                        content: None,
+                                                        messages: None,
+                                                        model: None,
+                                                        base_url: None,
+                                                    };
+                                                    if let Ok(json) = serde_json::to_string(&done_msg) {
+                                                        let _ = browser_ws.send_with_str(json);
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        } else if let Ok(worker::WebsocketEvent::Close(_)) = event {
+                            break;
+                        }
+                    }
+                });
+
+                return Response::from_websocket(client);
+            }
+
+            // NATIVE OPENAI WSS Responses API
             let mut headers = Headers::new();
             headers.set("Upgrade", "websocket")?;
             headers.set("Authorization", &format!("Bearer {}", api_key))?;
@@ -106,21 +198,7 @@ impl ChatDurableObject {
             init.with_method(Method::Get);
             init.with_headers(headers);
 
-            // OpenRouter doesn't support the /responses endpoint WSS yet.
-            // If it's not OpenAI, we cannot establish a native WSS session. We'd have to use standard HTTP /chat/completions.
-            // BUT, since this is a pure WebSocket example built on `Responses API`, we'll try to use the WSS endpoint.
-            // If the user provided OpenRouter, they likely mean standard HTTP streaming.
-            // But Cloudflare worker websocket() requires a 101 Switching Protocols.
-            
-            let req_url = if is_openai {
-                format!("{}/responses", base_url)
-            } else {
-                // For non-OpenAI, we assume they support WSS on the base URL, or just fail for now.
-                // We will attempt to connect to WSS. If it fails, we gracefully close.
-                // We'll append /chat/completions just in case some support WS there.
-                format!("{}/chat/completions", base_url)
-            };
-
+            let req_url = format!("{}/responses", base_url);
             let openai_req = Request::new_with_init(&req_url, &init)?;
             let openai_res = match Fetch::Request(openai_req).send().await {
                 Ok(res) => res,
@@ -136,7 +214,6 @@ impl ChatDurableObject {
                 Some(ws) => ws,
                 None => {
                     console_log!("Upstream did not return a WebSocket. Status: {}. URL: {}", openai_status, req_url);
-                    // OpenRouter/etc don't support WSS for this natively in the same way.
                     let error_msg = format!("Upstream does not support WebSocket Responses API (Status: {})", openai_status);
                     browser_ws.close(Some(1011), Some(&error_msg))?;
                     return Response::from_websocket(client);
@@ -171,11 +248,9 @@ impl ChatDurableObject {
                                                     }
                                                 }).collect::<Vec<_>>();
                                                 
-                                                // We use prompt caching feature!
                                                 let mut o_req = ResponseCreateRequest::new(model)
                                                     .input(ResponseInput::Messages(input_items));
                                                     
-                                                // Only add prompt caching for native OpenAI as others might reject it
                                                 if is_openai {
                                                     o_req = o_req.prompt_cache_key("oxide-dioxus-chat")
                                                                  .prompt_cache_retention("24h");

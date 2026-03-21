@@ -28,47 +28,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .build()?;
     client.responses().create(req).await?;
     
-    // 1. Plain text
-    let mut times = Vec::new();
-    for _ in 0..ITERATIONS {
-        let req = async_openai::types::responses::CreateResponseArgs::default()
-            .model(MODEL)
-            .input("What is the capital of France? One word.")
-            .max_output_tokens(16_u32)
-            .build()?;
-        
-        let t0 = Instant::now();
-        let _ = client.responses().create(req).await?;
-        times.push(t0.elapsed().as_millis());
-    }
-    let (med, _, _, _) = stats(&mut times);
-    println!("{:<25} {:>6}ms", "Plain text", med);
-
-    // 2. Structured output
-    println!("{:<25} {:>6}", "Structured output", "N/A");
-
-    // 3. Function calling
-    let mut times = Vec::new();
-    for _ in 0..ITERATIONS {
-        let req = async_openai::types::responses::CreateResponseArgs::default()
-            .model(MODEL)
-            .input("What's the weather in Tokyo?")
-            .tools(vec![async_openai::types::responses::Tool::Function(async_openai::types::responses::FunctionTool {
-                name: "get_weather".into(),
-                description: Some("Get weather".into()),
-                parameters: Some(serde_json::json!({"type": "object", "properties": {"city": {"type": "string"}, "unit": {"type": "string", "enum": ["celsius", "fahrenheit"]}}, "required": ["city", "unit"], "additionalProperties": false})),
-                strict: Some(true),
-            })])
-            .build()?;
-        
-        let t0 = Instant::now();
-        let _ = client.responses().create(req).await?;
-        times.push(t0.elapsed().as_millis());
-    }
-
-    let (med, _, _, _) = stats(&mut times);
-    println!("{:<25} {:>6}ms", "Function calling", med);
-
     // 10. Streaming TTFT
     let mut times = Vec::new();
     for _ in 0..ITERATIONS {
@@ -81,9 +40,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         let t0 = Instant::now();
         let mut stream = client.responses().create_stream(req).await?;
         while let Some(res) = stream.next().await {
-            let _ = res?;
-            times.push(t0.elapsed().as_millis());
-            break;
+            match res? {
+                async_openai::types::responses::ResponseStreamEvent::ResponseOutputTextDelta(_) => {
+                    times.push(t0.elapsed().as_millis());
+                    break;
+                },
+                _ => {}
+            }
         }
         while let Some(_) = stream.next().await {}
     }
