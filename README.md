@@ -104,6 +104,12 @@ All benchmarks were run to ensure a fair, real-world comparison of the clients:
 
 *Note: The new `Responses API` (`/v1/responses`) has higher backend latency on OpenAI's servers for non-streamed requests compared to the traditional `Chat Completions API` (`/v1/chat/completions`) due to its internal orchestration. `openai-oxide` provides first-class support for both APIs and implements zero-overhead stream parsing (`Accept: text/event-stream`).*
 
+#### What about WebSockets?
+`openai-oxide` natively supports OpenAI's WebSocket protocol for the Responses API (`features = ["websocket"]`). Bypassing the HTTP request overhead entirely yields the best performance for agentic workloads:
+- **WebSocket Plain text**: ~710ms (down from 1000ms HTTP)
+- **WebSocket Multi-turn**: ~1425ms (down from 2219ms HTTP)
+- **WebSocket Rapid-fire**: ~3227ms (down from 5147ms HTTP)
+
 ### Benchmark: `openai-oxide-python` vs `openai` (Python)
 
 All tests run on Python 3.13, warm connections, 5 iterations, median.
