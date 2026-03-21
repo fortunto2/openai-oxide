@@ -1,12 +1,21 @@
 use futures_util::StreamExt;
 use serde::{Deserialize, Serialize};
 use worker::*;
-use openai_oxide::types::responses::{ResponseCreateRequest, ResponseStreamEvent};
+use openai_oxide::types::common::Role;
+use openai_oxide::types::responses::{ResponseCreateRequest, ResponseStreamEvent, ResponseInputItem, ResponseInput};
+
+#[derive(Clone, Serialize, Deserialize, Debug)]
+struct ChatMessage {
+    role: String,
+    content: String,
+}
 
 #[derive(Serialize, Deserialize, Debug)]
 struct WsMessage {
     action: String,
     content: Option<String>,
+    messages: Option<Vec<ChatMessage>>,
+    model: Option<String>,
 }
 
 #[event(start)]
@@ -24,6 +33,9 @@ async fn main(req: Request, env: Env, _ctx: Context) -> Result<Response> {
             let id = namespace.id_from_name("global")?;
             let stub = id.get_stub()?;
             stub.fetch_with_request(req).await
+        })
+        .get_async("/*path", |_req, _ctx| async move {
+            Response::ok("Not Found")
         })
         .run(req, env)
         .await
@@ -109,9 +121,27 @@ impl ChatDurableObject {
                                 if let Some(text) = msg.text() {
                                     if let Ok(ws_msg) = serde_json::from_str::<WsMessage>(&text) {
                                         if ws_msg.action == "send" {
-                                            if let Some(content) = ws_msg.content {
-                                                // Create a response.create event for OpenAI
-                                                let o_req = ResponseCreateRequest::new("gpt-4o-mini").input(content);
+                                            if let Some(msgs) = ws_msg.messages {
+                                                let model = ws_msg.model.unwrap_or_else(|| "gpt-4o-mini".to_string());
+                                                
+                                                let input_items = msgs.into_iter().map(|m| {
+                                                    let role = match m.role.as_str() {
+                                                        "user" => Role::User,
+                                                        "assistant" => Role::Assistant,
+                                                        "system" => Role::System,
+                                                        _ => Role::User,
+                                                    };
+                                                    ResponseInputItem {
+                                                        role,
+                                                        content: serde_json::Value::String(m.content),
+                                                    }
+                                                }).collect::<Vec<_>>();
+                                                
+                                                // We use prompt caching feature!
+                                                let o_req = ResponseCreateRequest::new(model)
+                                                    .input(ResponseInput::Messages(input_items))
+                                                    .prompt_cache_key("oxide-dioxus-chat")
+                                                    .prompt_cache_retention("24h");
                                                 
                                                 let mut value = serde_json::to_value(&o_req).unwrap();
                                                 if let serde_json::Value::Object(ref mut map) = value {
@@ -138,6 +168,8 @@ impl ChatDurableObject {
                                                 let reply = WsMessage {
                                                     action: "chunk".into(),
                                                     content: Some(delta.to_string()),
+                                                    messages: None,
+                                                    model: None,
                                                 };
                                                 if let Ok(json) = serde_json::to_string(&reply) {
                                                     let _ = browser_ws.send_with_str(json);
@@ -147,6 +179,8 @@ impl ChatDurableObject {
                                             let done_msg = WsMessage {
                                                 action: "done".into(),
                                                 content: None,
+                                                messages: None,
+                                                model: None,
                                             };
                                             if let Ok(json) = serde_json::to_string(&done_msg) {
                                                 let _ = browser_ws.send_with_str(json);

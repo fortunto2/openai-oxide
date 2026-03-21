@@ -5,7 +5,7 @@ use futures_util::{SinkExt, StreamExt};
 use gloo_net::websocket::{futures::WebSocket, Message};
 use serde::{Deserialize, Serialize};
 
-#[derive(Clone, Serialize, Deserialize, PartialEq)]
+#[derive(Clone, Serialize, Deserialize, PartialEq, Debug)]
 struct ChatMessage {
     role: String,
     content: String,
@@ -14,7 +14,12 @@ struct ChatMessage {
 #[derive(Serialize, Deserialize, Debug)]
 struct WsMessage {
     action: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
     content: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    messages: Option<Vec<ChatMessage>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    model: Option<String>,
 }
 
 fn main() {
@@ -25,6 +30,8 @@ fn main() {
 pub fn App() -> Element {
     let mut messages = use_signal(Vec::<ChatMessage>::new);
     let mut input_text = use_signal(String::new);
+    let mut model = use_signal(|| "gpt-4o-mini".to_string());
+    
     let mut api_key = use_signal(|| {
         let storage = web_sys::window().unwrap().local_storage().unwrap().unwrap();
         storage.get_item("openai_api_key").unwrap().unwrap_or_default()
@@ -73,22 +80,17 @@ pub fn App() -> Element {
         loop {
             tokio::select! {
                 Some(msg_to_send) = rx.next() => {
-                    let payload = WsMessage {
-                        action: "send".into(),
-                        content: Some(msg_to_send),
-                    };
-                    if let Ok(json) = serde_json::to_string(&payload) {
-                        if let Err(e) = write.send(Message::Text(json)).await {
-                            tracing::error!("WS send error: {:?}", e);
-                            break;
-                        }
-                        
-                        let now = web_sys::window().unwrap().performance().unwrap().now();
-                        stream_start_time.set(now);
-                        ttft.set(0.0);
-                        speed.set(0.0);
-                        token_count.set(0);
+                    // Expecting a serialized JSON string from the channel
+                    if let Err(e) = write.send(Message::Text(msg_to_send)).await {
+                        tracing::error!("WS send error: {:?}", e);
+                        break;
                     }
+                    
+                    let now = web_sys::window().unwrap().performance().unwrap().now();
+                    stream_start_time.set(now);
+                    ttft.set(0.0);
+                    speed.set(0.0);
+                    token_count.set(0);
                 }
                 Some(ws_msg) = read.next() => {
                     if let Ok(Message::Text(text)) = ws_msg {
@@ -141,13 +143,22 @@ pub fn App() -> Element {
 
         let mut current_msgs = messages.read().clone();
         current_msgs.push(ChatMessage { role: "user".into(), content: text.clone() });
-        messages.set(current_msgs);
+        messages.set(current_msgs.clone());
         
-        ws_task.send(text);
+        let payload = WsMessage {
+            action: "send".into(),
+            content: None,
+            messages: Some(current_msgs),
+            model: Some(model.read().clone()),
+        };
+        if let Ok(json) = serde_json::to_string(&payload) {
+            ws_task.send(json);
+        }
+        
         input_text.set(String::new());
     };
 
-    let mut connect_ws = move || {
+    let connect_ws = move || {
         let key = api_key.read().clone();
         if let Ok(Some(storage)) = web_sys::window().unwrap().local_storage() {
             let _ = storage.set_item("openai_api_key", &key);
@@ -191,13 +202,27 @@ pub fn App() -> Element {
             }
 
             div {
-                style: "margin-bottom: 20px; padding: 10px; background-color: #e9ecef; border-radius: 5px; font-family: monospace; font-size: 14px;",
-                span { style: "margin-right: 20px;", "TTFT: {ttft():.0}ms" }
-                span { "Speed: {speed():.1} tokens/sec" }
+                style: "margin-bottom: 20px; padding: 10px; background-color: #e9ecef; border-radius: 5px; display: flex; justify-content: space-between; align-items: center;",
+                div {
+                    style: "font-family: monospace; font-size: 14px;",
+                    span { style: "margin-right: 20px;", "TTFT: {ttft():.0}ms" }
+                    span { "Speed: {speed():.1} tokens/sec" }
+                }
+                div {
+                    select {
+                        value: "{model}",
+                        onchange: move |e| model.set(e.value()),
+                        style: "padding: 5px; border-radius: 5px;",
+                        option { value: "gpt-4o-mini", "gpt-4o-mini" }
+                        option { value: "gpt-4o", "gpt-4o" }
+                        option { value: "gpt-4.5-preview", "gpt-4.5-preview" }
+                        option { value: "gpt-5", "gpt-5 (Soon)" }
+                    }
+                }
             }
             
             div {
-                style: "height: 400px; overflow-y: auto; border: 1px solid #ccc; padding: 10px; margin-bottom: 20px;",
+                style: "height: 400px; overflow-y: auto; border: 1px solid #ccc; padding: 10px; margin-bottom: 20px; white-space: pre-wrap;",
                 for msg in messages() {
                     div {
                         style: "margin-bottom: 10px; padding: 10px; border-radius: 5px;",

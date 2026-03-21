@@ -4,6 +4,8 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-async-openai = "0.33.1"
-genai = "0.5.3"
+async-openai = { version = "0.26", features = ["default"] }
+futures-util = "0.3.32"
+genai = "0.1"
+serde_json = "1.0.149"
 tokio = { version = "1", features = ["full"] }
