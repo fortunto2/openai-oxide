@@ -93,9 +93,3 @@ required-features = ["websocket", "responses"]
 name = "integration_test"
 required-features = ["websocket", "responses"]
 
-[[example]]
-name = "test_stream_fc"
-required-features = ["responses"]
-[[example]]
-name = "test_chat_bench"
-required-features = ["chat"]

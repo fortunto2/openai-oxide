@@ -73,6 +73,7 @@ impl<'a> Completions<'a> {
         let response = self
             .client
             .request(reqwest::Method::POST, "/chat/completions")
+            .header(reqwest::header::ACCEPT, "text/event-stream")
             .json(&request)
             .send()
             .await?;
