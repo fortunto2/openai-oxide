@@ -1,0 +1,16 @@
+{
+  "name": "openai-oxide-node",
+  "version": "0.1.0",
+  "main": "index.js",
+  "types": "index.d.ts",
+  "napi": {
+    "name": "openai-oxide-node"
+  },
+  "scripts": {
+    "build": "napi build --platform --release",
+    "test": "node test.js"
+  },
+  "devDependencies": {
+    "@napi-rs/cli": "^3.0.0"
+  }
+}

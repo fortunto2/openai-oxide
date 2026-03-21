@@ -1,0 +1,16 @@
+[package]
+name = "openai-oxide-node"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+napi = { version = "3.0.0-alpha", default-features = false, features = ["napi4", "async", "serde-json"] }
+napi-derive = "3.0.0-alpha"
+openai-oxide = { path = "..", default-features = false, features = ["chat", "responses"] }
+tokio = { version = "1", features = ["full"] }
+
+[build-dependencies]
+napi-build = "2"
