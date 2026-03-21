@@ -1,0 +1,21 @@
+[project]
+name = "openai-oxide"
+version = "0.1.0"
+description = "Fastest OpenAI client — Rust core with Python bindings"
+requires-python = ">=3.9"
+license = "MIT"
+readme = "README.md"
+
+[build-system]
+requires = ["maturin>=1.7,<2"]
+build-backend = "maturin"
+
+[tool.maturin]
+features = ["pyo3/extension-module"]
+
+[dependency-groups]
+dev = [
+    "maturin>=1.7",
+    "pytest>=8",
+    "openai>=2.0",
+]
