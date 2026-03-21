@@ -27,14 +27,18 @@ We built `openai-oxide` to squeeze every millisecond out of the OpenAI API.
 
 ### The Agentic Multiplier Effect
 
-In complex agent loops (e.g. coding agents, researchers) where a model calls dozens of tools sequentially, HTTP overhead adds up to tens of wasted seconds. `openai-oxide` collapses this latency through pipelining:
+In complex agent loops (e.g. coding agents, researchers) where a model calls dozens of tools sequentially, standard SDKs introduce compounding delays. `openai-oxide` collapses this latency through architectural pipelining:
+
+1. **Persistent Connections:** Standard SDKs perform a full HTTP round-trip (TCP/TLS handshake + headers) for every step. With `openai-oxide`'s WebSocket mode, the connection stays hot. You save ~300ms per tool call. Over 50 tool calls, that's **15 seconds** of pure network overhead eliminated.
+2. **Asynchronous Execution:** Standard SDKs wait for the `[DONE]` signal from OpenAI before parsing the response and yielding the tool call to your code. `openai-oxide` parses the SSE stream on the fly. The moment `{"type": "response.function_call.arguments.done"}` arrives, your local function (e.g. `ls` or `cat`) starts executing while OpenAI is still generating the final metadata.
+3. **Strict Typings:** Unlike wrappers that treat tool arguments as raw dynamic `Value`s, `openai-oxide` enforces strict typings. If OpenAI hallucinates invalid JSON structure, it is caught at the SDK boundary, allowing the agent to immediately self-correct without crashing the application.
 
 ```text
 Standard Client (HTTP/REST)
-Request 1 (ls)   : [TLS Handshake] -> [Req] -> [Wait TTFT] -> [Parse JSON at end] -> [Exec Tool]
-Request 2 (cat)  : [TLS Handshake] -> [Req] -> [Wait TTFT] -> [Parse JSON at end] -> [Exec Tool]
+Request 1 (ls)   : [TLS Handshake] -> [Req] -> [Wait TTFT] -> [Wait Done] -> [Parse JSON] -> [Exec Tool]
+Request 2 (cat)  : [TLS Handshake] -> [Req] -> [Wait TTFT] -> [Wait Done] -> [Parse JSON] -> [Exec Tool]
 
-openai-oxide (WebSockets + Early Parse + SIMD)
+openai-oxide (WebSockets + Early Parse)
 Connection       : [TLS Handshake] (Done once)
 Request 1 (ls)   : [Req] -> [Wait TTFT] -> [Exec Tool Early!]
 Request 2 (cat)  :                      [Req] -> [Wait TTFT] -> [Exec Tool Early!]
