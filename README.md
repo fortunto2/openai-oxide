@@ -107,12 +107,12 @@ Run `uv run python examples/bench_python.py` from the `openai-oxide-python` dire
 
 ## Python Usage
 
-Install via `uv` or `pip`:
+Install via `uv` or `pip` (no Rust toolchain required):
 
 ```bash
-cd openai-oxide-python
-uv sync
-uv run maturin develop --release
+pip install openai-oxide
+# or
+uv pip install openai-oxide
 ```
 
 ```python
