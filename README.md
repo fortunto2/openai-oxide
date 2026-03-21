@@ -194,6 +194,31 @@ let (r1, r2, r3) = tokio::join!(
 
 ---
 
+
+## Implemented APIs
+
+| API | Method |
+|-----|--------|
+| **Chat Completions** | `client.chat().completions().create()` / `create_stream()` |
+| **Responses** | `client.responses().create()` / `create_stream()` / `create_stream_fc()` |
+| **Responses Tools** | Function, WebSearch, FileSearch, CodeInterpreter, ComputerUse, Mcp, ImageGeneration |
+| **WebSocket** | `client.ws_session()` — send / send_stream / warmup / close |
+| **Hedged** | `hedged_request()` / `hedged_request_n()` / `speculative()` |
+| **Embeddings** | `client.embeddings().create()` |
+| **Models** | `client.models().list()` / `retrieve()` / `delete()` |
+| **Images** | `client.images().generate()` / `edit()` / `create_variation()` |
+| **Audio** | `client.audio().transcriptions()` / `translations()` / `speech()` |
+| **Files** | `client.files().create()` / `list()` / `retrieve()` / `delete()` / `content()` |
+| **Fine-tuning** | `client.fine_tuning().jobs().create()` / `list()` / `cancel()` / `list_events()` |
+| **Moderations** | `client.moderations().create()` |
+| **Batches** | `client.batches().create()` / `list()` / `retrieve()` / `cancel()` |
+| **Uploads** | `client.uploads().create()` / `cancel()` / `complete()` |
+| **Pagination** | `list_page()` / `list_auto()` — cursor-based, async stream |
+| **Assistants** (beta)| Full CRUD + threads + runs + vector stores |
+| **Realtime** (beta) | `client.beta().realtime().sessions().create()` |
+
+---
+
 ## Cargo Features & WASM Optimization
 
 Every endpoint is gated behind a Cargo feature. If you are building for **WebAssembly (WASM)** (e.g., Cloudflare Workers, Dioxus, Leptos), you can significantly **reduce your `.wasm` binary size and compilation time** by disabling default features and only compiling what you need.
@@ -244,13 +269,21 @@ let client = OpenAI::azure(AzureConfig::new()                   // Azure OpenAI
 
 ## Keeping up with OpenAI
 
-Types are strictly validated against the [official OpenAPI spec](https://github.com/openai/openai-openapi) and cross-checked with the Python SDK.
+OpenAI moves fast. To ensure `openai-oxide` never falls behind, we built an automated architecture synchronization pipeline.
+
+Types are strictly validated against the [official OpenAPI spec](https://github.com/openai/openai-openapi) and cross-checked directly with the [official Python SDK](https://github.com/openai/openai-python)'s AST.
 
 ```bash
-make sync       # download latest spec, diff, run coverage test
+make sync       # downloads latest spec, diffs against local schema, runs coverage
 ```
 
-Coverage is enforced on every commit via pre-commit hooks. Current field coverage for typed schemas: **100%**.
+`make sync` automatically:
+1. Downloads the latest OpenAPI schema from OpenAI.
+2. Displays a precise `git diff` of newly added endpoints, struct fields, and enums.
+3. Runs the `openapi_coverage` test suite to statically verify our Rust types against the spec.
+
+Coverage is enforced on every commit via pre-commit hooks. Current field coverage for all implemented typed schemas is **100%**. This guarantees 1:1 feature parity with the Python SDK, ensuring you can adopt new OpenAI models and features on day one.
+
 
 ## Used In
 
