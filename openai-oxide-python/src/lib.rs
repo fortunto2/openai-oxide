@@ -3,12 +3,15 @@
 //! Install: `cd openai-oxide-python && uv sync && uv run maturin develop`
 //! Usage:   `from openai_oxide_python import Client`
 
+mod stream;
+
 use openai_oxide::config::ClientConfig;
 use openai_oxide::types::responses::*;
 use openai_oxide::OpenAI;
 use pyo3::exceptions::PyRuntimeError;
 use pyo3::prelude::*;
 use pyo3_async_runtimes::tokio::future_into_py;
+use crate::stream::PyResponseStream;
 
 /// Convert OpenAI errors to Python RuntimeError.
 fn to_py_err(e: openai_oxide::OpenAIError) -> PyErr {
@@ -184,6 +187,52 @@ impl Client {
             Ok(resp.to_string())
         })
     }
+
+    /// Create streaming response — returns an async iterator of JSON strings
+    #[pyo3(signature = (model, input, max_output_tokens=None))]
+    fn create_stream<'py>(
+        &self,
+        py: Python<'py>,
+        model: String,
+        input: String,
+        max_output_tokens: Option<i64>,
+    ) -> PyResult<Bound<'py, PyAny>> {
+        let client = self.inner.clone();
+        future_into_py(py, async move {
+            let mut req = ResponseCreateRequest::new(&model).input(input.as_str());
+            if let Some(max) = max_output_tokens {
+                req = req.max_output_tokens(max);
+            }
+                
+            use futures_util::StreamExt;
+            let mut stream = client.responses().create_stream(req).await.map_err(to_py_err)?;
+            
+            let (tx, rx) = tokio::sync::mpsc::channel(32);
+            
+            tokio::spawn(async move {
+                while let Some(item) = stream.next().await {
+                    match item {
+                        Ok(event) => {
+                            let s = serde_json::to_string(&event).unwrap_or_default();
+                            if tx.send(Ok(s)).await.is_err() {
+                                break;
+                            }
+                        }
+                        Err(e) => {
+                            let _ = tx.send(Err(e.to_string())).await;
+                            break;
+                        }
+                    }
+                }
+            });
+
+            Python::with_gil(|py| {
+                Py::new(py, PyResponseStream {
+                    receiver: std::sync::Arc::new(tokio::sync::Mutex::new(rx)),
+                }).map(|p| p.into_any())
+            })
+        })
+    }
 }
 
 /// Convert Response to a Python-friendly dict string (JSON).
@@ -224,5 +273,6 @@ fn response_to_dict(resp: &openai_oxide::types::responses::Response) -> PyResult
 #[pymodule]
 fn openai_oxide_python(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<Client>()?;
+    m.add_class::<PyResponseStream>()?;
     Ok(())
 }

@@ -203,12 +203,20 @@ async def main():
     ot, pt = [], []
     for _ in range(N):
         t0 = time.perf_counter()
-        stream = py.responses.create(model=MODEL, input="Explain quicksort in 3 sentences.", max_output_tokens=200, stream=True)
-        for event in stream:
+        stream_ox = await oxide.create_stream(MODEL, "Explain quicksort in 3 sentences.", max_output_tokens=200)
+        async for event_str in stream_ox:
+            event = json.loads(event_str)
+            if event.get("type") == "response.output_text.delta":
+                ot.append(int((time.perf_counter() - t0) * 1000))
+                break
+    for _ in range(N):
+        t0 = time.perf_counter()
+        stream_py = py.responses.create(model=MODEL, input="Explain quicksort in 3 sentences.", max_output_tokens=200, stream=True)
+        for event in stream_py:
             if event.type == "response.output_text.delta":
                 pt.append(int((time.perf_counter() - t0) * 1000))
                 break
-    row("Streaming TTFT", "N/A", stats(pt))
+    row("Streaming TTFT", stats(ot), stats(pt))
 
     # 11. Parallel 3x
     ot, pt = [], []
@@ -227,15 +235,15 @@ async def main():
             for f in concurrent.futures.as_completed(fs):
                 f.result()
         pt.append(int((time.perf_counter() - t0) * 1000))
-    row("Parallel 3x", stats(ot), stats(pt))
+    row("Parallel 3x (fan-out)", stats(ot), stats(pt))
 
     # 12. Hedged (2x race)
     ot, pt = [], []
     for _ in range(N):
         t0 = time.perf_counter()
-        t1 = oxide.create(MODEL, "What is 7*8? Number only.", max_output_tokens=16)
-        t2 = oxide.create(MODEL, "What is 7*8? Number only.", max_output_tokens=16)
-        done, pending = await asyncio.wait([t1, t2], return_when=asyncio.FIRST_COMPLETED)
+        t1 = (oxide.create(MODEL, "What is 7*8? Number only.", max_output_tokens=16))
+        t2 = (oxide.create(MODEL, "What is 7*8? Number only.", max_output_tokens=16))
+        done, pending = await asyncio.wait([asyncio.ensure_future(t1), asyncio.ensure_future(t2)], return_when=asyncio.FIRST_COMPLETED)
         for p in pending:
             p.cancel()
         ot.append(int((time.perf_counter() - t0) * 1000))
@@ -257,4 +265,4 @@ async def main():
     print(f"\noxide-py wins {wins}/{len(results)} tests")
 
 if __name__ == "__main__":
-    asyncio.get_event_loop().run_until_complete(main())
+    asyncio.run(main())

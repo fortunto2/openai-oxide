@@ -432,7 +432,7 @@ pub struct ResponseRankingOptions {
 // ── Response types ──
 
 /// An error returned when the model fails to generate a Response.
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct ResponseError {
     /// The error code (e.g. "server_error", "rate_limit_exceeded", "invalid_prompt").
     pub code: String,
@@ -441,7 +441,7 @@ pub struct ResponseError {
 }
 
 /// Details about why the response is incomplete.
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct IncompleteDetails {
     /// The reason: "max_output_tokens" or "content_filter".
     #[serde(default)]
@@ -449,7 +449,7 @@ pub struct IncompleteDetails {
 }
 
 /// An annotation on response output text (e.g. URL citation, file citation).
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct ResponseAnnotation {
     /// Annotation type (e.g. "url_citation", "file_citation", "file_path").
     #[serde(rename = "type")]
@@ -474,7 +474,7 @@ pub struct ResponseAnnotation {
 /// Output item in a response.
 ///
 /// Covers multiple output types: `message`, `function_call`, `web_search_call`, etc.
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct ResponseOutputItem {
     /// Item type: "message", "function_call", "function_call_output", "web_search_call", etc.
     #[serde(rename = "type")]
@@ -504,7 +504,7 @@ pub struct ResponseOutputItem {
 }
 
 /// Content block within an output item.
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct ResponseOutputContent {
     #[serde(rename = "type")]
     pub type_: String,
@@ -515,7 +515,7 @@ pub struct ResponseOutputContent {
 }
 
 /// Usage for the Responses API.
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct ResponseUsage {
     #[serde(default)]
     pub input_tokens: Option<i64>,
@@ -530,21 +530,21 @@ pub struct ResponseUsage {
 }
 
 /// Input token usage details.
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct InputTokensDetails {
     #[serde(default)]
     pub cached_tokens: Option<i64>,
 }
 
 /// Output token usage details.
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct OutputTokensDetails {
     #[serde(default)]
     pub reasoning_tokens: Option<i64>,
 }
 
 /// Response from `POST /responses`.
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct Response {
     pub id: String,
     pub object: String,
@@ -663,7 +663,7 @@ impl Response {
 
 /// A streaming event from the Responses API.
 /// Events are prefixed with `event:` in SSE and have a `data:` JSON payload.
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct ResponseStreamEvent {
     /// Event type, e.g. "response.created", "response.output_text.delta".
     #[serde(rename = "type")]

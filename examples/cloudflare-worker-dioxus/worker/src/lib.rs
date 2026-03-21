@@ -9,10 +9,13 @@ struct WsMessage {
     content: Option<String>,
 }
 
+#[event(start)]
+pub fn start() {
+    console_error_panic_hook::set_once();
+}
+
 #[event(fetch)]
 async fn main(req: Request, env: Env, _ctx: Context) -> Result<Response> {
-    console_error_panic_hook::set_once();
-
     let router = Router::new();
 
     router
@@ -22,7 +25,7 @@ async fn main(req: Request, env: Env, _ctx: Context) -> Result<Response> {
             let stub = id.get_stub()?;
             stub.fetch_with_request(req).await
         })
-        .get_async("/.*", |_req, _ctx| async move {
+        .get_async("/*path", |_req, _ctx| async move {
             Response::ok("Not Found")
         })
         .run(req, env)

@@ -50,9 +50,54 @@ while let Some(fc) = handle.recv().await {
 }
 ```
 
-## Benchmarks
+## Python Bindings (PyO3)
 
-All clients use the Responses API, GPT-5.4, warm connections, 5 iterations, median.
+`openai-oxide` comes with native Python bindings via PyO3, exposing a drop-in async interface that outperforms the official Python SDK (`openai` + `httpx`), especially on concurrent requests and streaming.
+
+```bash
+cd openai-oxide-python
+uv sync
+uv run maturin develop --release
+```
+
+```python
+import asyncio
+from openai_oxide_python import Client
+
+async def main():
+    client = Client()
+    
+    # 1. Standard request
+    res = await client.create("gpt-5.4", "Hello!")
+    print(res["text"])
+    
+    # 2. Streaming (Async Iterator)
+    stream = await client.create_stream("gpt-5.4", "Explain quantum computing in 3 sentences.", max_output_tokens=200)
+    async for event in stream:
+        print(event)
+
+asyncio.run(main())
+```
+
+### Benchmark: `openai-oxide-python` vs `openai` (Python)
+
+All tests run on Python 3.13, warm connections, 5 iterations, median.
+Run `uv run python examples/bench_python.py` from the `openai-oxide-python` directory to test locally.
+
+| Test | `openai-oxide-python` | `openai` (httpx) | Winner |
+| :--- | :--- | :--- | :--- |
+| Plain text | **894ms** | 990ms | OXIDE (+9%) |
+| Structured output | **1354ms** | 1391ms | OXIDE (+2%) |
+| Function calling | **1089ms** | 1125ms | OXIDE (+3%) |
+| Multi-turn (2 reqs) | **2057ms** | 2232ms | OXIDE (+7%) |
+| Web search | 3276ms | **3039ms** | python (+7%) |
+| Nested structured output | 4811ms | **4186ms** | python (+14%) |
+| Agent loop (2-step) | **3408ms** | 3984ms | OXIDE (+14%) |
+| Rapid-fire (5 sequential calls) | **4835ms** | 5075ms | OXIDE (+4%) |
+| Prompt-cached | 4511ms | **4327ms** | python (+4%) |
+| Streaming TTFT | **709ms** | 769ms | OXIDE (+7%) |
+| Parallel 3x (fan-out) | **961ms** | 994ms | OXIDE (+3%) |
+| Hedged (2x race) | **1082ms** | 1001ms | python (+8%) |
 
 ### 4 clients compared
 
