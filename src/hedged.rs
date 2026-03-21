@@ -17,6 +17,15 @@ use crate::OpenAI;
 use crate::error::OpenAIError;
 use crate::types::responses::{Response, ResponseCreateRequest};
 
+/// Cross-platform sleep — tokio on native, gloo-timers on WASM.
+async fn sleep(duration: Duration) {
+    #[cfg(not(target_arch = "wasm32"))]
+    tokio::time::sleep(duration).await;
+
+    #[cfg(target_arch = "wasm32")]
+    gloo_timers::future::TimeoutFuture::new(duration.as_millis() as u32).await;
+}
+
 /// Send the same request to OpenAI twice with a hedge delay.
 /// Returns the first successful response.
 ///
@@ -43,7 +52,7 @@ pub async fn hedged_request(
     let fut1 = responses.create(req1);
     let fut2 = async {
         if let Some(delay) = hedge_delay {
-            tokio::time::sleep(delay).await;
+            sleep(delay).await;
         }
         client.responses().create(req2).await
     };
@@ -104,43 +113,56 @@ pub async fn hedged_request_n(
         return hedged_request(client, request, hedge_delay).await;
     }
 
-    // n == 3: use FuturesUnordered so we can poll all three.
-    use futures_util::stream::{FuturesUnordered, StreamExt};
-
-    let futures = FuturesUnordered::new();
+    // n == 3: race all three with staggered start
     let delay = hedge_delay.unwrap_or(Duration::ZERO);
+    let req1 = request.clone();
+    let req2 = request.clone();
+    let req3 = request;
+    let (c1, c2, c3) = (client.clone(), client.clone(), client.clone());
 
-    for i in 0..n {
-        let req = request.clone();
-        let client = client.clone();
-        let stagger = delay * i as u32;
-        futures.push(tokio::spawn(async move {
-            if !stagger.is_zero() {
-                tokio::time::sleep(stagger).await;
-            }
-            client.responses().create(req).await
-        }));
-    }
-
-    tokio::pin!(futures);
-
-    let mut last_error: Option<OpenAIError> = None;
-
-    while let Some(join_result) = futures.next().await {
-        match join_result {
-            Ok(Ok(response)) => return Ok(response),
-            Ok(Err(e)) => last_error = Some(e),
-            Err(join_err) => {
-                last_error = Some(OpenAIError::StreamError(format!(
-                    "task panicked: {join_err}"
-                )));
-            }
+    let fut1 = async { c1.responses().create(req1).await };
+    let fut2 = async {
+        if !delay.is_zero() {
+            sleep(delay).await;
         }
-    }
+        c2.responses().create(req2).await
+    };
+    let fut3 = async {
+        let stagger = delay * 2;
+        if !stagger.is_zero() {
+            sleep(stagger).await;
+        }
+        c3.responses().create(req3).await
+    };
 
-    Err(last_error.unwrap_or_else(|| {
-        OpenAIError::InvalidArgument("hedged_request_n: no futures were created".into())
-    }))
+    // Select first success, fallback to others
+    tokio::pin!(fut1);
+    tokio::pin!(fut2);
+    tokio::pin!(fut3);
+
+    tokio::select! {
+        r = &mut fut1 => match r {
+            Ok(resp) => Ok(resp),
+            Err(_) => tokio::select! {
+                r = &mut fut2 => match r { Ok(resp) => Ok(resp), Err(_) => fut3.await },
+                r = &mut fut3 => match r { Ok(resp) => Ok(resp), Err(_) => fut2.await },
+            },
+        },
+        r = &mut fut2 => match r {
+            Ok(resp) => Ok(resp),
+            Err(_) => tokio::select! {
+                r = &mut fut1 => match r { Ok(resp) => Ok(resp), Err(_) => fut3.await },
+                r = &mut fut3 => match r { Ok(resp) => Ok(resp), Err(_) => fut1.await },
+            },
+        },
+        r = &mut fut3 => match r {
+            Ok(resp) => Ok(resp),
+            Err(_) => tokio::select! {
+                r = &mut fut1 => match r { Ok(resp) => Ok(resp), Err(_) => fut2.await },
+                r = &mut fut2 => match r { Ok(resp) => Ok(resp), Err(_) => fut1.await },
+            },
+        },
+    }
 }
 
 /// Speculative execution — run dependent steps in parallel.

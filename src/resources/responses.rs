@@ -132,9 +132,6 @@ impl<'a> Responses<'a> {
 
     /// Stream a response and yield function calls as soon as arguments are complete.
     ///
-    /// Not available on WASM (requires tokio::time + tokio::spawn).
-    #[cfg(not(target_arch = "wasm32"))]
-    ///
     /// Emits each [`FunctionCall`](crate::types::responses::FunctionCall) on the
     /// `response.function_call_arguments.done` event — typically 200-500ms before
     /// `response.completed`. Safe: the event guarantees complete, valid JSON arguments.
@@ -168,15 +165,19 @@ impl<'a> Responses<'a> {
         let (fc_tx, fc_rx) = tokio::sync::mpsc::channel(16);
         let (meta_tx, meta_rx) = tokio::sync::watch::channel(StreamFcMeta::default());
 
-        tokio::spawn(async move {
+        // Spawn the stream consumer — tokio::spawn on native, spawn_local on WASM
+        let spawn_future = async move {
             let mut pending_name: std::collections::HashMap<i64, String> = Default::default();
             let mut pending_call_id: std::collections::HashMap<i64, String> = Default::default();
             let mut response_id: Option<String> = None;
 
             loop {
-                // Timeout per event — if server stops sending, don't hang forever
+                // On native: timeout after 60s. On WASM: no timeout (browser handles it).
+                #[cfg(not(target_arch = "wasm32"))]
                 let event =
                     tokio::time::timeout(std::time::Duration::from_secs(60), stream.next()).await;
+                #[cfg(target_arch = "wasm32")]
+                let event: Result<Option<Result<_, _>>, ()> = Ok(stream.next().await);
 
                 let event = match event {
                     Ok(Some(Ok(ev))) => ev,
@@ -187,7 +188,8 @@ impl<'a> Responses<'a> {
                         });
                         break;
                     }
-                    Ok(None) => break, // stream ended normally
+                    Ok(None) => break,
+                    #[cfg(not(target_arch = "wasm32"))]
                     Err(_) => {
                         let _ = meta_tx.send(StreamFcMeta {
                             response_id: response_id.clone(),
@@ -195,6 +197,8 @@ impl<'a> Responses<'a> {
                         });
                         break;
                     }
+                    #[cfg(target_arch = "wasm32")]
+                    Err(_) => break,
                 };
 
                 match event.type_.as_str() {
@@ -279,7 +283,13 @@ impl<'a> Responses<'a> {
                     _ => {}
                 }
             }
-        });
+        };
+
+        #[cfg(not(target_arch = "wasm32"))]
+        tokio::spawn(spawn_future);
+
+        #[cfg(target_arch = "wasm32")]
+        wasm_bindgen_futures::spawn_local(spawn_future);
 
         Ok(StreamFcHandle {
             rx: fc_rx,

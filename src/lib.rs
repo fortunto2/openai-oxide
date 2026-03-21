@@ -35,7 +35,7 @@ pub mod azure;
 pub mod client;
 pub mod config;
 pub mod error;
-#[cfg(all(feature = "responses", not(target_arch = "wasm32")))]
+#[cfg(feature = "responses")]
 pub mod hedged;
 pub mod pagination;
 pub mod request_options;
@@ -49,7 +49,7 @@ pub use azure::AzureConfig;
 pub use client::OpenAI;
 pub use config::ClientConfig;
 pub use error::OpenAIError;
-#[cfg(all(feature = "responses", not(target_arch = "wasm32")))]
+#[cfg(feature = "responses")]
 pub use hedged::{hedged_request, hedged_request_n, speculative};
 pub use pagination::Paginator;
 pub use request_options::RequestOptions;
