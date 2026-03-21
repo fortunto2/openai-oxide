@@ -312,7 +312,7 @@ Our goal is to make `openai-oxide` the universal engine for all LLM integrations
 - [ ] **HTMX + Axum Examples**: Showcasing how to stream LLM responses directly to HTML with zero-JS frontends.
 - [ ] **Swift Bindings (UniFFI)**: Native iOS/macOS integration for Apple ecosystem developers.
 - [ ] **Kotlin Bindings (UniFFI)**: Native Android integration via JNI.
-- [x] **Node.js/TypeScript Bindings (NAPI-RS)**: Native NPM module for the TS ecosystem (in progress).
+- [x] **Node.js/TypeScript Bindings (NAPI-RS)**: Native Node.js bindings for the TS ecosystem.
 
 Want to help us get there? PRs and discussions are highly welcome!
 
