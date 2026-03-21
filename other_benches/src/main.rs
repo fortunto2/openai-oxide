@@ -15,36 +15,32 @@ fn stats(times: &mut Vec<u128>) -> (u128, u128, u128, u128) {
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    println!("=== Testing async-openai 0.33.1 ===");
+    println!("=== Testing async-openai 0.33.1 (Responses API) ===");
     let client = async_openai::Client::new();
     
     // Warmup
-    let req = async_openai::types::CreateChatCompletionRequestArgs::default()
+    let req = async_openai::types::responses::CreateResponseArgs::default()
         .model(MODEL)
-        .messages([async_openai::types::ChatCompletionRequestSystemMessageArgs::default()
-            .content("ping")
-            .build()?
-            .into()])
+        .input("ping")
         .build()?;
-    client.chat().create(req).await?;
+    client.responses().create(req).await?;
     
     // 1. Plain text
     let mut times = Vec::new();
     for _ in 0..ITERATIONS {
-        let req = async_openai::types::CreateChatCompletionRequestArgs::default()
+        let req = async_openai::types::responses::CreateResponseArgs::default()
             .model(MODEL)
-            .messages([async_openai::types::ChatCompletionRequestUserMessageArgs::default()
-                .content("What is the capital of France? One word.")
-                .build()?
-                .into()])
+            .input("What is the capital of France? One word.")
+            .max_output_tokens(16_u32)
             .build()?;
         
         let t0 = Instant::now();
-        let _ = client.chat().create(req).await?;
+        let _ = client.responses().create(req).await?;
         times.push(t0.elapsed().as_millis());
     }
     let (med, _, _, _) = stats(&mut times);
     println!("{:<25} {:>6}ms", "Plain text", med);
+
 
     // 2. Structured output
     let mut times = Vec::new();
@@ -54,24 +50,22 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         "required": ["languages"], "additionalProperties": false
     });
     for _ in 0..ITERATIONS {
-        let req = async_openai::types::CreateChatCompletionRequestArgs::default()
+        let req = async_openai::types::responses::CreateResponseArgs::default()
             .model(MODEL)
-            .messages([async_openai::types::ChatCompletionRequestUserMessageArgs::default()
-                .content("List 3 programming languages with year created")
-                .build()?
-                .into()])
-            .response_format(async_openai::types::ResponseFormat::JsonSchema {
-                json_schema: async_openai::types::ResponseFormatJsonSchema {
+            .input("List 3 programming languages with year created")
+            .response_format(async_openai::types::responses::ResponseFormat::JsonSchema {
+                json_schema: async_openai::types::responses::ResponseFormatJsonSchema {
                     name: "languages".into(),
                     description: None,
                     schema: Some(schema.clone()),
                     strict: Some(true)
                 }
             })
+            .max_output_tokens(200_u32)
             .build()?;
         
         let t0 = Instant::now();
-        let _ = client.chat().create(req).await?;
+        let _ = client.responses().create(req).await?;
         times.push(t0.elapsed().as_millis());
     }
     let (med, _, _, _) = stats(&mut times);
@@ -80,70 +74,37 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // 3. Function calling
     let mut times = Vec::new();
     for _ in 0..ITERATIONS {
-        let req = async_openai::types::CreateChatCompletionRequestArgs::default()
+        let req = async_openai::types::responses::CreateResponseArgs::default()
             .model(MODEL)
-            .messages([async_openai::types::ChatCompletionRequestUserMessageArgs::default()
-                .content("What's the weather in Tokyo?")
-                .build()?
-                .into()])
-            .tools(vec![async_openai::types::ChatCompletionToolArgs::default()
-                .r#type(async_openai::types::ChatCompletionToolType::Function)
-                .function(async_openai::types::FunctionObjectArgs::default()
-                    .name("get_weather")
-                    .description("Get weather")
-                    .parameters(serde_json::json!({"type": "object", "properties": {"city": {"type": "string"}, "unit": {"type": "string", "enum": ["celsius", "fahrenheit"]}}, "required": ["city", "unit"], "additionalProperties": false}))
-                    .strict(true)
-                    .build()?)
-                .build()?])
+            .input("What's the weather in Tokyo?")
+            .tools(vec![async_openai::types::responses::Tool::Function(async_openai::types::responses::FunctionTool {
+                function: async_openai::types::responses::FunctionToolFunction {
+                    name: "get_weather".into(),
+                    description: Some("Get weather".into()),
+                    parameters: Some(serde_json::json!({"type": "object", "properties": {"city": {"type": "string"}, "unit": {"type": "string", "enum": ["celsius", "fahrenheit"]}}, "required": ["city", "unit"], "additionalProperties": false})),
+                    strict: Some(true),
+                },
+            })])
             .build()?;
         
         let t0 = Instant::now();
-        let _ = client.chat().create(req).await?;
+        let _ = client.responses().create(req).await?;
         times.push(t0.elapsed().as_millis());
     }
     let (med, _, _, _) = stats(&mut times);
     println!("{:<25} {:>6}ms", "Function calling", med);
 
-    // 4. Multi-turn
-    let mut times = Vec::new();
-    for _ in 0..ITERATIONS {
-        let t0 = Instant::now();
-        let req1 = async_openai::types::CreateChatCompletionRequestArgs::default()
-            .model(MODEL)
-            .messages([async_openai::types::ChatCompletionRequestUserMessageArgs::default()
-                .content("Remember: the answer is 42.")
-                .build()?
-                .into()])
-            .build()?;
-        let res1 = client.chat().create(req1).await?;
-        let ast = res1.choices[0].message.content.clone().unwrap_or_default();
-        
-        let req2 = async_openai::types::CreateChatCompletionRequestArgs::default()
-            .model(MODEL)
-            .messages([
-                async_openai::types::ChatCompletionRequestUserMessageArgs::default().content("Remember: the answer is 42.").build()?.into(),
-                async_openai::types::ChatCompletionRequestAssistantMessageArgs::default().content(ast).build()?.into(),
-                async_openai::types::ChatCompletionRequestUserMessageArgs::default().content("What is the answer?").build()?.into()
-            ])
-            .build()?;
-        let _ = client.chat().create(req2).await?;
-        times.push(t0.elapsed().as_millis());
-    }
-    let (med, _, _, _) = stats(&mut times);
-    println!("{:<25} {:>6}ms", "Multi-turn (2 reqs)", med);
-
     // 10. Streaming TTFT
     let mut times = Vec::new();
     for _ in 0..ITERATIONS {
-        let req = async_openai::types::CreateChatCompletionRequestArgs::default()
+        let req = async_openai::types::responses::CreateResponseArgs::default()
             .model(MODEL)
-            .messages([async_openai::types::ChatCompletionRequestUserMessageArgs::default()
-                .content("Explain quicksort in 3 sentences.")
-                .build()?
-                .into()])
+            .input("Explain quicksort in 3 sentences.")
+            .max_output_tokens(200_u32)
             .build()?;
+        
         let t0 = Instant::now();
-        let mut stream = client.chat().create_stream(req).await?;
+        let mut stream = client.responses().create_stream(req).await?;
         while let Some(res) = stream.next().await {
             let _ = res?;
             times.push(t0.elapsed().as_millis());
@@ -153,26 +114,5 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     }
     let (med, _, _, _) = stats(&mut times);
     println!("{:<25} {:>6}ms", "Streaming TTFT", med);
-
-    println!("\n=== Testing genai 0.5.3 ===");
-    let client = genai::Client::default();
-    
-    // Warmup
-    client.exec_chat(MODEL, genai::chat::ChatRequest::new(vec![genai::chat::ChatMessage::system("ping")]), None).await?;
-    
-    // 1. Plain text
-    let mut times = Vec::new();
-    for _ in 0..ITERATIONS {
-        let t0 = Instant::now();
-        let _ = client.exec_chat(
-            MODEL, 
-            genai::chat::ChatRequest::new(vec![genai::chat::ChatMessage::user("What is the capital of France? One word.")]), 
-            None
-        ).await?;
-        times.push(t0.elapsed().as_millis());
-    }
-    let (med, _, _, _) = stats(&mut times);
-    println!("{:<25} {:>6}ms", "Plain text", med);
-
     Ok(())
 }

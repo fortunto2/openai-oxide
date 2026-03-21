@@ -330,6 +330,7 @@ dependencies = [
  "dioxus-logger",
  "futures-util",
  "gloo-net 0.3.1",
+ "js-sys",
  "serde",
  "serde_json",
  "tokio",

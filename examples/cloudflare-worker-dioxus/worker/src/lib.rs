@@ -16,6 +16,8 @@ struct WsMessage {
     content: Option<String>,
     messages: Option<Vec<ChatMessage>>,
     model: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    base_url: Option<String>,
 }
 
 #[event(start)]
@@ -71,6 +73,19 @@ impl ChatDurableObject {
                 .or_else(|| self.env.var("OPENAI_API_KEY").ok().map(|v| v.to_string()))
                 .filter(|k| !k.is_empty());
 
+            let mut base_url = url.query_pairs().find(|(k, _)| k == "base_url").map(|(_, v)| v.into_owned())
+                .filter(|k| !k.is_empty())
+                .unwrap_or_else(|| "https://api.openai.com/v1".to_string());
+                
+            // OpenAI Responses API is only available on WSS. If the custom base URL is HTTP/S, we need to adapt it,
+            // or just use it if it's WSS. But `fetch` works with https:// for upgrading.
+            // But we actually use `fetch` with https://, so base_url should be https://
+            if !base_url.starts_with("http") {
+                base_url = format!("https://{}", base_url);
+            }
+            // remove trailing slash
+            let base_url = base_url.trim_end_matches('/');
+
             let api_key = match api_key {
                 Some(k) => k,
                 None => {
@@ -89,7 +104,8 @@ impl ChatDurableObject {
             init.with_method(Method::Get);
             init.with_headers(headers);
 
-            let openai_req = Request::new_with_init("https://api.openai.com/v1/responses", &init)?;
+            let req_url = format!("{}/responses", base_url);
+            let openai_req = Request::new_with_init(&req_url, &init)?;
             let openai_res = match Fetch::Request(openai_req).send().await {
                 Ok(res) => res,
                 Err(e) => {
@@ -170,6 +186,7 @@ impl ChatDurableObject {
                                                     content: Some(delta.to_string()),
                                                     messages: None,
                                                     model: None,
+                                                    base_url: None,
                                                 };
                                                 if let Ok(json) = serde_json::to_string(&reply) {
                                                     let _ = browser_ws.send_with_str(json);
@@ -181,6 +198,7 @@ impl ChatDurableObject {
                                                 content: None,
                                                 messages: None,
                                                 model: None,
+                                                base_url: None,
                                             };
                                             if let Ok(json) = serde_json::to_string(&done_msg) {
                                                 let _ = browser_ws.send_with_str(json);

@@ -30,7 +30,13 @@ fn main() {
 pub fn App() -> Element {
     let mut messages = use_signal(Vec::<ChatMessage>::new);
     let mut input_text = use_signal(String::new);
-    let mut model = use_signal(|| "gpt-4o-mini".to_string());
+    let mut model = use_signal(|| "gpt-5.4-mini".to_string());
+    let mut custom_model = use_signal(String::new);
+    
+    let mut base_url = use_signal(|| {
+        let storage = web_sys::window().unwrap().local_storage().unwrap().unwrap();
+        storage.get_item("openai_base_url").unwrap().unwrap_or_else(|| "https://api.openai.com/v1".to_string())
+    });
     
     let mut api_key = use_signal(|| {
         let storage = web_sys::window().unwrap().local_storage().unwrap().unwrap();
@@ -51,18 +57,33 @@ pub fn App() -> Element {
         let ws_protocol = if protocol == "https:" { "wss:" } else { "ws:" };
         
         let mut key = String::new();
+        let mut url_param = String::new();
+        
         while let Some(msg) = rx.next().await {
             if msg.starts_with("CONNECT:") {
-                key = msg.replace("CONNECT:", "");
+                let parts: Vec<&str> = msg.split("|||").collect();
+                key = parts[0].replace("CONNECT:", "");
+                if parts.len() > 1 {
+                    url_param = parts[1].to_string();
+                }
                 break;
             }
         }
         
-        let ws_url = if key.is_empty() {
-            format!("{}//{}/api/ws", ws_protocol, host)
-        } else {
-            format!("{}//{}/api/ws?key={}", ws_protocol, host, key)
-        };
+        let mut ws_url = format!("{}//{}/api/ws", ws_protocol, host);
+        let mut has_query = false;
+        
+        if !key.is_empty() {
+            ws_url.push_str(&format!("?key={}", key));
+            has_query = true;
+        }
+        
+        if !url_param.is_empty() {
+            let prefix = if has_query { "&" } else { "?" };
+            // URL encode the base_url
+            let encoded_url = js_sys::encode_uri_component(&url_param).as_string().unwrap_or(url_param);
+            ws_url.push_str(&format!("{}base_url={}", prefix, encoded_url));
+        }
         
         tracing::info!("Connecting to {}", ws_url);
         
@@ -145,11 +166,18 @@ pub fn App() -> Element {
         current_msgs.push(ChatMessage { role: "user".into(), content: text.clone() });
         messages.set(current_msgs.clone());
         
+        let selected_model = model.read().clone();
+        let actual_model = if selected_model == "custom" {
+            custom_model.read().clone()
+        } else {
+            selected_model
+        };
+        
         let payload = WsMessage {
             action: "send".into(),
             content: None,
             messages: Some(current_msgs),
-            model: Some(model.read().clone()),
+            model: Some(actual_model),
         };
         if let Ok(json) = serde_json::to_string(&payload) {
             ws_task.send(json);
@@ -160,10 +188,12 @@ pub fn App() -> Element {
 
     let connect_ws = move || {
         let key = api_key.read().clone();
+        let url = base_url.read().clone();
         if let Ok(Some(storage)) = web_sys::window().unwrap().local_storage() {
             let _ = storage.set_item("openai_api_key", &key);
+            let _ = storage.set_item("openai_base_url", &url);
         }
-        ws_task.send(format!("CONNECT:{}", key));
+        ws_task.send(format!("CONNECT:{}|||{}", key, url));
     };
 
     let status_color = if connected() { "green" } else { "red" };
@@ -175,29 +205,43 @@ pub fn App() -> Element {
             h1 { "OpenAI Oxide + Rust WASM + Durable Objects" }
             
             div {
-                style: "margin-bottom: 20px; padding: 10px; background-color: #f8f9fa; border-radius: 5px; display: flex; justify-content: space-between; align-items: center;",
+                style: "margin-bottom: 20px; padding: 10px; background-color: #f8f9fa; border-radius: 5px; display: flex; flex-direction: column; gap: 10px;",
                 div {
-                    label {
-                        style: "margin-right: 10px;",
-                        "OpenAI API Key: "
+                    style: "display: flex; justify-content: space-between; align-items: center;",
+                    div {
+                        label {
+                            style: "margin-right: 10px;",
+                            "API Key: "
+                        }
+                        input {
+                            "type": "password",
+                            value: "{api_key}",
+                            oninput: move |e| api_key.set(e.value()),
+                            placeholder: "sk-...",
+                            style: "margin-right: 10px; padding: 5px; width: 200px;"
+                        }
+                        label {
+                            style: "margin-right: 10px;",
+                            "Base URL: "
+                        }
+                        input {
+                            "type": "text",
+                            value: "{base_url}",
+                            oninput: move |e| base_url.set(e.value()),
+                            placeholder: "https://api.openai.com/v1",
+                            style: "margin-right: 10px; padding: 5px; width: 250px;"
+                        }
+                        button {
+                            onclick: move |_| connect_ws(),
+                            disabled: connected(),
+                            style: "padding: 5px 15px; cursor: pointer;",
+                            "Connect"
+                        }
                     }
-                    input {
-                        "type": "password",
-                        value: "{api_key}",
-                        oninput: move |e| api_key.set(e.value()),
-                        placeholder: "sk-...",
-                        style: "margin-right: 10px; padding: 5px; width: 250px;"
+                    div {
+                        style: "color: {status_color}; font-weight: bold;",
+                        "{status_text}"
                     }
-                    button {
-                        onclick: move |_| connect_ws(),
-                        disabled: connected(),
-                        style: "padding: 5px 15px; cursor: pointer;",
-                        "Connect"
-                    }
-                }
-                div {
-                    style: "color: {status_color}; font-weight: bold;",
-                    "{status_text}"
                 }
             }
 
@@ -209,14 +253,26 @@ pub fn App() -> Element {
                     span { "Speed: {speed():.1} tokens/sec" }
                 }
                 div {
+                    style: "display: flex; gap: 10px; align-items: center;",
+                    if *model.read() == "custom" {
+                        input {
+                            "type": "text",
+                            value: "{custom_model}",
+                            oninput: move |e| custom_model.set(e.value()),
+                            placeholder: "Enter custom model name...",
+                            style: "padding: 5px; border-radius: 5px; width: 200px;"
+                        }
+                    }
                     select {
                         value: "{model}",
                         onchange: move |e| model.set(e.value()),
                         style: "padding: 5px; border-radius: 5px;",
-                        option { value: "gpt-4o-mini", "gpt-4o-mini" }
-                        option { value: "gpt-4o", "gpt-4o" }
+                        option { value: "gpt-5.4-mini", "gpt-5.4-mini" }
+                        option { value: "gpt-5", "gpt-5" }
                         option { value: "gpt-4.5-preview", "gpt-4.5-preview" }
-                        option { value: "gpt-5", "gpt-5 (Soon)" }
+                        option { value: "gpt-4o", "gpt-4o" }
+                        option { value: "gpt-4o-mini", "gpt-4o-mini" }
+                        option { value: "custom", "Custom..." }
                     }
                 }
             }
