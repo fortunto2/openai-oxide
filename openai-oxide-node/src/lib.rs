@@ -4,9 +4,9 @@ use futures_util::StreamExt;
 use napi::bindgen_prelude::*;
 use napi::threadsafe_function::{ThreadsafeFunction, ThreadsafeFunctionCallMode};
 use napi_derive::napi;
+use openai_oxide::OpenAI;
 use openai_oxide::types::responses::ResponseCreateRequest;
 use openai_oxide::websocket::WsSession;
-use openai_oxide::OpenAI;
 use std::sync::Arc;
 use tokio::sync::Mutex;
 
