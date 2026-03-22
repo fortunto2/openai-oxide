@@ -5,6 +5,9 @@ export declare class Client {
   createChatCompletion(request: Record<string, any>): Promise<Record<string, any>>
   createChatStream(request: Record<string, any>, tsfn: (err: Error | null, event: Record<string, any> | null) => void): Promise<void>
   createResponse(request: Record<string, any>): Promise<Record<string, any>>
+  createText(model: string, input: string, maxOutputTokens?: number): Promise<string>
+  createStoredResponseId(model: string, input: string, maxOutputTokens?: number): Promise<string>
+  createTextFollowup(model: string, input: string, previousResponseId: string, maxOutputTokens?: number): Promise<string>
   createStream(request: Record<string, any>, tsfn: (err: Error | null, event: Record<string, any> | null) => void): Promise<void>
   wsSession(): Promise<NodeWsSession>
 }

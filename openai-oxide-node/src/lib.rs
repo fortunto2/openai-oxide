@@ -10,6 +10,36 @@ use openai_oxide::websocket::WsSession;
 use std::sync::Arc;
 use tokio::sync::Mutex;
 
+fn response_output_text(value: &serde_json::Value) -> String {
+    let mut result = String::new();
+    let Some(output) = value.get("output").and_then(serde_json::Value::as_array) else {
+        return result;
+    };
+
+    for item in output {
+        let Some(content) = item.get("content").and_then(serde_json::Value::as_array) else {
+            continue;
+        };
+        for block in content {
+            if block.get("type").and_then(serde_json::Value::as_str) == Some("output_text")
+                && let Some(text) = block.get("text").and_then(serde_json::Value::as_str)
+            {
+                result.push_str(text);
+            }
+        }
+    }
+
+    result
+}
+
+fn response_id(value: &serde_json::Value) -> Result<String> {
+    value
+        .get("id")
+        .and_then(serde_json::Value::as_str)
+        .map(str::to_owned)
+        .ok_or_else(|| Error::from_reason("response.id missing"))
+}
+
 #[napi]
 pub struct Client {
     inner: OpenAI,
@@ -117,6 +147,84 @@ impl Client {
             .await
             .map_err(|e| Error::from_reason(e.to_string()))?;
         Ok(res)
+    }
+
+    #[napi(
+        ts_args_type = "model: string, input: string, maxOutputTokens?: number",
+        ts_return_type = "Promise<string>"
+    )]
+    pub async fn create_text(
+        &self,
+        model: String,
+        input: String,
+        max_output_tokens: Option<u32>,
+    ) -> Result<String> {
+        let mut request = ResponseCreateRequest::new(model).input(input);
+        if let Some(max_output_tokens) = max_output_tokens {
+            request = request.max_output_tokens(i64::from(max_output_tokens));
+        }
+
+        let response = self
+            .inner
+            .responses()
+            .create_raw(&request)
+            .await
+            .map_err(|e| Error::from_reason(e.to_string()))?;
+
+        Ok(response_output_text(&response))
+    }
+
+    #[napi(
+        ts_args_type = "model: string, input: string, maxOutputTokens?: number",
+        ts_return_type = "Promise<string>"
+    )]
+    pub async fn create_stored_response_id(
+        &self,
+        model: String,
+        input: String,
+        max_output_tokens: Option<u32>,
+    ) -> Result<String> {
+        let mut request = ResponseCreateRequest::new(model).input(input).store(true);
+        if let Some(max_output_tokens) = max_output_tokens {
+            request = request.max_output_tokens(i64::from(max_output_tokens));
+        }
+
+        let response = self
+            .inner
+            .responses()
+            .create_raw(&request)
+            .await
+            .map_err(|e| Error::from_reason(e.to_string()))?;
+
+        response_id(&response)
+    }
+
+    #[napi(
+        ts_args_type = "model: string, input: string, previousResponseId: string, maxOutputTokens?: number",
+        ts_return_type = "Promise<string>"
+    )]
+    pub async fn create_text_followup(
+        &self,
+        model: String,
+        input: String,
+        previous_response_id: String,
+        max_output_tokens: Option<u32>,
+    ) -> Result<String> {
+        let mut request = ResponseCreateRequest::new(model)
+            .input(input)
+            .previous_response_id(previous_response_id);
+        if let Some(max_output_tokens) = max_output_tokens {
+            request = request.max_output_tokens(i64::from(max_output_tokens));
+        }
+
+        let response = self
+            .inner
+            .responses()
+            .create_raw(&request)
+            .await
+            .map_err(|e| Error::from_reason(e.to_string()))?;
+
+        Ok(response_output_text(&response))
     }
 
     #[napi(

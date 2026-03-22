@@ -138,7 +138,7 @@ jobs:
       - name: Prepare npm manifests and publish platform packages
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: pnpm exec napi prepublish -t npm --npm-dir npm --no-gh-release
+        run: node scripts/npm-publish-with-skip.mjs pnpm exec napi prepublish -t npm --npm-dir npm --no-gh-release
 
       - name: Preview npm package layout
         run: find npm -maxdepth 2 -type f | sort
@@ -149,9 +149,9 @@ jobs:
           NPM_CONFIG_PROVENANCE: "true"
         run: |
           if [[ "${GITHUB_REF_NAME}" =~ ^node-v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-            pnpm publish --access public --no-git-checks --ignore-scripts
+            node scripts/npm-publish-with-skip.mjs pnpm publish --access public --no-git-checks --ignore-scripts
           elif [[ "${GITHUB_REF_NAME}" =~ ^node-v[0-9]+\.[0-9]+\.[0-9]+- ]]; then
-            pnpm publish --tag next --access public --no-git-checks --ignore-scripts
+            node scripts/npm-publish-with-skip.mjs pnpm publish --tag next --access public --no-git-checks --ignore-scripts
           else
             echo "Unsupported tag format: ${GITHUB_REF_NAME}"
             exit 1

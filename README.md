@@ -138,6 +138,28 @@ Run `uv run python examples/bench_python.py` from the `openai-oxide-python` dire
 
 ---
 
+### Node.js Ecosystem (`openai-oxide` vs `openai`)
+
+The Node package uses native `napi-rs` bindings and now includes low-overhead fast paths for hot loops:
+`createText`, `createStoredResponseId`, and `createTextFollowup`.
+
+Run `BENCH_ITERATIONS=5 pnpm bench` from the `openai-oxide-node` directory to reproduce locally.
+
+| Test | `openai-oxide` | `openai` | Winner |
+| :--- | ---: | ---: | :--- |
+| **Plain text** | **1131ms** | 1316ms | OXIDE (+14%) |
+| **Structured output** | 1467ms | **1244ms** | openai (+18%) |
+| **Function calling** | **1103ms** | 1151ms | OXIDE (+4%) |
+| **Multi-turn (2 reqs)** | **1955ms** | 2014ms | OXIDE (+3%) |
+| **Rapid-fire (5 calls)** | 4535ms | **4440ms** | openai (+2%) |
+| **Streaming TTFT** | **603ms** | 720ms | OXIDE (+16%) |
+| **Parallel 3x (fan-out)** | **890ms** | 947ms | OXIDE (+6%) |
+| **WebSocket hot pair** | **2359ms** | N/A | OXIDE |
+
+See the full Node package guide and benchmark notes in [openai-oxide-node/README.md](/Users/rustam/startups/active/openai-rust/openai-oxide-node/README.md).
+
+---
+
 ## Python Usage
 
 Install via `uv` or `pip` (no Rust toolchain required):

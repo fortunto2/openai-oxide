@@ -150,13 +150,7 @@ async function main() {
 
   printRow(
     'Plain text',
-    await sample(ITERATIONS, () =>
-      oxide.createResponse({
-        model: MODEL,
-        input: 'What is the capital of France? One word.',
-        max_output_tokens: 16,
-      })
-    ),
+    await sample(ITERATIONS, () => oxide.createText(MODEL, 'What is the capital of France? One word.', 16)),
     await sample(ITERATIONS, () =>
       official.responses.create({
         model: MODEL,
@@ -221,18 +215,8 @@ async function main() {
   printRow(
     'Multi-turn (2 reqs)',
     await sample(ITERATIONS, async () => {
-      const first = await oxide.createResponse({
-        model: MODEL,
-        input: 'Remember: the answer is 42.',
-        store: true,
-        max_output_tokens: 32,
-      });
-      await oxide.createResponse({
-        model: MODEL,
-        input: 'What is the answer?',
-        previous_response_id: first.id,
-        max_output_tokens: 16,
-      });
+      const firstId = await oxide.createStoredResponseId(MODEL, 'Remember: the answer is 42.', 32);
+      await oxide.createTextFollowup(MODEL, 'What is the answer?', firstId, 16);
     }),
     await sample(ITERATIONS, async () => {
       const first = await official.responses.create({
@@ -254,11 +238,7 @@ async function main() {
     'Rapid-fire (5 calls)',
     await sample(ITERATIONS, async () => {
       for (let i = 1; i <= 5; i += 1) {
-        await oxide.createResponse({
-          model: MODEL,
-          input: `What is ${i}+${i}? Reply with just the number.`,
-          max_output_tokens: 16,
-        });
+        await oxide.createText(MODEL, `What is ${i}+${i}? Reply with just the number.`, 16);
       }
     }),
     await sample(ITERATIONS, async () => {

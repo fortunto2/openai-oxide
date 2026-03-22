@@ -9,7 +9,20 @@ The package exposes the Rust client to Node.js with native streaming and WebSock
 - Native bindings for chat, responses, streaming, and WebSocket sessions
 - Shared Rust core with the main `openai-oxide` crate
 - Prebuilt npm artifacts for the main desktop and server targets
+- Fast-path APIs for hot loops that return only `text` or `response id`
 - Local development and release flow driven by `pnpm`
+
+## Why choose `openai-oxide` on Node?
+
+| Feature | `openai-oxide` | official `openai` SDK |
+| :--- | :--- | :--- |
+| **WebSocket Responses** | Persistent `wss://` session, reuses TLS for every step | REST-only |
+| **Streaming parser** | Zero-copy SSE parser + early function-call parse | HTTP/2 response buffering |
+| **Typed Rust core** | Full `Response` struct, hedged requests, parallel fan-outs | Generic JS objects |
+| **Hot REST paths** | `createText`, `createStoredResponseId`, `createTextFollowup` avoid JSON bridge | Always serializes `Record<string, any>` |
+| **Platform binaries** | Prebuilt `.node` for darwin/linux/windows in npm | Pure JS package |
+
+The official SDK is great for HTTP/REST but does not expose WebSocket streaming or Rust-level hedged/parallel tooling out of the box. If your workload issues quick successive tool calls, streams tokens, or runs inside a WebSocket session, the native bindings keep latency and contention lower while still letting you call the same OpenAI APIs.
 
 ## Supported Targets
 
@@ -68,6 +81,44 @@ Examples live in [`examples/`](examples/):
 - `examples/02_streaming.js`
 - `examples/03_websocket.js`
 - `examples/bench_node.js`
+
+## Benchmarks
+
+Benchmarks were run locally against the live OpenAI API with:
+
+```bash
+BENCH_ITERATIONS=5 pnpm bench
+```
+
+Setup:
+
+- Model: `gpt-5.4`
+- Iterations: `5`
+- Reported value: median latency
+- Comparison target: official [`openai`](https://www.npmjs.com/package/openai) npm SDK
+
+| Test | `openai-oxide` | `openai` | Winner |
+| :--- | ---: | ---: | :--- |
+| Plain text | 1131ms | 1316ms | `openai-oxide` |
+| Structured output | 1467ms | 1244ms | `openai` |
+| Function calling | 1103ms | 1151ms | `openai-oxide` |
+| Multi-turn (2 reqs) | 1955ms | 2014ms | `openai-oxide` |
+| Rapid-fire (5 calls) | 4535ms | 4440ms | `openai` |
+| Streaming TTFT | 603ms | 720ms | `openai-oxide` |
+| Parallel 3x | 890ms | 947ms | `openai-oxide` |
+| WebSocket hot pair | 2359ms | N/A | `openai-oxide` |
+
+Summary:
+
+- `openai-oxide` wins `6` of `8` scenarios
+- strongest gains are in plain text, function calling, streaming TTFT, parallel fan-out, and WebSocket reuse
+- official `openai` is still faster in this run for structured output and rapid-fire sequential REST calls
+
+For the lowest-overhead REST paths in Node, prefer the fast-path methods:
+
+- `client.createText(model, input, maxOutputTokens?)`
+- `client.createStoredResponseId(model, input, maxOutputTokens?)`
+- `client.createTextFollowup(model, input, previousResponseId, maxOutputTokens?)`
 
 ## Development
 
