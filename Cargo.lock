@@ -1111,7 +1111,7 @@ dependencies = [
 
 [[package]]
 name = "openai-oxide-node"
-version = "0.1.0"
+version = "0.9.4"
 dependencies = [
  "futures-util",
  "napi",

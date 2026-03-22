@@ -9,7 +9,7 @@ importers:
   .:
     devDependencies:
       '@napi-rs/cli':
-        specifier: ^3.0.0
+        specifier: ^3.5.1
         version: 3.5.1(@emnapi/runtime@1.9.1)
 
 packages:
