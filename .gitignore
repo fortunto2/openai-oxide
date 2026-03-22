@@ -21,3 +21,6 @@ tail.log
 dist/
 .dioxus/
 
+# Node bindings artifacts
+openai-oxide-node/node_modules/
+openai-oxide-node/*.node
