@@ -1,4 +1,4 @@
-const { Client } = require('../index.js');
+const { Client } = require('openai-oxide');
 
 async function main() {
     console.log("Testing Node.js streaming powered by openai-oxide (Rust)...");

@@ -54,6 +54,7 @@
   },
   "scripts": {
     "artifacts": "napi artifacts --output-dir artifacts --npm-dir npm",
+    "bench": "node examples/bench_node.js",
     "build": "napi build --platform --release",
     "build:debug": "napi build --platform",
     "create:npm-dirs": "napi create-npm-dirs --npm-dir npm",
@@ -63,7 +64,17 @@
     "version": "napi version --npm-dir npm"
   },
   "devDependencies": {
-    "@napi-rs/cli": "^3.5.1"
+    "@napi-rs/cli": "^3.5.1",
+    "openai": "^6.32.0"
   },
-  "packageManager": "pnpm@10.8.1"
+  "packageManager": "pnpm@10.8.1",
+  "optionalDependencies": {
+    "openai-oxide-darwin-arm64": "0.9.4",
+    "openai-oxide-darwin-x64": "0.9.4",
+    "openai-oxide-linux-arm64-gnu": "0.9.4",
+    "openai-oxide-linux-arm64-musl": "0.9.4",
+    "openai-oxide-linux-x64-gnu": "0.9.4",
+    "openai-oxide-linux-x64-musl": "0.9.4",
+    "openai-oxide-win32-x64-msvc": "0.9.4"
+  }
 }

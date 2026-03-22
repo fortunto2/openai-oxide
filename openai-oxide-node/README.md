@@ -67,6 +67,7 @@ Examples live in [`examples/`](examples/):
 - `examples/01_basic_request.js`
 - `examples/02_streaming.js`
 - `examples/03_websocket.js`
+- `examples/bench_node.js`
 
 ## Development
 
@@ -76,6 +77,7 @@ Useful commands:
 pnpm install
 pnpm build
 pnpm test
+pnpm bench
 pnpm pack:preview
 ```
 
