@@ -7,18 +7,10 @@ See the official [Realtime API guide](https://platform.openai.com/docs/guides/re
 ## Rust
 
 ```rust
-use openai_oxide::OpenAI;
-
-let client = OpenAI::from_env()?;
-
-let mut session = client.ws_session().await?;
-
-// Send multiple requests over the same connection
-let response = session.create("gpt-4o-mini", "First message").await?;
-let followup = session.create("gpt-4o-mini", "Follow-up question").await?;
-
-session.close().await?;
+{{#include ../../../examples/websocket.rs}}
 ```
+
+Run: `OPENAI_API_KEY=sk-... cargo run --example websocket --features websocket`
 
 ## When to Use WebSockets
 

@@ -7,26 +7,10 @@ See the official [Structured Outputs guide](https://platform.openai.com/docs/gui
 ## Rust
 
 ```rust
-use openai_oxide::{OpenAI, types::responses::*};
-
-let client = OpenAI::from_env()?;
-
-let response = client.responses().create(
-    ResponseCreateRequest::new("gpt-4o")
-        .input("Extract: John is 30 years old and lives in NYC")
-        .text_format(JsonSchema::new("person", serde_json::json!({
-            "type": "object",
-            "properties": {
-                "name": { "type": "string" },
-                "age": { "type": "integer" },
-                "city": { "type": "string" }
-            },
-            "required": ["name", "age", "city"]
-        })))
-).await?;
-
-// response.output_text() contains valid JSON matching the schema
+{{#include ../../../examples/structured_output.rs}}
 ```
+
+Run: `OPENAI_API_KEY=sk-... cargo run --example structured_output`
 
 ## Next Steps
 

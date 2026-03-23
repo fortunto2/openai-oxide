@@ -7,26 +7,10 @@ See the official [Function Calling guide](https://platform.openai.com/docs/guide
 ## Rust
 
 ```rust
-use openai_oxide::{OpenAI, types::responses::*};
-
-let client = OpenAI::from_env()?;
-
-let response = client.responses().create(
-    ResponseCreateRequest::new("gpt-4o")
-        .input("What is the weather in Tokyo?")
-        .tools(vec![Tool::function(
-            "get_weather",
-            "Get current weather for a location",
-            serde_json::json!({
-                "type": "object",
-                "properties": {
-                    "location": { "type": "string" }
-                },
-                "required": ["location"]
-            }),
-        )])
-).await?;
+{{#include ../../../examples/tool_calling.rs}}
 ```
+
+Run: `OPENAI_API_KEY=sk-... cargo run --example tool_calling`
 
 ## Next Steps
 

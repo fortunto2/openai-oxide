@@ -4,25 +4,13 @@ Stream tokens and events as they are generated, reducing time-to-first-token (TT
 
 See the official [Streaming documentation](https://platform.openai.com/docs/api-reference/streaming) for event types and behavior.
 
-## Rust
+## Rust (Chat Completions)
 
 ```rust
-use openai_oxide::{OpenAI, types::responses::*};
-use futures::StreamExt;
-
-let client = OpenAI::from_env()?;
-
-let mut stream = client.responses().create_stream(
-    ResponseCreateRequest::new("gpt-4o-mini")
-        .input("Write a haiku about Rust.")
-).await?;
-
-while let Some(event) = stream.next().await {
-    let event = event?;
-    // Handle each SSE event as it arrives
-    println!("{:?}", event);
-}
+{{#include ../../../examples/chat_stream.rs}}
 ```
+
+Run: `OPENAI_API_KEY=sk-... cargo run --example chat_stream`
 
 ## Next Steps
 
