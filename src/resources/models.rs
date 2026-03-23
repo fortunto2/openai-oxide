@@ -5,6 +5,8 @@ use crate::error::OpenAIError;
 use crate::types::model::{Model, ModelDeleted, ModelList};
 
 /// Access model endpoints.
+///
+/// API reference: <https://platform.openai.com/docs/api-reference/models>
 pub struct Models<'a> {
     client: &'a OpenAI,
 }

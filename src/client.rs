@@ -44,6 +44,8 @@ const RETRYABLE_STATUS_CODES: [u16; 4] = [429, 500, 502, 503];
 
 /// The main OpenAI client.
 ///
+/// See [OpenAI API docs](https://platform.openai.com/docs/api-reference) for the full API reference.
+///
 /// Use [`with_options()`](Self::with_options) to create a cheap clone with
 /// per-request customization (extra headers, query params, timeout):
 ///

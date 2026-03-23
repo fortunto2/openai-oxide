@@ -1,0 +1,432 @@
+# openai-oxide
+
+> High-performance OpenAI client for Rust, Node.js, and Python. 1:1 parity with the official Python SDK. Persistent WebSockets, zero-copy SSE streaming, WASM support, hedged requests, SIMD JSON parsing.
+
+openai-oxide is a production-grade OpenAI API client written in Rust with native bindings for Node.js (napi-rs) and Python (PyO3). It covers the full OpenAI API surface: Chat Completions, Responses API, Embeddings, Models, Images, Audio, Files, Fine-tuning, Moderations, Batches, Uploads, Assistants (beta), Threads (beta), Runs (beta), Vector Stores (beta), and Realtime (beta).
+
+The library is designed for agentic workflows where latency compounds across dozens of sequential tool calls. Key performance primitives include persistent WebSocket connections (37% faster agent loops), stream-based function call early parsing (execute tools ~400ms before response completes), hedged requests for tail latency reduction (50-96% P99 improvement), and optional SIMD JSON parsing via AVX2/NEON.
+
+## Package Registries
+
+- Rust: [crates.io/crates/openai-oxide](https://crates.io/crates/openai-oxide)
+- Node.js: [npmjs.com/package/openai-oxide](https://www.npmjs.com/package/openai-oxide)
+- Python: [pypi.org/project/openai-oxide](https://pypi.org/project/openai-oxide/)
+- Docs: [docs.rs/openai-oxide](https://docs.rs/openai-oxide)
+- Source: [github.com/fortunto2/openai-oxide](https://github.com/fortunto2/openai-oxide)
+
+## Installation
+
+### Rust
+```bash
+cargo add openai-oxide tokio --features tokio/full
+```
+
+### Node.js
+```bash
+npm install openai-oxide
+```
+
+### Python
+```bash
+pip install openai-oxide
+```
+
+## Quick Start — Rust
+
+### Basic Request (Responses API)
+```rust
+use openai_oxide::{OpenAI, types::responses::*};
+
+#[tokio::main]
+async fn main() -> Result<(), openai_oxide::OpenAIError> {
+    let client = OpenAI::from_env()?; // Uses OPENAI_API_KEY
+
+    let response = client.responses().create(
+        ResponseCreateRequest::new("gpt-4o")
+            .input("Explain quantum computing in one sentence.")
+            .max_output_tokens(100)
+    ).await?;
+
+    println!("{}", response.output_text());
+    Ok(())
+}
+```
+
+### Chat Completions
+```rust
+use openai_oxide::{OpenAI, types::chat::*};
+
+#[tokio::main]
+async fn main() -> Result<(), openai_oxide::OpenAIError> {
+    let client = OpenAI::from_env()?;
+
+    let request = ChatCompletionRequest::new("gpt-4o")
+        .message(ChatMessage::user("What is Rust?"));
+
+    let response = client.chat().completions().create(request).await?;
+    println!("{}", response.choices[0].message.content.as_deref().unwrap_or_default());
+    Ok(())
+}
+```
+
+### Streaming
+```rust
+use openai_oxide::{OpenAI, types::chat::*};
+use futures_util::StreamExt;
+
+#[tokio::main]
+async fn main() -> Result<(), openai_oxide::OpenAIError> {
+    let client = OpenAI::from_env()?;
+
+    let request = ChatCompletionRequest::new("gpt-4o")
+        .message(ChatMessage::user("Write a haiku about Rust."));
+
+    let mut stream = client.chat().completions().create_stream(request).await?;
+    while let Some(chunk) = stream.next().await {
+        let chunk = chunk?;
+        if let Some(delta) = chunk.choices.first().and_then(|c| c.delta.content.as_deref()) {
+            print!("{delta}");
+        }
+    }
+    Ok(())
+}
+```
+
+### WebSocket Mode (Persistent Connection)
+```rust
+use openai_oxide::{OpenAI, types::responses::*};
+
+#[tokio::main]
+async fn main() -> Result<(), openai_oxide::OpenAIError> {
+    let client = OpenAI::from_env()?;
+    let mut session = client.ws_session().await?;
+
+    let r1 = session.send(
+        ResponseCreateRequest::new("gpt-4o").input("My name is Alice.").store(true)
+    ).await?;
+
+    let r2 = session.send(
+        ResponseCreateRequest::new("gpt-4o").input("What's my name?").previous_response_id(&r1.id)
+    ).await?;
+
+    session.close().await?;
+    Ok(())
+}
+```
+
+### Function Calling with Early Parse
+```rust
+let mut handle = client.responses().create_stream_fc(request).await?;
+
+while let Some(fc) = handle.recv().await {
+    // Fires immediately on arguments.done — don't wait for stream to finish
+    let result = execute_tool(&fc.name, &fc.arguments).await;
+}
+```
+
+### Hedged Requests
+```rust
+use openai_oxide::hedged_request;
+use std::time::Duration;
+
+// Sends 2 identical requests with a delay; returns whichever finishes first
+let response = hedged_request(&client, request, Some(Duration::from_secs(2))).await?;
+```
+
+### Structured Output
+```rust
+let request = ChatCompletionRequest::new("gpt-4o")
+    .message(ChatMessage::user("Extract the name and age from: John is 30 years old."))
+    .response_format(ResponseFormat::json_schema(serde_json::json!({
+        "name": "person",
+        "strict": true,
+        "schema": {
+            "type": "object",
+            "properties": {
+                "name": { "type": "string" },
+                "age": { "type": "integer" }
+            },
+            "required": ["name", "age"],
+            "additionalProperties": false
+        }
+    })));
+```
+
+### Tool Calling
+```rust
+use openai_oxide::types::responses::*;
+
+let request = ResponseCreateRequest::new("gpt-4o")
+    .input("What is the weather in Paris?")
+    .tool(Tool::function(
+        "get_weather",
+        Some("Get current weather for a city"),
+        serde_json::json!({
+            "type": "object",
+            "properties": {
+                "city": { "type": "string" }
+            },
+            "required": ["city"]
+        }),
+    ));
+```
+
+### openai_tool Macro
+```rust
+use openai_oxide_macros::openai_tool;
+
+#[openai_tool(description = "Get the current weather")]
+fn get_weather(location: String, unit: Option<String>) -> String {
+    format!("Weather in {location}")
+}
+
+let tool = get_weather_tool(); // Returns serde_json::Value schema
+```
+
+### Image Generation
+```rust
+let response = client.images().generate(
+    ImageGenerateRequest::new("A sunset over mountains")
+        .model("dall-e-3")
+        .size(ImageSize::Size1024x1024)
+        .quality(ImageQuality::Hd)
+).await?;
+```
+
+### Audio Transcription
+```rust
+let transcription = client.audio().transcriptions().create(
+    TranscriptionRequest::new("path/to/audio.mp3")
+        .model("whisper-1")
+).await?;
+```
+
+### Embeddings
+```rust
+let response = client.embeddings().create(
+    EmbeddingRequest::new("text-embedding-3-small", "Hello world")
+).await?;
+```
+
+### Azure OpenAI
+```rust
+use openai_oxide::azure::AzureConfig;
+
+let client = OpenAI::azure(
+    AzureConfig::new()
+        .azure_endpoint("https://my.openai.azure.com")
+        .azure_deployment("gpt-4")
+        .api_key("...")
+)?;
+```
+
+### Configuration
+```rust
+use openai_oxide::{OpenAI, config::ClientConfig};
+
+let client = OpenAI::new("sk-...");                // Explicit key
+let client = OpenAI::from_env()?;                  // From OPENAI_API_KEY env var
+let client = OpenAI::with_config(                  // Custom config
+    ClientConfig::new("sk-...")
+        .base_url("https://...")
+        .timeout_secs(30)
+        .max_retries(3)
+);
+```
+
+### Pagination
+```rust
+use futures_util::StreamExt;
+
+// Auto-paginate all files
+let files: Vec<_> = client.files()
+    .list_auto(FileListParams::new())
+    .collect::<Vec<_>>()
+    .await;
+
+// Single page
+let page = client.files()
+    .list_page(FileListParams::new().limit(10))
+    .await?;
+```
+
+### Parallel Fan-Out
+```rust
+let (c1, c2, c3) = (client.clone(), client.clone(), client.clone());
+let (r1, r2, r3) = tokio::join!(
+    async { c1.responses().create(req1).await },
+    async { c2.responses().create(req2).await },
+    async { c3.responses().create(req3).await },
+);
+```
+
+## Quick Start — Node.js
+
+### Basic Request
+```javascript
+const { Client } = require("openai-oxide");
+
+const client = new Client(); // Uses OPENAI_API_KEY
+const text = await client.createText("gpt-4o-mini", "Hello from Node!");
+console.log(text);
+```
+
+### Full Response Object
+```javascript
+const { Client } = require("openai-oxide");
+
+const client = new Client();
+const response = await client.createResponse({
+    model: "gpt-4o-mini",
+    input: "Say hello from Rust via napi-rs."
+});
+console.log(response.output?.[0]?.content?.[0]?.text);
+```
+
+### WebSocket Session (Node.js)
+```javascript
+const { Client } = require("openai-oxide");
+
+const client = new Client();
+const session = await client.wsSession();
+const res = await session.send("gpt-4o-mini", "Say hello!");
+console.log(res);
+await session.close();
+```
+
+### Fast-Path APIs (Node.js)
+```javascript
+const { Client } = require("openai-oxide");
+
+const client = new Client();
+
+// Returns only text string — fastest path
+const text = await client.createText("gpt-4o-mini", "Hello!");
+
+// Returns stored response ID for multi-turn
+const id = await client.createStoredResponseId("gpt-4o-mini", "Remember me.");
+
+// Follow-up using previous response ID
+const followup = await client.createTextFollowup("gpt-4o-mini", "What did I say?", id);
+```
+
+## Quick Start — Python
+
+### Basic Request
+```python
+import asyncio
+from openai_oxide import Client
+
+async def main():
+    client = Client()  # Uses OPENAI_API_KEY
+    res = await client.create("gpt-4o-mini", "Hello from Python!")
+    print(res["text"])
+
+asyncio.run(main())
+```
+
+### Streaming (Python)
+```python
+import asyncio
+from openai_oxide import Client
+
+async def main():
+    client = Client()
+    stream = await client.create_stream(
+        "gpt-4o-mini",
+        "Explain quantum computing...",
+        max_output_tokens=200
+    )
+    async for event in stream:
+        print(event)
+
+asyncio.run(main())
+```
+
+## Cargo Feature Flags
+
+Each API endpoint is gated behind an optional Cargo feature. All enabled by default. For WASM or minimal builds, disable defaults:
+
+```toml
+# Full (default) — all APIs
+openai-oxide = "0.9"
+
+# Minimal — only Responses API
+openai-oxide = { version = "0.9", default-features = false, features = ["responses"] }
+
+# With WebSocket support
+openai-oxide = { version = "0.9", features = ["websocket"] }
+
+# With SIMD JSON parsing
+openai-oxide = { version = "0.9", features = ["simd"] }
+
+# For WASM targets
+openai-oxide = { version = "0.9", default-features = false, features = ["responses", "websocket-wasm"] }
+```
+
+Available features: `chat`, `responses`, `embeddings`, `images`, `audio`, `files`, `fine-tuning`, `models`, `moderations`, `batches`, `uploads`, `beta`, `websocket`, `websocket-wasm`, `simd`, `macros`.
+
+## API Reference
+
+### Resource Access Pattern (Rust)
+Resources are accessed via zero-cost borrows from the client:
+
+- `client.chat().completions()` — Chat Completions
+- `client.responses()` — Responses API
+- `client.embeddings()` — Embeddings
+- `client.models()` — Models
+- `client.images()` — Image generation
+- `client.audio()` — Speech, transcription, translation
+- `client.files()` — File CRUD
+- `client.fine_tuning().jobs()` — Fine-tuning jobs
+- `client.moderations()` — Content moderation
+- `client.batches()` — Batch processing
+- `client.uploads()` — Large file uploads
+- `client.beta().assistants()` — Assistants (beta)
+- `client.beta().threads()` — Threads (beta)
+- `client.beta().runs(thread_id)` — Runs (beta)
+- `client.beta().vector_stores()` — Vector Stores (beta)
+- `client.beta().realtime()` — Realtime API (beta)
+- `client.ws_session()` — WebSocket persistent connection
+
+### Key Types (Rust)
+
+- `OpenAI` — Main client, created via `new()`, `from_env()`, `with_config()`, or `azure()`
+- `ChatCompletionRequest` / `ChatCompletionResponse` — Chat API types
+- `ChatMessage` — User/assistant/system/tool messages with `ChatMessage::user()`, `ChatMessage::system()`, etc.
+- `ResponseCreateRequest` / `Response` — Responses API types
+- `Tool` — Function, WebSearch, FileSearch, CodeInterpreter, ComputerUse, Mcp, ImageGeneration
+- `SseStream<T>` — Async stream for SSE events, implements `futures::Stream`
+- `Paginator<T>` — Async iterator for cursor-based pagination
+- `OpenAIError` — Error enum with `ApiError`, `NetworkError`, `ParseError` variants
+- `ClientConfig` — Timeouts, retries, base URL, default headers
+- `AzureConfig` — Azure OpenAI configuration
+- `RequestOptions` — Per-request headers, query params, timeout overrides
+
+### Common Enums
+- `Role` — `System`, `User`, `Assistant`, `Tool`
+- `FinishReason` — `Stop`, `Length`, `ToolCalls`, `ContentFilter`
+- `ImageSize` — `Size256x256`, `Size512x512`, `Size1024x1024`, `Size1024x1792`, `Size1792x1024`
+- `AudioVoice` — `Alloy`, `Echo`, `Fable`, `Onyx`, `Nova`, `Shimmer`
+- `ReasoningEffort` — `Low`, `Medium`, `High`
+
+## Architecture Notes
+
+- Async-first: built on tokio + reqwest. No async-std support.
+- All public types implement `Clone + Debug + Send + Sync`.
+- Builder methods return `&mut Self` for chaining.
+- All response fields that may be omitted by the API are `Option<T>`.
+- Enums use `#[non_exhaustive]` for forward compatibility with new API values.
+- Streaming returns `impl Stream<Item = Result<T, OpenAIError>>` — never collects internally.
+- WASM target compiles to `wasm32-unknown-unknown` with full streaming and retry support.
+
+## Links
+
+- [GitHub Repository](https://github.com/fortunto2/openai-oxide)
+- [Rust API Docs (docs.rs)](https://docs.rs/openai-oxide)
+- [crates.io](https://crates.io/crates/openai-oxide)
+- [npm](https://www.npmjs.com/package/openai-oxide)
+- [PyPI](https://pypi.org/project/openai-oxide/)
+- [Cloudflare Worker Example](https://github.com/fortunto2/openai-oxide/tree/main/examples/cloudflare-worker-dioxus)
+- [Benchmark Example](https://github.com/fortunto2/openai-oxide/tree/main/examples/benchmark.rs)
+- [OpenAI API Reference](https://platform.openai.com/docs/api-reference)

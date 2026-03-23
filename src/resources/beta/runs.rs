@@ -7,6 +7,8 @@ use crate::pagination::{Page, Paginator};
 use crate::types::beta::{Run, RunCreateRequest, RunListParams, SubmitToolOutputsRequest};
 
 /// Thread runs endpoint (beta).
+///
+/// API reference: <https://platform.openai.com/docs/api-reference/runs>
 pub struct Runs<'a> {
     client: &'a OpenAI,
     thread_id: String,

@@ -9,6 +9,9 @@ use crate::types::fine_tuning::{
 };
 
 /// Access fine-tuning endpoints.
+///
+/// OpenAI guide: <https://platform.openai.com/docs/guides/fine-tuning>
+/// API reference: <https://platform.openai.com/docs/api-reference/fine-tuning>
 pub struct FineTuning<'a> {
     client: &'a OpenAI,
 }

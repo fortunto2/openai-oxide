@@ -10,6 +10,8 @@ use crate::types::beta::{
 };
 
 /// Access thread endpoints (beta).
+///
+/// API reference: <https://platform.openai.com/docs/api-reference/threads>
 pub struct Threads<'a> {
     client: &'a OpenAI,
 }

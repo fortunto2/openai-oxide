@@ -9,6 +9,8 @@ use crate::error::OpenAIError;
 
 /// A stream of parsed SSE events from an OpenAI streaming response.
 ///
+/// See [OpenAI streaming guide](https://platform.openai.com/docs/api-reference/streaming).
+///
 /// Wraps a byte stream from reqwest and yields deserialized items.
 pub struct SseStream<T> {
     #[cfg(not(target_arch = "wasm32"))]

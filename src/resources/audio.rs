@@ -7,6 +7,10 @@ use crate::types::audio::{
 };
 
 /// Access audio endpoints.
+///
+/// OpenAI guide (TTS): <https://platform.openai.com/docs/guides/text-to-speech>
+/// OpenAI guide (STT): <https://platform.openai.com/docs/guides/speech-to-text>
+/// API reference: <https://platform.openai.com/docs/api-reference/audio>
 pub struct Audio<'a> {
     client: &'a OpenAI,
 }

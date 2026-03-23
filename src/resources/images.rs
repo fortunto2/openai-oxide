@@ -7,6 +7,9 @@ use crate::types::image::{
 };
 
 /// Access image endpoints.
+///
+/// OpenAI guide: <https://platform.openai.com/docs/guides/images>
+/// API reference: <https://platform.openai.com/docs/api-reference/images>
 pub struct Images<'a> {
     client: &'a OpenAI,
 }

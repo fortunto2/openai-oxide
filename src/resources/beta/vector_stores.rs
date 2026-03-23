@@ -10,6 +10,8 @@ use crate::types::beta::{
 };
 
 /// Access vector store endpoints (beta).
+///
+/// API reference: <https://platform.openai.com/docs/api-reference/vector-stores>
 pub struct VectorStores<'a> {
     client: &'a OpenAI,
 }

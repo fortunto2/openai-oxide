@@ -6,6 +6,9 @@ use crate::pagination::{Page, Paginator};
 use crate::types::batch::{Batch, BatchCreateRequest, BatchList, BatchListParams};
 
 /// Access batch endpoints.
+///
+/// OpenAI guide: <https://platform.openai.com/docs/guides/batch>
+/// API reference: <https://platform.openai.com/docs/api-reference/batch>
 pub struct Batches<'a> {
     client: &'a OpenAI,
 }

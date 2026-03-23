@@ -1,0 +1,13 @@
+[book]
+authors = ["Rustam"]
+language = "en"
+src = "docs/src"
+title = "openai-oxide Documentation"
+
+[build]
+build-dir = "docs/book"
+
+[output.html]
+default-theme = "coal"
+git-repository-url = "https://github.com/fortunto2/openai-oxide"
+site-url = "/openai-oxide/"

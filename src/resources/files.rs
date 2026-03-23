@@ -6,6 +6,8 @@ use crate::pagination::{Page, Paginator};
 use crate::types::file::{FileDeleted, FileList, FileListParams, FileObject, FileUploadParams};
 
 /// Access file endpoints.
+///
+/// API reference: <https://platform.openai.com/docs/api-reference/files>
 pub struct Files<'a> {
     client: &'a OpenAI,
 }

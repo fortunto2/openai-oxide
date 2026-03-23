@@ -53,6 +53,9 @@ impl StreamFcHandle {
 }
 
 /// Access the Responses API endpoints.
+///
+/// OpenAI guide: <https://platform.openai.com/docs/guides/responses-vs-chat-completions>
+/// API reference: <https://platform.openai.com/docs/api-reference/responses>
 pub struct Responses<'a> {
     client: &'a OpenAI,
 }

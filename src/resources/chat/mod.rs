@@ -6,6 +6,9 @@ use crate::streaming::SseStream;
 use crate::types::chat::{ChatCompletionChunk, ChatCompletionRequest, ChatCompletionResponse};
 
 /// Access chat-related endpoints.
+///
+/// OpenAI guide: <https://platform.openai.com/docs/guides/chat-completions>
+/// API reference: <https://platform.openai.com/docs/api-reference/chat>
 pub struct Chat<'a> {
     client: &'a OpenAI,
 }

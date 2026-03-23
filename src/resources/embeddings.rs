@@ -5,6 +5,9 @@ use crate::error::OpenAIError;
 use crate::types::embedding::{CreateEmbeddingResponse, EmbeddingRequest};
 
 /// Access embedding endpoints.
+///
+/// OpenAI guide: <https://platform.openai.com/docs/guides/embeddings>
+/// API reference: <https://platform.openai.com/docs/api-reference/embeddings>
 pub struct Embeddings<'a> {
     client: &'a OpenAI,
 }

@@ -5,6 +5,8 @@ use crate::error::OpenAIError;
 use crate::types::upload::{Upload, UploadCompleteRequest, UploadCreateRequest};
 
 /// Access upload endpoints.
+///
+/// API reference: <https://platform.openai.com/docs/api-reference/uploads>
 pub struct Uploads<'a> {
     client: &'a OpenAI,
 }

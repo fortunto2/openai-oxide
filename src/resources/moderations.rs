@@ -5,6 +5,9 @@ use crate::error::OpenAIError;
 use crate::types::moderation::{ModerationCreateResponse, ModerationRequest};
 
 /// Access moderation endpoints.
+///
+/// OpenAI guide: <https://platform.openai.com/docs/guides/moderation>
+/// API reference: <https://platform.openai.com/docs/api-reference/moderations>
 pub struct Moderations<'a> {
     client: &'a OpenAI,
 }

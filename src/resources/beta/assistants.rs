@@ -9,6 +9,9 @@ use crate::types::beta::{
 };
 
 /// Access assistant endpoints (beta).
+///
+/// OpenAI guide: <https://platform.openai.com/docs/assistants>
+/// API reference: <https://platform.openai.com/docs/api-reference/assistants>
 pub struct Assistants<'a> {
     client: &'a OpenAI,
 }
