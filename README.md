@@ -10,6 +10,7 @@
     <a href="https://pypi.org/project/openai-oxide/"><img src="https://img.shields.io/pypi/v/openai-oxide.svg" alt="PyPI"></a>
     <a href="https://docs.rs/openai-oxide"><img src="https://docs.rs/openai-oxide/badge.svg" alt="docs.rs"></a>
     <a href="https://fortunto2.github.io/openai-oxide/"><img src="https://img.shields.io/badge/docs-mdbook-blue.svg" alt="Guide"></a>
+    <a href="https://socket.dev/npm/package/openai-oxide"><img src="https://badge.socket.dev/npm/package/openai-oxide" alt="Socket"></a>
     <a href="https://github.com/fortunto2/openai-oxide/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="MIT"></a>
     <a href="https://github.com/fortunto2/openai-oxide"><img src="https://img.shields.io/github/stars/fortunto2/openai-oxide?style=social" alt="GitHub stars"></a>
   </p>
