@@ -168,6 +168,101 @@ impl Client {
         })
     }
 
+    /// Create with structured output — accepts a Python class (Pydantic or dataclass).
+    ///
+    /// Generates JSON schema from the class and parses the response text back.
+    ///
+    /// ```python
+    /// from pydantic import BaseModel
+    ///
+    /// class Answer(BaseModel):
+    ///     text: str
+    ///     confidence: float
+    ///
+    /// result = await client.create_parsed("gpt-5.4-mini", "Is Rust fast?", Answer)
+    /// print(result.text, result.confidence)
+    /// ```
+    #[pyo3(signature = (model, input, response_class, max_output_tokens=None))]
+    fn create_parsed<'py>(
+        &self,
+        py: Python<'py>,
+        model: String,
+        input: String,
+        response_class: Bound<'py, pyo3::types::PyAny>,
+        max_output_tokens: Option<i64>,
+    ) -> PyResult<Bound<'py, PyAny>> {
+        // Extract JSON schema from the Python class
+        let schema_json: String = if let Ok(method) = response_class.getattr("model_json_schema") {
+            // Pydantic v2 BaseModel
+            let schema_obj = method.call0()?;
+            let json_mod = py.import("json")?;
+            json_mod.call_method1("dumps", (schema_obj,))?.extract()?
+        } else if let Ok(method) = response_class.getattr("schema") {
+            // Pydantic v1 BaseModel
+            let schema_obj = method.call0()?;
+            let json_mod = py.import("json")?;
+            json_mod.call_method1("dumps", (schema_obj,))?.extract()?
+        } else {
+            // Try dataclasses — use __dataclass_fields__ to build schema
+            return Err(PyRuntimeError::new_err(
+                "response_class must be a Pydantic BaseModel (v1 or v2). \
+                 dataclasses are not yet supported — use Pydantic.",
+            ));
+        };
+
+        let class_name: String = response_class
+            .getattr("__name__")
+            .and_then(|n| n.extract())
+            .unwrap_or_else(|_| "Response".to_string());
+
+        // Store the class for parsing later
+        let response_class_ref = response_class.unbind();
+        let client = self.inner.clone();
+
+        future_into_py(py, async move {
+            let schema_val: serde_json::Value = serde_json::from_str(&schema_json)
+                .map_err(|e| PyRuntimeError::new_err(e.to_string()))?;
+
+            let mut req = ResponseCreateRequest::new(&model)
+                .input(input.as_str())
+                .text(ResponseTextConfig {
+                    format: Some(ResponseTextFormat::JsonSchema {
+                        name: class_name,
+                        description: None,
+                        schema: Some(schema_val),
+                        strict: Some(true),
+                    }),
+                    verbosity: None,
+                });
+            if let Some(max) = max_output_tokens {
+                req = req.max_output_tokens(max);
+            }
+
+            let resp = client.responses().create(req).await.map_err(to_py_err)?;
+            let text = resp.output_text();
+
+            // Parse text back into the Python class
+            Python::with_gil(|py| {
+                let class = response_class_ref.bind(py);
+                let json_mod = py.import("json")?;
+                let data = json_mod.call_method1("loads", (text,))?;
+
+                // Try Pydantic v2: model_validate(data)
+                if let Ok(method) = class.getattr("model_validate") {
+                    return method.call1((data,)).map(|r| r.unbind());
+                }
+                // Try Pydantic v1: parse_obj(data)
+                if let Ok(method) = class.getattr("parse_obj") {
+                    return method.call1((data,)).map(|r| r.unbind());
+                }
+                // Fallback: class(**data)
+                class.call((), Some(&data.downcast::<pyo3::types::PyDict>().map_err(|_| {
+                    PyRuntimeError::new_err("failed to parse response as dict")
+                })?)).map(|r| r.unbind())
+            })
+        })
+    }
+
     /// Raw request — send any JSON, get raw JSON back.
     #[pyo3(signature = (request_json,))]
     fn create_raw<'py>(
