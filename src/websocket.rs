@@ -276,6 +276,7 @@ impl WsSession {
                                 message,
                                 type_: Some("response_failed".into()),
                                 code,
+                                request_id: None,
                             });
                         }
                         other => {

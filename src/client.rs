@@ -693,8 +693,18 @@ impl OpenAI {
         serde_json::from_slice::<T>(body).map_err(OpenAIError::from)
     }
 
+    /// Extract the `x-request-id` header from a response.
+    pub(crate) fn extract_request_id(response: &reqwest::Response) -> Option<String> {
+        response
+            .headers()
+            .get("x-request-id")
+            .and_then(|v| v.to_str().ok())
+            .map(String::from)
+    }
+
     /// Extract an OpenAIError from a failed response.
     pub(crate) async fn extract_error(status: u16, response: reqwest::Response) -> OpenAIError {
+        let request_id = Self::extract_request_id(&response);
         let body = response.text().await.unwrap_or_default();
         if let Ok(error_resp) = serde_json::from_str::<ErrorResponse>(&body) {
             OpenAIError::ApiError {
@@ -702,6 +712,7 @@ impl OpenAI {
                 message: error_resp.error.message,
                 type_: error_resp.error.type_,
                 code: error_resp.error.code,
+                request_id,
             }
         } else {
             OpenAIError::ApiError {
@@ -709,6 +720,7 @@ impl OpenAI {
                 message: body,
                 type_: None,
                 code: None,
+                request_id,
             }
         }
     }
@@ -917,6 +929,7 @@ mod tests {
                 message,
                 type_,
                 code,
+                ..
             } => {
                 assert_eq!(status, 404);
                 assert!(message.contains("does not exist"));

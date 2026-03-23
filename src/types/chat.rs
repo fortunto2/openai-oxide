@@ -123,6 +123,10 @@ pub struct ChatCompletionRequest {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub web_search_options: Option<WebSearchOptions>,
 
+    /// Stable key for prompt caching — requests with the same key may hit cache.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub prompt_cache_key: Option<String>,
+
     /// DEPRECATED: Maximum number of tokens to generate.
     /// Use max_completion_tokens instead.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -172,6 +176,7 @@ impl ChatCompletionRequest {
             audio: None,
             prediction: None,
             web_search_options: None,
+            prompt_cache_key: None,
             max_tokens: None,
             functions: None,
             function_call: None,

@@ -39,6 +39,8 @@ pub enum OpenAIError {
         message: String,
         type_: Option<String>,
         code: Option<String>,
+        /// The `x-request-id` header value for debugging with OpenAI support.
+        request_id: Option<String>,
     },
 
     /// HTTP request failed.

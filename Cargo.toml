@@ -30,6 +30,8 @@ pin-project-lite = "0.2"
 base64 = { version = "0.22", optional = true }
 simd-json = { version = "0.17", optional = true }
 tokio-tungstenite = { version = "0.26", optional = true, features = ["native-tls"] }
+hmac = { version = "0.12", optional = true }
+sha2 = { version = "0.10", optional = true }
 async-trait = "0.1.89"
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
@@ -71,6 +73,7 @@ live-tests = []
 simd = ["dep:simd-json"]
 websocket = ["dep:tokio-tungstenite"]
 websocket-wasm = ["dep:gloo-net", "dep:web-sys"]
+webhooks = ["dep:hmac", "dep:sha2", "base64"]
 
 [[example]]
 name = "chat"

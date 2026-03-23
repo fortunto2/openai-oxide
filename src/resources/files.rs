@@ -17,6 +17,31 @@ impl<'a> Files<'a> {
         Self { client }
     }
 
+    /// Upload a file from a filesystem path.
+    ///
+    /// Reads the file asynchronously and infers the filename from the path.
+    ///
+    /// ```ignore
+    /// let file = client.files().create_from_path("data.jsonl", FilePurpose::FineTune).await?;
+    /// ```
+    pub async fn create_from_path(
+        &self,
+        path: impl AsRef<std::path::Path>,
+        purpose: crate::types::file::FilePurpose,
+    ) -> Result<FileObject, OpenAIError> {
+        let path = path.as_ref();
+        let filename = path
+            .file_name()
+            .and_then(|n| n.to_str())
+            .unwrap_or("upload")
+            .to_string();
+        let data = tokio::fs::read(path).await.map_err(|e| {
+            OpenAIError::InvalidArgument(format!("failed to read {}: {e}", path.display()))
+        })?;
+        self.create(FileUploadParams::new(data, filename, purpose))
+            .await
+    }
+
     /// Upload a file.
     ///
     /// `POST /files`

@@ -22,3 +22,5 @@ pub mod moderations;
 pub mod responses;
 #[cfg(feature = "uploads")]
 pub mod uploads;
+#[cfg(feature = "webhooks")]
+pub mod webhooks;
