@@ -10,7 +10,7 @@ use crate::error::OpenAIError;
 /// ```ignore
 /// use openai_oxide::resources::webhooks::Webhooks;
 ///
-/// let webhooks = Webhooks::new("whsec_5WbX5kEWLlfzsGNjH64I8lOOqUB6e8FH");
+/// let webhooks = Webhooks::new("whsec_YOUR_WEBHOOK_SECRET");
 /// let payload = webhooks.unwrap(body, &headers)?;
 /// ```
 pub struct Webhooks {
