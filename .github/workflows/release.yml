@@ -92,7 +92,8 @@ jobs:
 
   create-github-release:
     name: Create GitHub Release
-    needs: publish-pypi
+    needs: [publish-rust, publish-pypi]
+    if: always() && needs.publish-rust.result != 'cancelled'
     runs-on: ubuntu-latest
     permissions:
       contents: write
