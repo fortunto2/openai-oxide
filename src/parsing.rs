@@ -161,6 +161,65 @@ fn parse_message_content<T: DeserializeOwned>(
     }
 }
 
+// ── Responses API structured output ──
+
+/// A Response with its text output parsed into `T`.
+#[derive(Debug, Clone)]
+pub struct ParsedResponse<T> {
+    /// The raw API response.
+    pub response: crate::types::responses::Response,
+    /// The deserialized text output, or `None` if empty/failed.
+    pub parsed: Option<T>,
+}
+
+impl<T> std::ops::Deref for ParsedResponse<T> {
+    type Target = crate::types::responses::Response;
+    fn deref(&self) -> &Self::Target {
+        &self.response
+    }
+}
+
+/// Generate the `text.format` parameter for Responses API structured output.
+pub fn text_format_from_type<T: JsonSchema>() -> crate::types::responses::ResponseTextFormat {
+    let schema = schemars::schema_for!(T);
+    let mut value = serde_json::to_value(schema).unwrap_or_default();
+    ensure_strict(&mut value);
+
+    crate::types::responses::ResponseTextFormat::JsonSchema {
+        name: std::any::type_name::<T>()
+            .rsplit("::")
+            .next()
+            .unwrap_or("Response")
+            .to_string(),
+        description: None,
+        schema: Some(value),
+        strict: Some(true),
+    }
+}
+
+/// Parse a Responses API response, extracting `output_text()` into `T`.
+pub fn parse_response<T: DeserializeOwned>(
+    response: crate::types::responses::Response,
+) -> Result<ParsedResponse<T>, OpenAIError> {
+    if response.status.as_deref() == Some("failed") {
+        let msg = response
+            .error
+            .as_ref()
+            .map(|e| e.message.clone())
+            .unwrap_or_else(|| "response failed".into());
+        return Err(OpenAIError::InvalidArgument(msg));
+    }
+
+    let text = response.output_text();
+    let parsed = if text.is_empty() {
+        None
+    } else {
+        Some(serde_json::from_str::<T>(&text)?)
+    };
+
+    Ok(ParsedResponse { response, parsed })
+}
+
 /// Enforce OpenAI's strict JSON schema rules recursively.
 fn ensure_strict(value: &mut serde_json::Value) {
     if let serde_json::Value::Object(map) = value {
@@ -365,5 +424,54 @@ mod tests {
                 .unwrap()
                 .contains(&serde_json::json!("name"))
         );
+    }
+
+    #[test]
+    fn test_text_format_generation() {
+        let fmt = text_format_from_type::<MathResponse>();
+        match fmt {
+            crate::types::responses::ResponseTextFormat::JsonSchema {
+                name,
+                strict,
+                schema,
+                ..
+            } => {
+                assert_eq!(name, "MathResponse");
+                assert_eq!(strict, Some(true));
+                let schema = schema.unwrap();
+                assert_eq!(schema["additionalProperties"], false);
+            }
+            _ => panic!("expected JsonSchema variant"),
+        }
+    }
+
+    #[test]
+    fn test_parse_response_success() {
+        let json = r#"{
+            "id": "resp-1", "object": "response", "created_at": 1.0,
+            "model": "gpt-4o",
+            "output": [{"type": "message", "id": "msg-1", "role": "assistant",
+                "status": "completed",
+                "content": [{"type": "output_text",
+                    "text": "{\"steps\":[],\"final_answer\":\"42\"}"}]
+            }],
+            "status": "completed"
+        }"#;
+        let response: crate::types::responses::Response = serde_json::from_str(json).unwrap();
+        let parsed: ParsedResponse<MathResponse> = parse_response(response).unwrap();
+        assert_eq!(parsed.parsed.unwrap().final_answer, "42");
+    }
+
+    #[test]
+    fn test_parse_response_failed() {
+        let json = r#"{
+            "id": "resp-err", "object": "response", "created_at": 1.0,
+            "model": "gpt-4o", "output": [], "status": "failed",
+            "error": {"code": "server_error", "message": "something broke"}
+        }"#;
+        let response: crate::types::responses::Response = serde_json::from_str(json).unwrap();
+        let result = parse_response::<MathResponse>(response);
+        assert!(result.is_err());
+        assert!(format!("{}", result.unwrap_err()).contains("something broke"));
     }
 }

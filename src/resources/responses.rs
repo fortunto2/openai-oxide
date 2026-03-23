@@ -110,6 +110,34 @@ impl<'a> Responses<'a> {
         self.client.post("/responses", &request).await
     }
 
+    /// Create a response and parse the text output into a typed struct.
+    ///
+    /// Automatically sets `text.format` to a strict JSON schema derived
+    /// from `T` using [`schemars::JsonSchema`].
+    ///
+    /// ```ignore
+    /// #[derive(Deserialize, JsonSchema)]
+    /// struct Summary { title: String, points: Vec<String> }
+    ///
+    /// let result = client.responses()
+    ///     .parse::<Summary>(request).await?;
+    /// println!("{}", result.parsed.unwrap().title);
+    /// ```
+    ///
+    /// Requires the `structured` feature.
+    #[cfg(feature = "structured")]
+    pub async fn parse<T: serde::de::DeserializeOwned + schemars::JsonSchema>(
+        &self,
+        mut request: ResponseCreateRequest,
+    ) -> Result<crate::parsing::ParsedResponse<T>, OpenAIError> {
+        request.text = Some(crate::types::responses::ResponseTextConfig {
+            format: Some(crate::parsing::text_format_from_type::<T>()),
+            verbosity: None,
+        });
+        let response: Response = self.client.post("/responses", &request).await?;
+        crate::parsing::parse_response(response)
+    }
+
     /// Create a streaming response.
     ///
     /// Returns a `Stream<Item = Result<ResponseStreamEvent>>`.
