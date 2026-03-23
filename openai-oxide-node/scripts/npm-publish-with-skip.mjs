@@ -84,9 +84,10 @@ main().catch((err) => {
 
 function isAlreadyPublishedError(output) {
   return (
-    /previously published versions/i.test(output) ||
-    /cannot publish over (?:the )?previously published versions/i.test(output) ||
-    /cannot publish over existing version/i.test(output)
+    /previously published versions?/i.test(output) ||
+    /cannot publish over (?:the )?previously published versions?/i.test(output) ||
+    /cannot publish over existing version/i.test(output) ||
+    /You cannot publish over the previously published versions/i.test(output)
   )
 }
 
