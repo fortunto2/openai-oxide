@@ -181,18 +181,18 @@ Run `uv run python examples/bench_python.py` from the `openai-oxide-python` dire
 
 | Test | `openai-oxide-python` | `openai` (httpx) | Winner |
 | :--- | :--- | :--- | :--- |
-| **Plain text** | **894ms** | 990ms | OXIDE (+9%) |
-| **Structured output** | **1354ms** | 1391ms | OXIDE (+2%) |
-| **Function calling** | **1089ms** | 1125ms | OXIDE (+3%) |
-| **Multi-turn (2 reqs)** | **2057ms** | 2232ms | OXIDE (+7%) |
-| **Web search** | 3276ms | **3039ms** | python (+7%) |
-| **Nested structured output** | 4811ms | **4186ms** | python (+14%) |
-| **Agent loop (2-step)** | **3408ms** | 3984ms | OXIDE (+14%) |
-| **Rapid-fire (5 sequential calls)** | **4835ms** | 5075ms | OXIDE (+4%) |
-| **Prompt-cached** | 4511ms | **4327ms** | python (+4%) |
-| **Streaming TTFT** | **709ms** | 769ms | OXIDE (+7%) |
-| **Parallel 3x (fan-out)** | **961ms** | 994ms | OXIDE (+3%) |
-| **Hedged (2x race)** | **1082ms** | 1001ms | python (+8%) |
+| **Plain text** | **845ms** | 997ms | OXIDE (+15%) |
+| **Structured output** | **1367ms** | 1379ms | OXIDE (+1%) |
+| **Function calling** | **1195ms** | 1230ms | OXIDE (+3%) |
+| **Multi-turn (2 reqs)** | **2260ms** | 3089ms | OXIDE (+27%) |
+| **Web search** | **3157ms** | 3499ms | OXIDE (+10%) |
+| **Nested structured output** | 5377ms | **5339ms** | python (+1%) |
+| **Agent loop (2-step)** | **4570ms** | 5144ms | OXIDE (+11%) |
+| **Rapid-fire (5 sequential calls)** | **5667ms** | 6136ms | OXIDE (+8%) |
+| **Prompt-cached** | **4425ms** | 5564ms | OXIDE (+20%) |
+| **Streaming TTFT** | **626ms** | 638ms | OXIDE (+2%) |
+| **Parallel 3x (fan-out)** | 1184ms | **1090ms** | python (+9%) |
+| **Hedged (2x race)** | **893ms** | 995ms | OXIDE (+10%) |
 
 ---
 
@@ -205,14 +205,14 @@ Run `BENCH_ITERATIONS=5 pnpm bench` from the `openai-oxide-node` directory to re
 
 | Test | `openai-oxide` | `openai` | Winner |
 | :--- | ---: | ---: | :--- |
-| **Plain text** | **1131ms** | 1316ms | OXIDE (+14%) |
-| **Structured output** | 1467ms | **1244ms** | openai (+18%) |
-| **Function calling** | **1103ms** | 1151ms | OXIDE (+4%) |
-| **Multi-turn (2 reqs)** | **1955ms** | 2014ms | OXIDE (+3%) |
-| **Rapid-fire (5 calls)** | 4535ms | **4440ms** | openai (+2%) |
-| **Streaming TTFT** | **603ms** | 720ms | OXIDE (+16%) |
-| **Parallel 3x (fan-out)** | **890ms** | 947ms | OXIDE (+6%) |
-| **WebSocket hot pair** | **2359ms** | N/A | OXIDE |
+| **Plain text** | **1075ms** | 1311ms | OXIDE (+18%) |
+| **Structured output** | **1370ms** | 1765ms | OXIDE (+22%) |
+| **Function calling** | **1725ms** | 1832ms | OXIDE (+6%) |
+| **Multi-turn (2 reqs)** | **2283ms** | 2859ms | OXIDE (+20%) |
+| **Rapid-fire (5 calls)** | **6246ms** | 6936ms | OXIDE (+10%) |
+| **Streaming TTFT** | **534ms** | 580ms | OXIDE (+8%) |
+| **Parallel 3x (fan-out)** | **1937ms** | 1991ms | OXIDE (+3%) |
+| **WebSocket hot pair** | **2181ms** | N/A | OXIDE |
 
 See the full Node package guide and benchmark notes in [openai-oxide-node/README.md](/Users/rustam/startups/active/openai-rust/openai-oxide-node/README.md).
 
