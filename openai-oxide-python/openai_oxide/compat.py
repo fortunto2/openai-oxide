@@ -178,12 +178,35 @@ class _Completions:
         *,
         model: str,
         messages: list[dict],
+        stream: bool = False,
         **kwargs,
-    ) -> _ChatCompletion:
+    ):
+        if stream:
+            return await self._create_stream(model=model, messages=messages, **kwargs)
         request = {"model": model, "messages": messages, **kwargs}
         raw_json = await self._client.create_chat_raw(json.dumps(request))
         raw = json.loads(raw_json)
         return _build_completion(raw)
+
+    async def _create_stream(self, *, model: str, messages: list[dict], **kwargs):
+        """Chat streaming — returns async iterator of chunk dicts."""
+        import json as _json
+        request = {"model": model, "messages": messages, "stream": True, **kwargs}
+        # Use raw request through Responses API streaming as fallback
+        # Extract last user message for Responses API
+        last_msg = ""
+        for m in reversed(messages):
+            if m.get("role") == "user":
+                last_msg = m.get("content", "")
+                break
+        max_tokens = kwargs.get("max_completion_tokens") or kwargs.get("max_tokens")
+        stream = await self._client.create_stream(model, last_msg, max_output_tokens=max_tokens)
+
+        # Wrap PyResponseStream to yield dicts
+        async def _iter():
+            async for event_json in stream:
+                yield _json.loads(event_json)
+        return _iter()
 
     async def parse(
         self,
