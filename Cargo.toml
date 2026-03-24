@@ -29,7 +29,7 @@ bytes = "1"
 pin-project-lite = "0.2"
 base64 = { version = "0.22", optional = true }
 simd-json = { version = "0.17", optional = true }
-tokio-tungstenite = { version = "0.26", optional = true, features = ["native-tls"] }
+tokio-tungstenite = { version = "0.26", optional = true, features = ["rustls-tls-native-roots"] }
 hmac = { version = "0.12", optional = true }
 sha2 = { version = "0.10", optional = true }
 schemars = { version = "0.8", optional = true }
