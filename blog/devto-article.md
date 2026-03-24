@@ -180,6 +180,16 @@ const { OpenAI } = require('openai-oxide/compat');
 const client = new OpenAI();
 ```
 
+## How This Was Built
+
+This library started as a need for a fast OpenAI client for my realtime TTS voice agent project. The official Python SDK worked, but I needed Rust-level performance for WebSocket audio streaming and edge deployment.
+
+The entire crate — 100+ API methods, typed streaming, structured outputs, WASM support, Node/Python bindings with drop-in compatibility — was built in a few days using a harness engineering approach: Claude Code as the primary coding agent, with the official Python SDK source as the reference implementation. Every type was cross-checked against OpenAI's OpenAPI spec and the Python SDK's types directory.
+
+The key insight: instead of writing an SDK from scratch, treat the Python SDK as a spec and systematically port every pattern — retry logic, error handling, streaming, structured outputs — into idiomatic Rust. The coding agent handles the mechanical translation; you focus on architecture decisions like "should this be a tagged enum or a struct with a type field?"
+
+The result: a crate that matches Python SDK parity while adding Rust-specific features (zero-copy parsing, WASM, WebSockets) that aren't possible in Python.
+
 ## Try It
 
 ```bash
