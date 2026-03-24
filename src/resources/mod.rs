@@ -6,6 +6,7 @@ pub mod batches;
 pub mod beta;
 #[cfg(feature = "chat")]
 pub mod chat;
+pub mod conversations;
 #[cfg(feature = "embeddings")]
 pub mod embeddings;
 #[cfg(feature = "files")]
@@ -22,5 +23,6 @@ pub mod moderations;
 pub mod responses;
 #[cfg(feature = "uploads")]
 pub mod uploads;
+pub mod videos;
 #[cfg(feature = "webhooks")]
 pub mod webhooks;

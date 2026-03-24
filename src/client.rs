@@ -222,6 +222,16 @@ impl OpenAI {
         Embeddings::new(self)
     }
 
+    /// Access conversation endpoints (multi-turn server-side state).
+    pub fn conversations(&self) -> crate::resources::conversations::Conversations<'_> {
+        crate::resources::conversations::Conversations::new(self)
+    }
+
+    /// Access video generation endpoints (Sora).
+    pub fn videos(&self) -> crate::resources::videos::Videos<'_> {
+        crate::resources::videos::Videos::new(self)
+    }
+
     /// Create a persistent WebSocket session to the Responses API.
     ///
     /// Opens a connection to `wss://api.openai.com/v1/responses` and returns
