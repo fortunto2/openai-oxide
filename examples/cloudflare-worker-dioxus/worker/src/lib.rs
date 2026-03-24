@@ -233,7 +233,7 @@ impl ChatDurableObject {
                                     if let Ok(ws_msg) = serde_json::from_str::<WsMessage>(&text) {
                                         if ws_msg.action == "send" {
                                             if let Some(msgs) = ws_msg.messages {
-                                                let model = ws_msg.model.unwrap_or_else(|| "gpt-4o-mini".to_string());
+                                                let model = ws_msg.model.unwrap_or_else(|| "gpt-5.4-mini".to_string());
                                                 
                                                 let input_items = msgs.into_iter().map(|m| {
                                                     let role = match m.role.as_str() {

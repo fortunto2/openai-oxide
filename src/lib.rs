@@ -37,10 +37,12 @@ pub mod config;
 pub mod error;
 #[cfg(feature = "responses")]
 pub mod hedged;
+#[cfg(not(target_arch = "wasm32"))]
 pub mod middleware;
 pub mod pagination;
 #[cfg(feature = "structured")]
 pub mod parsing;
+#[cfg(not(target_arch = "wasm32"))]
 pub mod rate_limit;
 pub mod request_options;
 pub mod resources;

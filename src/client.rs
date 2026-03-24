@@ -300,6 +300,23 @@ impl OpenAI {
         Self::handle_response(response).await
     }
 
+    /// WASM: GET with query params appended to URL string.
+    #[allow(dead_code)]
+    #[cfg(target_arch = "wasm32")]
+    pub(crate) async fn get_with_query<T: serde::de::DeserializeOwned>(
+        &self,
+        path: &str,
+        query: &[(String, String)],
+    ) -> Result<T, OpenAIError> {
+        let url = if query.is_empty() {
+            path.to_string()
+        } else {
+            let qs: Vec<String> = query.iter().map(|(k, v)| format!("{}={}", k, v)).collect();
+            format!("{}?{}", path, qs.join("&"))
+        };
+        self.get(&url).await
+    }
+
     /// Send a POST request with a JSON body and deserialize the response.
     pub(crate) async fn post<B: serde::Serialize, T: serde::de::DeserializeOwned>(
         &self,
@@ -430,7 +447,7 @@ impl OpenAI {
     ) -> Result<T, OpenAIError> {
         let body_value = self.prepare_body(body)?;
 
-        for attempt in 0..=self.config.max_retries {
+        for attempt in 0..=self.config.max_retries() {
             let mut req = self.request(method.clone(), path);
             if let Some(ref val) = body_value {
                 req = req.json(val);
@@ -438,7 +455,7 @@ impl OpenAI {
 
             let response = match req.send().await {
                 Ok(resp) => resp,
-                Err(e) if attempt == self.config.max_retries => {
+                Err(e) if attempt == self.config.max_retries() => {
                     return Err(OpenAIError::RequestError(e));
                 }
                 Err(_) => {
@@ -448,7 +465,7 @@ impl OpenAI {
             };
 
             let status = response.status().as_u16();
-            if !RETRYABLE_STATUS_CODES.contains(&status) || attempt == self.config.max_retries {
+            if !RETRYABLE_STATUS_CODES.contains(&status) || attempt == self.config.max_retries() {
                 return Self::handle_response(response).await;
             }
 
@@ -645,6 +662,15 @@ impl OpenAI {
         }
 
         Err(last_error)
+    }
+
+    /// WASM: send without retry (no tokio::time::sleep on wasm32).
+    #[cfg(target_arch = "wasm32")]
+    pub(crate) async fn send_raw_with_retry(
+        &self,
+        builder: reqwest::RequestBuilder,
+    ) -> Result<reqwest::Response, OpenAIError> {
+        Ok(builder.send().await?)
     }
 
     /// Check a streaming response status and return error if non-2xx.
