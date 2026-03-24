@@ -104,20 +104,21 @@ Setup:
 
 | Test | `openai-oxide` | `openai` | Winner |
 | :--- | ---: | ---: | :--- |
-| Plain text | 1131ms | 1316ms | `openai-oxide` |
-| Structured output | 1467ms | 1244ms | `openai` |
-| Function calling | 1103ms | 1151ms | `openai-oxide` |
-| Multi-turn (2 reqs) | 1955ms | 2014ms | `openai-oxide` |
-| Rapid-fire (5 calls) | 4535ms | 4440ms | `openai` |
-| Streaming TTFT | 603ms | 720ms | `openai-oxide` |
-| Parallel 3x | 890ms | 947ms | `openai-oxide` |
-| WebSocket hot pair | 2359ms | N/A | `openai-oxide` |
+| Plain text | **1075ms** | 1311ms | OXIDE (+18%) |
+| Structured output | **1370ms** | 1765ms | OXIDE (+22%) |
+| Function calling | **1725ms** | 1832ms | OXIDE (+6%) |
+| Multi-turn (2 reqs) | **2283ms** | 2859ms | OXIDE (+20%) |
+| Rapid-fire (5 calls) | **6246ms** | 6936ms | OXIDE (+10%) |
+| Streaming TTFT | **534ms** | 580ms | OXIDE (+8%) |
+| Parallel 3x | **1937ms** | 1991ms | OXIDE (+3%) |
+| WebSocket hot pair | **2181ms** | N/A | OXIDE |
+
+*Median of 3 runs × 5 iterations. Model: gpt-5.4.*
 
 Summary:
 
-- `openai-oxide` wins `6` of `8` scenarios
-- strongest gains are in plain text, function calling, streaming TTFT, parallel fan-out, and WebSocket reuse
-- official `openai` is still faster in this run for structured output and rapid-fire sequential REST calls
+- `openai-oxide` wins **8 of 8** scenarios
+- Strongest gains: structured output (+22%), multi-turn (+20%), plain text (+18%)
 
 For the lowest-overhead REST paths in Node, prefer the fast-path methods:
 
