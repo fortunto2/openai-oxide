@@ -14,7 +14,7 @@ documentation = "https://fortunto2.github.io/openai-oxide/"
 homepage = "https://github.com/fortunto2/openai-oxide"
 readme = "README.md"
 keywords = ["openai", "gpt", "ai", "llm", "chatgpt"]
-categories = ["api-bindings", "web-programming::http-client"]
+categories = ["api-bindings", "asynchronous", "wasm", "web-programming::http-client"]
 exclude = [".solo/", ".githooks/", "docs/", "CLAUDE.md", "Makefile"]
 
 [dependencies]
