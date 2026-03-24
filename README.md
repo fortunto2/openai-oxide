@@ -16,18 +16,21 @@
   </p>
 </p>
 
-`openai-oxide` implements the full [Responses API](https://platform.openai.com/docs/api-reference/responses), [Chat Completions](https://platform.openai.com/docs/api-reference/chat), and 20+ other endpoints. It introduces performance primitives like **persistent WebSockets**, **hedged requests**, and **early-parsing for function calls** — features previously unavailable in the Rust ecosystem.
+`openai-oxide` implements the full [Responses API](https://platform.openai.com/docs/api-reference/responses), [Chat Completions](https://platform.openai.com/docs/api-reference/chat), and 20+ other endpoints. It introduces performance primitives like **persistent WebSockets**, **hedged requests**, **early-parsing for function calls**, and **type-safe Structured Outputs** — features previously unavailable in the Rust ecosystem.
 
 ## Why openai-oxide?
 
 We built `openai-oxide` to squeeze every millisecond out of the OpenAI API.
 
-- **Zero-Overhead Streaming:** Uses a custom zero-copy SSE parser. By enforcing strict `Accept: text/event-stream` and `Cache-Control: no-cache` headers, it prevents reverse-proxy buffering, achieving Time-To-First-Token (TTFT) in ~670ms.
-- **WebSocket Mode:** Maintains a persistent `wss://` connection for the Responses API. By bypassing per-request TLS handshakes, it reduces multi-turn agent loop latency by up to 37%.
-- **Stream FC Early Parse:** Yields function calls the exact moment `arguments.done` is emitted, allowing you to start executing local tools ~400ms before the overall response finishes.
+- **Structured Outputs — `parse::<T>()`:** Auto-generates JSON schema from Rust types via `schemars` and deserializes the response in one call — `parse::<MyStruct>()`. Works with Chat and Responses APIs. Node (Zod) and Python (Pydantic v2) bindings included.
+- **Stream Helpers:** High-level `ChatStreamEvent` with automatic text/tool-call accumulation, typed `ContentDelta`/`ToolCallDone` events, `get_final_completion()`, and `current_content()` snapshots. No manual chunk stitching.
+- **Zero-Overhead Streaming:** Custom zero-copy SSE parser with strict `Accept: text/event-stream` and `Cache-Control: no-cache` headers to prevent reverse-proxy buffering — TTFT in ~580ms.
+- **WebSocket Mode:** Persistent `wss://` connection for the Responses API. Bypasses per-request TLS handshakes, reducing multi-turn agent loop latency by up to 37%.
+- **Stream FC Early Parse:** Yields function calls the exact moment `arguments.done` is emitted, letting you execute local tools ~400ms before the overall response finishes.
 - **Hardware-Accelerated JSON (`simd`):** Opt-in AVX2/NEON vector instructions for parsing massive agent histories and complex tool calls in microseconds.
 - **Hedged Requests:** Send redundant requests and cancel the slower ones. Costs 2-7% extra tokens but reliably reduces P99 tail latency by 50-96% (inspired by Google's "The Tail at Scale").
-- **WASM First-Class:** Compiles to `wasm32-unknown-unknown` without dropping features. Unlike other clients, streaming, retries, and early-parsing work flawlessly in Cloudflare Workers and browsers.
+- **Webhook Verification:** HMAC-SHA256 signature verification with timestamp replay protection — production-ready webhook handling out of the box.
+- **WASM First-Class:** Compiles to `wasm32-unknown-unknown` without dropping features. Streaming, retries, and early-parsing work flawlessly in Cloudflare Workers and browsers.
 
 ### The Agentic Multiplier Effect
 
