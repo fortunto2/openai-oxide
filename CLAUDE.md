@@ -89,18 +89,27 @@ src/
 | Fine-tuning | `client.fine_tuning().jobs().create()` / `list()` / `list_page()` / `list_auto()` / `cancel()` / `list_events()` / `list_events_auto()` | Done |
 | Moderations | `client.moderations().create()` | Done |
 | Batches | `client.batches().create()` / `list()` / `list_page()` / `list_auto()` / `retrieve()` / `cancel()` | Done |
-| Uploads | `client.uploads().create()` / `cancel()` / `complete()` | Done |
+| Uploads | `client.uploads().create()` / `add_part()` / `cancel()` / `complete()` | Done |
+| Conversations | `client.conversations()` CRUD + items CRUD | Done |
+| Videos (Sora) | `client.videos()` create/list/retrieve/delete/content/edit/extend/remix/characters | Done |
+| Webhooks | `Webhooks::new(secret).verify()` / `.unwrap()` (feature: `webhooks`) | Done |
 | Assistants (beta) | `client.beta().assistants()` CRUD + `list_page()` / `list_auto()` | Done |
 | Threads (beta) | `client.beta().threads()` CRUD + messages `list_page()` / `list_auto()` | Done |
-| Runs (beta) | `client.beta().runs(thread_id)` CRUD + `list()` / `list_page()` / `list_auto()` | Done |
-| Vector Stores (beta) | `client.beta().vector_stores()` CRUD + `list_page()` / `list_auto()` | Done |
+| Runs (beta) | `client.beta().runs(thread_id)` CRUD + steps + `submit_tool_outputs` | Done |
+| Vector Stores (beta) | `client.beta().vector_stores()` CRUD + `search()` + `list_page()` / `list_auto()` | Done |
 | Realtime (beta) | `client.beta().realtime().sessions().create()` | Done |
 
-**Current version:** v0.9.6 on crates.io
+**Current version:** v0.9.7 on crates.io
 
-**Feature flags:** Each resource is gated behind an optional Cargo feature (`chat`, `responses`, `embeddings`, `images`, `audio`, `files`, `fine-tuning`, `models`, `moderations`, `batches`, `uploads`, `beta`). All enabled by default. `cargo check --no-default-features` compiles with zero resources (just client + types).
+**Feature flags:** Each resource is gated behind an optional Cargo feature (`chat`, `responses`, `embeddings`, `images`, `audio`, `files`, `fine-tuning`, `models`, `moderations`, `batches`, `uploads`, `beta`). Additional optional features: `structured` (schemars), `webhooks` (hmac+sha2), `websocket`, `simd`. All resource features enabled by default. `cargo check --no-default-features` compiles with zero resources (just client + types).
 
-Remaining (experimental/newer): Evals, Skills, Videos, Containers, legacy Completions.
+**Structured Outputs:** `client.chat().completions().parse::<T>()` and `client.responses().parse::<T>()` auto-generate JSON schema from Rust types via `schemars` (feature: `structured`). Also available in Node (Zod) and Python (Pydantic v2).
+
+**Stream Helpers:** `client.chat().completions().create_stream_helper()` returns typed `ChatStreamEvent` with automatic delta accumulation. `get_final_completion()` assembles the full response.
+
+**Drop-in Replacement:** Python `from openai_oxide.compat import AsyncOpenAI` and Node `require('openai-oxide/compat')` match official SDK syntax — change one import line.
+
+Remaining (experimental/newer): Evals, Skills, Containers, legacy Completions.
 
 ## Documentation
 

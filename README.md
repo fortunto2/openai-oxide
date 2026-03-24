@@ -115,19 +115,19 @@ async fn main() -> Result<(), openai_oxide::OpenAIError> {
 const { Client } = require("openai-oxide");
 
 const client = new Client(); // Uses OPENAI_API_KEY
-const text = await client.createText("gpt-4o-mini", "Hello from Node!");
+const text = await client.createText("gpt-5.4-mini", "Hello from Node!");
 console.log(text);
 ```
 
 ### Python
 
 ```python
-import asyncio
+import asyncio, json
 from openai_oxide import Client
 
 async def main():
     client = Client()  # Uses OPENAI_API_KEY
-    res = await client.create("gpt-4o-mini", "Hello from Python!")
+    res = json.loads(await client.create("gpt-5.4-mini", "Hello from Python!"))
     print(res["text"])
 
 asyncio.run(main())
@@ -324,7 +324,7 @@ const { Client } = require("openai-oxide");
 (async () => {
   const client = new Client();
   const session = await client.wsSession();
-  const res = await session.send("gpt-4o-mini", "Say hello to Rust from Node!");
+  const res = await session.send("gpt-5.4-mini", "Say hello to Rust from Node!");
   console.log(res);
   await session.close();
 })();
@@ -406,10 +406,13 @@ Use OpenAI's official guides — the same concepts apply directly. Here's how ea
 | [Text-to-Speech](https://platform.openai.com/docs/guides/text-to-speech) | `client.audio().speech().create()` | via `createResponse()` raw | via `create_raw()` |
 | [Speech-to-Text](https://platform.openai.com/docs/guides/speech-to-text) | `client.audio().transcriptions().create()` | via `createResponse()` raw | via `create_raw()` |
 | [Fine-tuning](https://platform.openai.com/docs/guides/fine-tuning) | `client.fine_tuning().jobs().create()` | via `createResponse()` raw | via `create_raw()` |
+| [Conversations](https://platform.openai.com/docs/guides/conversational-agents) | `client.conversations()` CRUD + items | via raw | via raw |
+| [Video Generation (Sora)](https://developers.openai.com/api/docs/guides/video-generation) | `client.videos()` create/edit/extend/remix | via raw | via raw |
+| [Webhooks](https://platform.openai.com/docs/guides/webhooks) | `Webhooks::new(secret).verify()` | — | — |
 | [Realtime API](https://platform.openai.com/docs/guides/realtime) | `client.ws_session()` | `client.wsSession()` | — |
-| [Assistants](https://platform.openai.com/docs/assistants) | `client.beta().assistants()` | via `createResponse()` raw | via `create_raw()` |
+| [Assistants](https://platform.openai.com/docs/assistants) | `client.beta().assistants()` | via raw | via raw |
 
-> **Tip:** Parameter names match the official Python SDK exactly. If OpenAI docs show `model="gpt-4o"`, use `.model("gpt-4o")` in Rust or `{model: "gpt-4o"}` in Node.js.
+> **Tip:** Parameter names match the official Python SDK exactly. If OpenAI docs show `model="gpt-5.4"`, use `.model("gpt-5.4")` in Rust or `{model: "gpt-5.4"}` in Node.js.
 >
 > **Note:** Node.js and Python bindings have typed helpers for Responses, Chat, Streaming, Function Calling, and Structured Output. All other endpoints are available via the raw JSON methods (`createResponse()` / `create_raw()`) which accept any OpenAI API request body.
 
