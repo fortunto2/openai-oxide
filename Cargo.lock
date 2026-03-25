@@ -1030,6 +1030,7 @@ dependencies = [
  "hmac",
  "mockito",
  "openai-oxide-macros",
+ "openai-types",
  "openapiv3",
  "pin-project-lite",
  "reqwest 0.12.28",
