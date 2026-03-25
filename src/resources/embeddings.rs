@@ -2,7 +2,7 @@
 
 use crate::client::OpenAI;
 use crate::error::OpenAIError;
-use crate::types::embedding::{CreateEmbeddingResponse, EmbeddingRequest};
+use crate::types::embedding::{EmbeddingRequest, EmbeddingResponse};
 
 /// Access embedding endpoints.
 ///
@@ -45,7 +45,7 @@ impl<'a> Embeddings<'a> {
     pub async fn create(
         &self,
         request: EmbeddingRequest,
-    ) -> Result<CreateEmbeddingResponse, OpenAIError> {
+    ) -> Result<EmbeddingResponse, OpenAIError> {
         self.client.post("/embeddings", &request).await
     }
 }
@@ -125,7 +125,7 @@ mod tests {
         assert_eq!(response.object, "list");
         assert_eq!(response.model, "text-embedding-3-small");
         assert_eq!(response.data.len(), 1);
-        assert_eq!(response.data[0].embedding.len(), 3);
+        assert_eq!(response.data[0].embedding.as_ref().unwrap().len(), 3);
         mock.assert_async().await;
     }
 }

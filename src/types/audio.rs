@@ -1,57 +1,54 @@
 // Audio types — mirrors openai-python types/audio/
 
+use crate::openai_enum;
 use serde::{Deserialize, Serialize};
 
-/// Response format for audio transcription/translation.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-#[serde(rename_all = "snake_case")]
-#[non_exhaustive]
-pub enum AudioResponseFormat {
-    Json,
-    Text,
-    Srt,
-    VerboseJson,
-    Vtt,
-    DiarizedJson,
+openai_enum! {
+    /// Response format for audio transcription/translation.
+    pub enum AudioResponseFormat {
+        Json = "json",
+        Text = "text",
+        Srt = "srt",
+        VerboseJson = "verbose_json",
+        Vtt = "vtt",
+        DiarizedJson = "diarized_json",
+    }
 }
 
-/// Audio format for speech output.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-#[serde(rename_all = "snake_case")]
-#[non_exhaustive]
-pub enum SpeechResponseFormat {
-    Mp3,
-    Opus,
-    Aac,
-    Flac,
-    Wav,
-    Pcm,
+openai_enum! {
+    /// Audio format for speech output.
+    pub enum SpeechResponseFormat {
+        Mp3 = "mp3",
+        Opus = "opus",
+        Aac = "aac",
+        Flac = "flac",
+        Wav = "wav",
+        Pcm = "pcm",
+    }
 }
 
-/// Voice for text-to-speech.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-#[serde(rename_all = "snake_case")]
-#[non_exhaustive]
-pub enum AudioVoice {
-    Alloy,
-    Ash,
-    Ballad,
-    Coral,
-    Echo,
-    Sage,
-    Shimmer,
-    Verse,
-    Marin,
-    Cedar,
+openai_enum! {
+    /// Voice for text-to-speech.
+    pub enum AudioVoice {
+        Alloy = "alloy",
+        Ash = "ash",
+        Ballad = "ballad",
+        Coral = "coral",
+        Echo = "echo",
+        Sage = "sage",
+        Shimmer = "shimmer",
+        Verse = "verse",
+        Marin = "marin",
+        Cedar = "cedar",
+    }
 }
 
-/// Input audio format in content parts.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-#[serde(rename_all = "snake_case")]
-#[non_exhaustive]
-pub enum InputAudioFormat {
-    Wav,
-    Mp3,
+openai_enum! {
+    /// Input audio format in content parts.
+    pub enum InputAudioFormat {
+        Wav = "wav",
+        Mp3 = "mp3",
+    }
 }
 
 // ── Transcription request (multipart) ──

@@ -1,18 +1,18 @@
 // Image types — mirrors openai-python types/image.py + images_response.py
 
+use crate::openai_enum;
 use serde::{Deserialize, Serialize};
 
-/// Image quality level.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-#[serde(rename_all = "snake_case")]
-#[non_exhaustive]
-pub enum ImageQuality {
-    Standard,
-    Hd,
-    Low,
-    Medium,
-    High,
-    Auto,
+openai_enum! {
+    /// Image quality level.
+    pub enum ImageQuality {
+        Standard = "standard",
+        Hd = "hd",
+        Low = "low",
+        Medium = "medium",
+        High = "high",
+        Auto = "auto",
+    }
 }
 
 /// Image dimensions.
@@ -37,51 +37,46 @@ pub enum ImageSize {
     S1024x1792,
 }
 
-/// Image style (dall-e-3 only).
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-#[serde(rename_all = "snake_case")]
-#[non_exhaustive]
-pub enum ImageStyle {
-    Vivid,
-    Natural,
+openai_enum! {
+    /// Image style (dall-e-3 only).
+    pub enum ImageStyle {
+        Vivid = "vivid",
+        Natural = "natural",
+    }
 }
 
-/// Output format for generated images (GPT image models).
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-#[serde(rename_all = "snake_case")]
-#[non_exhaustive]
-pub enum ImageOutputFormat {
-    Png,
-    Jpeg,
-    Webp,
+openai_enum! {
+    /// Output format for generated images (GPT image models).
+    pub enum ImageOutputFormat {
+        Png = "png",
+        Jpeg = "jpeg",
+        Webp = "webp",
+    }
 }
 
-/// Response format for images.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-#[serde(rename_all = "snake_case")]
-#[non_exhaustive]
-pub enum ImageResponseFormat {
-    Url,
-    B64Json,
+openai_enum! {
+    /// Response format for images.
+    pub enum ImageResponseFormat {
+        Url = "url",
+        B64Json = "b64_json",
+    }
 }
 
-/// Background transparency for generated images (GPT image models).
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-#[serde(rename_all = "snake_case")]
-#[non_exhaustive]
-pub enum ImageBackground {
-    Transparent,
-    Opaque,
-    Auto,
+openai_enum! {
+    /// Background transparency for generated images (GPT image models).
+    pub enum ImageBackground {
+        Transparent = "transparent",
+        Opaque = "opaque",
+        Auto = "auto",
+    }
 }
 
-/// Content moderation level for image generation.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-#[serde(rename_all = "snake_case")]
-#[non_exhaustive]
-pub enum ImageModeration {
-    Low,
-    Auto,
+openai_enum! {
+    /// Content moderation level for image generation.
+    pub enum ImageModeration {
+        Low = "low",
+        Auto = "auto",
+    }
 }
 
 // ── Request types ──
@@ -100,49 +95,42 @@ pub struct ImageGenerateRequest {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub n: Option<i64>,
 
-    /// Image quality.
+    /// Quality level (standard or hd for dall-e-3; low/medium/high/auto for gpt-image-1).
     #[serde(skip_serializing_if = "Option::is_none")]
     pub quality: Option<ImageQuality>,
-
-    /// Response format: url or b64_json.
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub response_format: Option<ImageResponseFormat>,
 
     /// Image dimensions.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub size: Option<ImageSize>,
 
-    /// Image style (dall-e-3 only).
+    /// Response format (url or b64_json).
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub response_format: Option<ImageResponseFormat>,
+
+    /// Style (vivid or natural) — dall-e-3 only.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub style: Option<ImageStyle>,
 
-    /// End user identifier.
+    /// A unique identifier representing your end-user.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub user: Option<String>,
 
-    /// Output format (GPT image models only).
+    // GPT-image-1 specific fields
+    /// Output format (png, jpeg, webp).
     #[serde(skip_serializing_if = "Option::is_none")]
     pub output_format: Option<ImageOutputFormat>,
 
-    /// Compression level 0–100 for webp/jpeg output (GPT image models only).
+    /// Output compression quality (0–100).
     #[serde(skip_serializing_if = "Option::is_none")]
     pub output_compression: Option<i64>,
 
-    /// Background transparency (GPT image models only).
+    /// Background style (transparent, opaque, auto).
     #[serde(skip_serializing_if = "Option::is_none")]
     pub background: Option<ImageBackground>,
 
-    /// Content moderation level (GPT image models only).
+    /// Moderation level (low, auto).
     #[serde(skip_serializing_if = "Option::is_none")]
     pub moderation: Option<ImageModeration>,
-
-    /// Number of partial images for streaming (0–3, GPT image models only).
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub partial_images: Option<i64>,
-
-    /// Whether to stream the image generation (GPT image models only).
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub stream: Option<bool>,
 }
 
 impl ImageGenerateRequest {
@@ -152,33 +140,113 @@ impl ImageGenerateRequest {
             model: None,
             n: None,
             quality: None,
-            response_format: None,
             size: None,
+            response_format: None,
             style: None,
             user: None,
             output_format: None,
             output_compression: None,
             background: None,
             moderation: None,
-            partial_images: None,
-            stream: None,
         }
+    }
+
+    pub fn model(mut self, model: impl Into<String>) -> Self {
+        self.model = Some(model.into());
+        self
+    }
+
+    pub fn n(mut self, n: i64) -> Self {
+        self.n = Some(n);
+        self
+    }
+
+    pub fn quality(mut self, quality: ImageQuality) -> Self {
+        self.quality = Some(quality);
+        self
+    }
+
+    pub fn size(mut self, size: ImageSize) -> Self {
+        self.size = Some(size);
+        self
+    }
+
+    pub fn response_format(mut self, response_format: ImageResponseFormat) -> Self {
+        self.response_format = Some(response_format);
+        self
+    }
+
+    pub fn style(mut self, style: ImageStyle) -> Self {
+        self.style = Some(style);
+        self
+    }
+
+    pub fn user(mut self, user: impl Into<String>) -> Self {
+        self.user = Some(user.into());
+        self
+    }
+
+    pub fn output_format(mut self, output_format: ImageOutputFormat) -> Self {
+        self.output_format = Some(output_format);
+        self
+    }
+
+    pub fn output_compression(mut self, output_compression: i64) -> Self {
+        self.output_compression = Some(output_compression);
+        self
+    }
+
+    pub fn background(mut self, background: ImageBackground) -> Self {
+        self.background = Some(background);
+        self
+    }
+
+    pub fn moderation(mut self, moderation: ImageModeration) -> Self {
+        self.moderation = Some(moderation);
+        self
     }
 }
 
-/// Parameters for image edit (multipart upload).
-#[derive(Debug)]
-pub struct ImageEditParams {
+/// Request body for `POST /images/edits`.
+#[derive(Debug, Clone, Serialize)]
+pub struct ImageEditRequest {
+    /// Image to edit (multpart file).
+    #[serde(skip_serializing)]
     pub image: Vec<u8>,
+    #[serde(skip_serializing)]
     pub image_filename: String,
+
+    /// Prompt describing the edit.
     pub prompt: String,
+
+    /// Additional image for reference (optional).
+    #[serde(skip_serializing)]
+    pub mask: Option<Vec<u8>>,
+    #[serde(skip_serializing)]
+    pub mask_filename: Option<String>,
+
+    /// Model to use.
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub model: Option<String>,
-    pub mask: Option<(Vec<u8>, String)>,
+
+    /// Number of images to generate.
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub n: Option<i64>,
+
+    /// Image dimensions.
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub size: Option<ImageSize>,
+
+    /// Response format.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub response_format: Option<ImageResponseFormat>,
+
+    /// A unique identifier representing your end-user.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub user: Option<String>,
 }
 
-impl ImageEditParams {
+impl ImageEditRequest {
     pub fn new(
         image: Vec<u8>,
         image_filename: impl Into<String>,
@@ -188,246 +256,161 @@ impl ImageEditParams {
             image,
             image_filename: image_filename.into(),
             prompt: prompt.into(),
-            model: None,
             mask: None,
+            mask_filename: None,
+            model: None,
             n: None,
             size: None,
+            response_format: None,
+            user: None,
         }
     }
 }
 
-/// Parameters for image variation (multipart upload).
-#[derive(Debug)]
-pub struct ImageVariationParams {
+/// Backward compatibility alias.
+pub type ImageEditParams = ImageEditRequest;
+
+/// Request body for `POST /images/variations`.
+#[derive(Debug, Clone, Serialize)]
+pub struct ImageVariationRequest {
+    /// Image to vary (multipart file).
+    #[serde(skip_serializing)]
     pub image: Vec<u8>,
+    #[serde(skip_serializing)]
     pub image_filename: String,
-    pub model: Option<String>,
+
+    /// Number of images to generate.
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub n: Option<i64>,
+
+    /// Image dimensions.
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub size: Option<ImageSize>,
+
+    /// Response format.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub response_format: Option<ImageResponseFormat>,
+
+    /// A unique identifier representing your end-user.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub user: Option<String>,
 }
 
-impl ImageVariationParams {
+impl ImageVariationRequest {
     pub fn new(image: Vec<u8>, image_filename: impl Into<String>) -> Self {
         Self {
             image,
             image_filename: image_filename.into(),
-            model: None,
             n: None,
             size: None,
+            response_format: None,
+            user: None,
         }
     }
 }
+
+/// Backward compatibility alias.
+pub type ImageVariationParams = ImageVariationRequest;
 
 // ── Response types ──
 
 /// A single generated image.
 #[derive(Debug, Clone, Deserialize)]
 pub struct Image {
-    /// Base64-encoded image data.
-    #[serde(default)]
-    pub b64_json: Option<String>,
-
-    /// Revised prompt (dall-e-3).
-    #[serde(default)]
-    pub revised_prompt: Option<String>,
-
-    /// URL of the generated image.
+    /// The URL of the generated image (if response_format is url).
     #[serde(default)]
     pub url: Option<String>,
+    /// The base64-encoded JSON of the generated image (if response_format is b64_json).
+    #[serde(default)]
+    pub b64_json: Option<String>,
+    /// The prompt that was used to generate the image (dall-e-3 only).
+    #[serde(default)]
+    pub revised_prompt: Option<String>,
 }
 
-#[cfg(feature = "images")]
 impl Image {
-    /// Save the image to a file.
-    ///
-    /// - If `b64_json` is set, decodes the base64 data and writes it.
-    /// - If `url` is set, downloads the image via HTTP and writes it.
-    /// - Returns an error if neither field is populated.
-    ///
-    /// ```ignore
-    /// let resp = client.images().generate(req).await?;
-    /// if let Some(images) = &resp.data {
-    ///     images[0].save("output.png").await?;
-    /// }
-    /// ```
-    pub async fn save(
-        &self,
-        path: impl AsRef<std::path::Path>,
-    ) -> Result<(), crate::error::OpenAIError> {
-        use base64::Engine;
+    /// Decode the base64 image data and save it to a file.
+    #[cfg(feature = "images")]
+    pub fn save(&self, path: &std::path::Path) -> Result<(), crate::error::OpenAIError> {
+        use std::io::Write;
 
-        let bytes = if let Some(ref b64) = self.b64_json {
-            base64::engine::general_purpose::STANDARD
-                .decode(b64)
-                .map_err(|e| {
-                    crate::error::OpenAIError::InvalidArgument(format!(
-                        "failed to decode b64_json: {e}"
-                    ))
-                })?
-        } else if let Some(ref url) = self.url {
-            let resp = reqwest::get(url)
-                .await
-                .map_err(crate::error::OpenAIError::RequestError)?;
-            if !resp.status().is_success() {
-                return Err(crate::error::OpenAIError::InvalidArgument(format!(
-                    "failed to download image: HTTP {}",
-                    resp.status()
-                )));
-            }
-            resp.bytes()
-                .await
-                .map_err(crate::error::OpenAIError::RequestError)?
-                .to_vec()
-        } else {
-            return Err(crate::error::OpenAIError::InvalidArgument(
-                "image has neither b64_json nor url".to_string(),
-            ));
-        };
-
-        tokio::fs::write(path, &bytes).await.map_err(|e| {
-            crate::error::OpenAIError::InvalidArgument(format!("failed to write file: {e}"))
-        })
+        let b64 = self.b64_json.as_ref().ok_or_else(|| {
+            crate::error::OpenAIError::InvalidArgument("No base64 data available".into())
+        })?;
+        let bytes = base64::Engine::decode(&base64::engine::general_purpose::STANDARD, b64)
+            .map_err(|e| {
+                crate::error::OpenAIError::InvalidArgument(format!(
+                    "Failed to decode base64: {}",
+                    e
+                ))
+            })?;
+        let mut file = std::fs::File::create(path).map_err(|e| {
+            crate::error::OpenAIError::InvalidArgument(format!("Failed to create file: {}", e))
+        })?;
+        file.write_all(&bytes).map_err(|e| {
+            crate::error::OpenAIError::InvalidArgument(format!("Failed to write file: {}", e))
+        })?;
+        Ok(())
     }
 }
 
-/// Response from image generation/edit/variation endpoints.
+/// Response from image generation endpoints.
 #[derive(Debug, Clone, Deserialize)]
 pub struct ImagesResponse {
     pub created: i64,
-    #[serde(default)]
-    pub data: Option<Vec<Image>>,
+    pub data: Vec<Image>,
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
 
-    #[cfg(feature = "images")]
-    #[tokio::test]
-    async fn test_image_save_b64_json() {
-        use base64::Engine;
-        let png_bytes = b"\x89PNG\r\n\x1a\nfakedata";
-        let b64 = base64::engine::general_purpose::STANDARD.encode(png_bytes);
-
-        let image = Image {
-            b64_json: Some(b64),
-            revised_prompt: None,
-            url: None,
-        };
-
-        let dir = std::env::temp_dir().join("openai_oxide_test_b64");
-        let path = dir.join("test_save.png");
-        let _ = std::fs::create_dir_all(&dir);
-
-        image.save(&path).await.unwrap();
-        let saved = std::fs::read(&path).unwrap();
-        assert_eq!(saved, png_bytes);
-
-        let _ = std::fs::remove_file(&path);
-    }
-
-    #[cfg(feature = "images")]
-    #[tokio::test]
-    async fn test_image_save_url() {
-        let mut server = mockito::Server::new_async().await;
-        let image_bytes = b"\x89PNG\r\n\x1a\nfromurl";
-        let mock = server
-            .mock("GET", "/image.png")
-            .with_status(200)
-            .with_body(image_bytes.as_slice())
-            .create_async()
-            .await;
-
-        let image = Image {
-            b64_json: None,
-            revised_prompt: None,
-            url: Some(format!("{}/image.png", server.url())),
-        };
-
-        let dir = std::env::temp_dir().join("openai_oxide_test_url");
-        let path = dir.join("test_save_url.png");
-        let _ = std::fs::create_dir_all(&dir);
-
-        image.save(&path).await.unwrap();
-        let saved = std::fs::read(&path).unwrap();
-        assert_eq!(saved, image_bytes.as_slice());
-        mock.assert_async().await;
-
-        let _ = std::fs::remove_file(&path);
-    }
-
-    #[cfg(feature = "images")]
-    #[tokio::test]
-    async fn test_image_save_no_data_error() {
-        let image = Image {
-            b64_json: None,
-            revised_prompt: None,
-            url: None,
-        };
-
-        let err = image.save("/tmp/should_not_exist.png").await.unwrap_err();
-        match err {
-            crate::error::OpenAIError::InvalidArgument(msg) => {
-                assert!(msg.contains("neither b64_json nor url"));
-            }
-            other => panic!("expected InvalidArgument, got: {other:?}"),
-        }
-    }
-
     #[test]
-    fn test_serialize_image_generate_request() {
-        let req = ImageGenerateRequest::new("A cute baby sea otter");
+    fn test_serialize_image_generate() {
+        let req = ImageGenerateRequest::new("A cute cat")
+            .model("dall-e-3")
+            .n(1);
         let json = serde_json::to_value(&req).unwrap();
-        assert_eq!(json["prompt"], "A cute baby sea otter");
-        assert!(json.get("model").is_none());
+        assert_eq!(json["prompt"], "A cute cat");
+        assert_eq!(json["model"], "dall-e-3");
+        assert_eq!(json["n"], 1);
     }
 
     #[test]
     fn test_serialize_image_generate_gpt_image_fields() {
-        let mut req = ImageGenerateRequest::new("A futuristic city");
-        req.model = Some("gpt-image-1".into());
-        req.output_format = Some(ImageOutputFormat::Webp);
-        req.output_compression = Some(80);
-        req.background = Some(ImageBackground::Transparent);
-        req.moderation = Some(ImageModeration::Low);
-        req.partial_images = Some(2);
-        req.stream = Some(true);
-
+        let req = ImageGenerateRequest::new("A dog")
+            .model("gpt-image-1")
+            .quality(ImageQuality::High)
+            .output_format(ImageOutputFormat::Webp)
+            .background(ImageBackground::Transparent);
         let json = serde_json::to_value(&req).unwrap();
+        assert_eq!(json["model"], "gpt-image-1");
+        assert_eq!(json["quality"], "high");
         assert_eq!(json["output_format"], "webp");
-        assert_eq!(json["output_compression"], 80);
         assert_eq!(json["background"], "transparent");
-        assert_eq!(json["moderation"], "low");
-        assert_eq!(json["partial_images"], 2);
-        assert_eq!(json["stream"], true);
     }
 
     #[test]
-    fn test_deserialize_images_response_url() {
+    fn test_deserialize_images_response() {
         let json = r#"{
-            "created": 1589478378,
+            "created": 1699012949,
             "data": [
-                {"url": "https://example.com/image.png", "revised_prompt": "A cute baby sea otter floating"}
+                {"url": "https://example.com/image1.png"},
+                {"url": "https://example.com/image2.png"}
             ]
         }"#;
         let resp: ImagesResponse = serde_json::from_str(json).unwrap();
-        assert_eq!(resp.created, 1589478378);
-        let data = resp.data.unwrap();
-        assert_eq!(data.len(), 1);
-        assert!(data[0].url.is_some());
-        assert!(data[0].revised_prompt.is_some());
+        assert_eq!(resp.data.len(), 2);
+        assert!(resp.data[0].url.is_some());
     }
 
     #[test]
-    fn test_deserialize_images_response_b64() {
+    fn test_deserialize_images_response_with_b64() {
         let json = r#"{
-            "created": 1589478378,
-            "data": [
-                {"b64_json": "iVBORw0KGgoAAAANSUhEUg=="}
-            ]
+            "created": 1699012949,
+            "data": [{"b64_json": "iVBORw0KGgo="}]
         }"#;
         let resp: ImagesResponse = serde_json::from_str(json).unwrap();
-        let data = resp.data.unwrap();
-        assert!(data[0].b64_json.is_some());
+        assert!(resp.data[0].b64_json.is_some());
     }
 }

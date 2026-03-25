@@ -1,0 +1,52 @@
+//! Typed OpenAI API models — standalone, zero runtime dependencies beyond serde.
+//!
+//! Auto-managed by `py2rust.py`. Manual overrides in non-`_gen.rs` files are preserved.
+
+#[cfg(feature = "audio")]
+pub mod audio;
+#[cfg(feature = "batch")]
+pub mod batch;
+#[cfg(feature = "beta")]
+pub mod beta;
+#[cfg(feature = "chat")]
+pub mod chat;
+#[cfg(feature = "completion")]
+pub mod completion;
+#[cfg(feature = "containers")]
+pub mod containers;
+#[cfg(feature = "conversations")]
+pub mod conversations;
+#[cfg(feature = "embedding")]
+pub mod embedding;
+#[cfg(feature = "evals")]
+pub mod evals;
+#[cfg(feature = "file")]
+pub mod file;
+#[cfg(feature = "fine-tuning")]
+pub mod fine_tuning;
+#[cfg(feature = "graders")]
+pub mod graders;
+#[cfg(feature = "image")]
+pub mod image;
+#[cfg(feature = "model")]
+pub mod model;
+#[cfg(feature = "moderation")]
+pub mod moderation;
+#[cfg(feature = "realtime")]
+pub mod realtime;
+#[cfg(feature = "responses")]
+pub mod responses;
+#[cfg(feature = "shared")]
+pub mod shared;
+#[cfg(feature = "skills")]
+pub mod skills;
+#[cfg(feature = "uploads")]
+pub mod uploads;
+#[cfg(feature = "vector-stores")]
+pub mod vector_stores;
+#[cfg(feature = "video")]
+pub mod video;
+#[cfg(feature = "webhooks")]
+pub mod webhooks;
+#[cfg(feature = "websocket")]
+pub mod websocket;

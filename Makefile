@@ -38,6 +38,12 @@ bench-update:
 	python3 benchmarks/generate.py
 	python3 benchmarks/update-readme.py
 
+sync-types:
+	python3 scripts/py2rust.py sync ~/startups/shared/openai-python/src/openai/types/ openai-types/src/
+	cargo fmt -p openai-types
+	cargo check -p openai-types
+	cargo test -p openai-types
+
 clean:
 	cargo clean
 
@@ -55,4 +61,5 @@ help:
 	@echo "bench-all    — all three benchmarks"
 	@echo "wasm         — check WASM compilation"
 	@echo "bench-update — regenerate tables from results.json"
+	@echo "sync-types   — sync types crate from Python SDK"
 	@echo "clean        — remove build artifacts"

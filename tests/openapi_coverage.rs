@@ -231,7 +231,7 @@ fn embedding_request_coverage() {
         .get("CreateEmbeddingRequest")
         .expect("schema not found");
 
-    let rust_fields = fields_from_source("src/types/embedding.rs", "EmbeddingRequest");
+    let rust_fields = fields_from_source("src/types/embedding.rs", "EmbeddingCreateRequest");
 
     let pct = check_coverage("CreateEmbeddingRequest", spec, &rust_fields);
     assert!(pct >= 80.0, "coverage {pct:.0}% < 80%");

@@ -1,28 +1,27 @@
 // Fine-tuning types — mirrors openai-python types/fine_tuning/
 
+use crate::openai_enum;
 use serde::{Deserialize, Serialize};
 
-/// Status of a fine-tuning job.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-#[serde(rename_all = "snake_case")]
-#[non_exhaustive]
-pub enum FineTuningStatus {
-    ValidatingFiles,
-    Queued,
-    Running,
-    Succeeded,
-    Failed,
-    Cancelled,
+openai_enum! {
+    /// Status of a fine-tuning job.
+    pub enum FineTuningStatus {
+        ValidatingFiles = "validating_files",
+        Queued = "queued",
+        Running = "running",
+        Succeeded = "succeeded",
+        Failed = "failed",
+        Cancelled = "cancelled",
+    }
 }
 
-/// Event severity level.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-#[serde(rename_all = "snake_case")]
-#[non_exhaustive]
-pub enum FineTuningEventLevel {
-    Info,
-    Warn,
-    Error,
+openai_enum! {
+    /// Event severity level.
+    pub enum FineTuningEventLevel {
+        Info = "info",
+        Warn = "warn",
+        Error = "error",
+    }
 }
 
 // ── Request types ──

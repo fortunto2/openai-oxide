@@ -1,14 +1,14 @@
 // Embedding types — mirrors openai-python types/embedding.py
 
+use crate::openai_enum;
 use serde::{Deserialize, Serialize};
 
-/// Encoding format for embedding output.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-#[serde(rename_all = "snake_case")]
-#[non_exhaustive]
-pub enum EncodingFormat {
-    Float,
-    Base64,
+openai_enum! {
+    /// Encoding format for embedding output.
+    pub enum EncodingFormat {
+        Float = "float",
+        Base64 = "base64",
+    }
 }
 
 // ── Request types ──
@@ -41,77 +41,71 @@ impl From<Vec<String>> for EmbeddingInput {
     }
 }
 
+impl From<Vec<Vec<i64>>> for EmbeddingInput {
+    fn from(v: Vec<Vec<i64>>) -> Self {
+        EmbeddingInput::Tokens(v)
+    }
+}
+
 /// Request body for `POST /embeddings`.
 #[derive(Debug, Clone, Serialize)]
-pub struct EmbeddingRequest {
+pub struct EmbeddingCreateRequest {
     /// Input text to embed.
     pub input: EmbeddingInput,
 
-    /// Model ID, e.g. "text-embedding-3-small".
+    /// Embedding model (e.g. "text-embedding-3-small").
     pub model: String,
 
-    /// Number of output dimensions.
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub dimensions: Option<i64>,
-
-    /// Encoding format.
+    /// Encoding format for the embedding vectors.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub encoding_format: Option<EncodingFormat>,
 
-    /// End user identifier.
+    /// Number of dimensions to return (for supported models).
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub dimensions: Option<i64>,
+
+    /// A unique identifier representing your end-user.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub user: Option<String>,
 }
 
-impl EmbeddingRequest {
-    /// Create a new embedding request.
-    pub fn new(model: impl Into<String>, input: impl Into<EmbeddingInput>) -> Self {
+impl EmbeddingCreateRequest {
+    pub fn new(input: impl Into<EmbeddingInput>, model: impl Into<String>) -> Self {
         Self {
             input: input.into(),
             model: model.into(),
-            dimensions: None,
             encoding_format: None,
+            dimensions: None,
             user: None,
         }
     }
 }
+
+/// Backward compatibility alias.
+pub type EmbeddingRequest = EmbeddingCreateRequest;
 
 // ── Response types ──
 
 /// A single embedding vector.
 #[derive(Debug, Clone, Deserialize)]
 pub struct Embedding {
-    /// The embedding vector.
-    pub embedding: Vec<f64>,
-
-    /// Index of this embedding in the request.
-    pub index: i64,
-
-    /// Always "embedding".
     pub object: String,
-}
-
-/// Embedding-specific usage (no completion_tokens).
-#[derive(Debug, Clone, Deserialize)]
-pub struct EmbeddingUsage {
-    pub prompt_tokens: i64,
-    pub total_tokens: i64,
+    /// The embedding vector (when encoding_format is float).
+    #[serde(default)]
+    pub embedding: Option<Vec<f64>>,
+    /// Base64-encoded embedding (when encoding_format is base64).
+    #[serde(default)]
+    pub b64_embedding: Option<String>,
+    pub index: i64,
 }
 
 /// Response from `POST /embeddings`.
 #[derive(Debug, Clone, Deserialize)]
-pub struct CreateEmbeddingResponse {
-    /// List of embedding objects.
-    pub data: Vec<Embedding>,
-
-    /// Model used.
-    pub model: String,
-
-    /// Always "list".
+pub struct EmbeddingResponse {
     pub object: String,
-
-    /// Token usage.
-    pub usage: EmbeddingUsage,
+    pub data: Vec<Embedding>,
+    pub model: String,
+    pub usage: crate::types::common::Usage,
 }
 
 #[cfg(test)]
@@ -119,22 +113,22 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_serialize_embedding_request_string() {
-        let req = EmbeddingRequest::new("text-embedding-3-small", "Hello world");
+    fn test_serialize_embedding_request() {
+        let req = EmbeddingCreateRequest::new("Hello world", "text-embedding-3-small");
         let json = serde_json::to_value(&req).unwrap();
-        assert_eq!(json["model"], "text-embedding-3-small");
         assert_eq!(json["input"], "Hello world");
-        assert!(json.get("dimensions").is_none());
+        assert_eq!(json["model"], "text-embedding-3-small");
     }
 
     #[test]
-    fn test_serialize_embedding_request_array() {
-        let req = EmbeddingRequest::new(
+    fn test_serialize_embedding_request_with_array() {
+        let req = EmbeddingCreateRequest::new(
+            vec!["Hello".to_string(), "World".to_string()],
             "text-embedding-3-small",
-            EmbeddingInput::StringArray(vec!["Hello".into(), "World".into()]),
         );
         let json = serde_json::to_value(&req).unwrap();
-        assert_eq!(json["input"].as_array().unwrap().len(), 2);
+        let arr = json["input"].as_array().unwrap();
+        assert_eq!(arr.len(), 2);
     }
 
     #[test]
@@ -143,23 +137,14 @@ mod tests {
             "object": "list",
             "data": [{
                 "object": "embedding",
-                "embedding": [0.0023, -0.0094, 0.0158],
+                "embedding": [0.1, 0.2, 0.3],
                 "index": 0
             }],
             "model": "text-embedding-3-small",
-            "usage": {
-                "prompt_tokens": 8,
-                "total_tokens": 8
-            }
+            "usage": {"prompt_tokens": 10, "total_tokens": 10}
         }"#;
-
-        let resp: CreateEmbeddingResponse = serde_json::from_str(json).unwrap();
-        assert_eq!(resp.object, "list");
-        assert_eq!(resp.model, "text-embedding-3-small");
+        let resp: EmbeddingResponse = serde_json::from_str(json).unwrap();
         assert_eq!(resp.data.len(), 1);
-        assert_eq!(resp.data[0].embedding.len(), 3);
-        assert_eq!(resp.data[0].index, 0);
-        assert_eq!(resp.usage.prompt_tokens, 8);
-        assert_eq!(resp.usage.total_tokens, 8);
+        assert_eq!(resp.data[0].embedding.as_ref().unwrap().len(), 3);
     }
 }

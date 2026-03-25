@@ -3,31 +3,30 @@
 use serde::{Deserialize, Serialize};
 
 use super::common::{Role, SortOrder};
+use crate::openai_enum;
 
-/// Status of a thread run.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-#[serde(rename_all = "snake_case")]
-#[non_exhaustive]
-pub enum RunStatus {
-    Queued,
-    InProgress,
-    RequiresAction,
-    Cancelling,
-    Cancelled,
-    Failed,
-    Completed,
-    Incomplete,
-    Expired,
+openai_enum! {
+    /// Status of a thread run.
+    pub enum RunStatus {
+        Queued = "queued",
+        InProgress = "in_progress",
+        RequiresAction = "requires_action",
+        Cancelling = "cancelling",
+        Cancelled = "cancelled",
+        Failed = "failed",
+        Completed = "completed",
+        Incomplete = "incomplete",
+        Expired = "expired",
+    }
 }
 
-/// Status of a vector store.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-#[serde(rename_all = "snake_case")]
-#[non_exhaustive]
-pub enum VectorStoreStatus {
-    Expired,
-    InProgress,
-    Completed,
+openai_enum! {
+    /// Status of a vector store.
+    pub enum VectorStoreStatus {
+        Expired = "expired",
+        InProgress = "in_progress",
+        Completed = "completed",
+    }
 }
 
 // ── Tool types ──

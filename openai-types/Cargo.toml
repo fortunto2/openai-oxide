@@ -1,0 +1,52 @@
+[package]
+name = "openai-types"
+version = "0.1.0"
+edition = "2024"
+description = "Typed OpenAI API models — zero dependencies beyond serde"
+license = "MIT"
+repository = "https://github.com/fortunto2/openai-oxide"
+keywords = ["openai", "api", "types", "serde"]
+categories = ["api-bindings", "data-structures"]
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+schemars = { version = "0.8", optional = true }
+
+[features]
+default = ["all"]
+all = [
+    "audio", "batch", "beta", "chat", "completion", "containers",
+    "conversations", "embedding", "evals", "file", "fine-tuning",
+    "graders", "image", "model", "moderation", "realtime",
+    "responses", "shared", "skills", "uploads", "vector-stores",
+    "video", "webhooks", "websocket",
+]
+
+audio = []
+batch = []
+beta = []
+chat = []
+completion = []
+containers = []
+conversations = []
+embedding = []
+evals = []
+file = []
+fine-tuning = []
+graders = []
+image = []
+model = []
+moderation = []
+realtime = []
+responses = ["shared"]
+shared = []
+skills = []
+uploads = []
+vector-stores = []
+video = []
+webhooks = []
+websocket = []
+
+# Optional: derive JsonSchema for structured outputs
+structured = ["schemars"]

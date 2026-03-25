@@ -1,5 +1,6 @@
 // Batch types — mirrors openai-python types/batch.py
 
+use crate::openai_enum;
 use serde::{Deserialize, Serialize};
 
 /// Request body for `POST /batches`.
@@ -34,19 +35,18 @@ impl BatchCreateRequest {
     }
 }
 
-/// Status of a batch job.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-#[serde(rename_all = "snake_case")]
-#[non_exhaustive]
-pub enum BatchStatus {
-    Validating,
-    Failed,
-    InProgress,
-    Finalizing,
-    Completed,
-    Expired,
-    Cancelling,
-    Cancelled,
+openai_enum! {
+    /// Status of a batch job.
+    pub enum BatchStatus {
+        Validating = "validating",
+        Failed = "failed",
+        InProgress = "in_progress",
+        Finalizing = "finalizing",
+        Completed = "completed",
+        Expired = "expired",
+        Cancelling = "cancelling",
+        Cancelled = "cancelled",
+    }
 }
 
 /// A batch object.

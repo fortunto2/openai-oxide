@@ -1,5 +1,6 @@
 // Upload types — mirrors openai-python types/upload.py
 
+use crate::openai_enum;
 use serde::{Deserialize, Serialize};
 
 /// Request body for `POST /uploads`.
@@ -42,15 +43,14 @@ pub struct UploadCompleteRequest {
     pub md5: Option<String>,
 }
 
-/// Status of an upload.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-#[serde(rename_all = "snake_case")]
-#[non_exhaustive]
-pub enum UploadStatus {
-    Pending,
-    Completed,
-    Cancelled,
-    Expired,
+openai_enum! {
+    /// Status of an upload.
+    pub enum UploadStatus {
+        Pending = "pending",
+        Completed = "completed",
+        Cancelled = "cancelled",
+        Expired = "expired",
+    }
 }
 
 /// An upload object.

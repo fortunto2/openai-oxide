@@ -3,9 +3,19 @@
 use serde::{Deserialize, Serialize};
 
 use super::common::SortOrder;
+use crate::openai_enum;
+
+/// Wrapper to adapt &String to &str for serialize_other.
+#[allow(clippy::ptr_arg)]
+fn serialize_other_string<S>(value: &String, serializer: S) -> Result<S::Ok, S::Error>
+where
+    S: serde::Serializer,
+{
+    crate::types::common::serialize_other(value, serializer)
+}
 
 /// The intended purpose of an uploaded file.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 #[non_exhaustive]
 pub enum FilePurpose {
     #[serde(rename = "assistants")]
@@ -24,16 +34,38 @@ pub enum FilePurpose {
     Vision,
     #[serde(rename = "user_data")]
     UserData,
+    /// Catch-all for unknown purposes (forward compatibility).
+    #[serde(serialize_with = "serialize_other_string")]
+    Other(String),
 }
 
-/// Processing status of an uploaded file.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-#[serde(rename_all = "snake_case")]
-#[non_exhaustive]
-pub enum FileStatus {
-    Uploaded,
-    Processed,
-    Error,
+impl<'de> Deserialize<'de> for FilePurpose {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        let s = String::deserialize(deserializer)?;
+        match s.as_str() {
+            "assistants" => Ok(FilePurpose::Assistants),
+            "assistants_output" => Ok(FilePurpose::AssistantsOutput),
+            "batch" => Ok(FilePurpose::Batch),
+            "batch_output" => Ok(FilePurpose::BatchOutput),
+            "fine-tune" => Ok(FilePurpose::FineTune),
+            "fine-tune-results" => Ok(FilePurpose::FineTuneResults),
+            "vision" => Ok(FilePurpose::Vision),
+            "user_data" => Ok(FilePurpose::UserData),
+            _ => Ok(FilePurpose::Other(s)),
+        }
+    }
+}
+
+openai_enum! {
+    /// Processing status of an uploaded file.
+    pub enum FileStatus {
+        Uploaded = "uploaded",
+        Processed = "processed",
+        Error = "error",
+    }
 }
 
 /// A file object from the API.

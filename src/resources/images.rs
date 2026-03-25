@@ -43,7 +43,10 @@ impl<'a> Images<'a> {
         if let Some(m) = params.model {
             form = form.text("model", m);
         }
-        if let Some((mask_bytes, mask_name)) = params.mask {
+        if let Some(mask_bytes) = params.mask {
+            let mask_name = params
+                .mask_filename
+                .unwrap_or_else(|| "mask.png".to_string());
             form = form.part(
                 "mask",
                 reqwest::multipart::Part::bytes(mask_bytes).file_name(mask_name),
@@ -71,9 +74,6 @@ impl<'a> Images<'a> {
             reqwest::multipart::Part::bytes(params.image).file_name(params.image_filename),
         );
 
-        if let Some(m) = params.model {
-            form = form.text("model", m);
-        }
         if let Some(n) = params.n {
             form = form.text("n", n.to_string());
         }
@@ -116,7 +116,7 @@ mod tests {
 
         let response = client.images().generate(request).await.unwrap();
         assert_eq!(response.created, 1589478378);
-        let data = response.data.unwrap();
+        let data = response.data;
         assert_eq!(data.len(), 1);
         assert!(data[0].url.is_some());
         mock.assert_async().await;
@@ -143,7 +143,7 @@ mod tests {
         let params = ImageVariationParams::new(vec![0x89, 0x50, 0x4E, 0x47], "image.png");
 
         let response = client.images().create_variation(params).await.unwrap();
-        assert_eq!(response.data.unwrap().len(), 1);
+        assert_eq!(response.data.len(), 1);
         mock.assert_async().await;
     }
 }

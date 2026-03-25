@@ -2,17 +2,91 @@
 
 use serde::{Deserialize, Serialize};
 
-/// Message role in chat/thread conversations.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-#[serde(rename_all = "snake_case")]
-#[non_exhaustive]
-pub enum Role {
-    System,
-    Developer,
-    User,
-    Assistant,
-    Tool,
-    Function,
+/// Macro to create an OpenAI API enum with forward-compatible `Other(String)` variant.
+///
+/// Syntax: `VariantName = "json_value"`
+///
+/// Example:
+/// ```ignore
+/// openai_enum! {
+///     /// Message role
+///     pub enum Role {
+///         System = "system",
+///         Developer = "developer",
+///         InProgress = "in_progress",  // auto-handles snake_case
+///         FineTune = "fine-tune",      // handles hyphens
+///     }
+/// }
+/// ```
+#[macro_export]
+macro_rules! openai_enum {
+    (
+        $(#[$meta:meta])*
+        $vis:vis enum $name:ident {
+            $(
+                $(#[$var_meta:meta])*
+                $variant:ident = $json:literal
+            ),*$(,)?
+        }
+    ) => {
+        $(#[$meta])*
+        #[derive(Debug, Clone, PartialEq, Eq)]
+        #[non_exhaustive]
+        $vis enum $name {
+            $(
+                $(#[$var_meta])*
+                $variant,
+            )*
+            /// Catch-all for unknown variants (forward compatibility).
+            Other(String),
+        }
+
+        impl serde::Serialize for $name {
+            fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+            where
+                S: serde::Serializer,
+            {
+                match self {
+                    $(Self::$variant => serializer.serialize_str($json),)*
+                    Self::Other(s) => serializer.serialize_str(s),
+                }
+            }
+        }
+
+        impl<'de> serde::Deserialize<'de> for $name {
+            fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+            where
+                D: serde::Deserializer<'de>,
+            {
+                let s = String::deserialize(deserializer)?;
+                match s.as_str() {
+                    $($json => Ok(Self::$variant),)*
+                    _ => Ok(Self::Other(s)),
+                }
+            }
+        }
+    };
+}
+
+/// Helper function to serialize the `Other(String)` variant.
+/// Used by enums that don't use the openai_enum! macro (e.g., FilePurpose with custom serde renames).
+pub fn serialize_other<S>(value: &str, serializer: S) -> Result<S::Ok, S::Error>
+where
+    S: serde::Serializer,
+{
+    serializer.serialize_str(value)
+}
+
+openai_enum! {
+    /// Message role in chat/thread conversations.
+    pub enum Role {
+        System = "system",
+        Developer = "developer",
+        User = "user",
+        Assistant = "assistant",
+        Tool = "tool",
+        Function = "function",
+    }
 }
 
 /// Token usage information returned by the API.
@@ -38,16 +112,15 @@ pub struct PromptTokensDetails {
     pub audio_tokens: Option<i64>,
 }
 
-/// Reason the model stopped generating tokens.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-#[serde(rename_all = "snake_case")]
-#[non_exhaustive]
-pub enum FinishReason {
-    Stop,
-    Length,
-    ToolCalls,
-    ContentFilter,
-    FunctionCall,
+openai_enum! {
+    /// Reason the model stopped generating tokens.
+    pub enum FinishReason {
+        Stop = "stop",
+        Length = "length",
+        ToolCalls = "tool_calls",
+        ContentFilter = "content_filter",
+        FunctionCall = "function_call",
+    }
 }
 
 impl std::fmt::Display for FinishReason {
@@ -58,40 +131,38 @@ impl std::fmt::Display for FinishReason {
             Self::ToolCalls => write!(f, "tool_calls"),
             Self::ContentFilter => write!(f, "content_filter"),
             Self::FunctionCall => write!(f, "function_call"),
+            Self::Other(s) => write!(f, "{}", s),
         }
     }
 }
 
-/// Service tier used for the request.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-#[serde(rename_all = "snake_case")]
-#[non_exhaustive]
-pub enum ServiceTier {
-    Auto,
-    Default,
-    Flex,
-    Scale,
-    Priority,
+openai_enum! {
+    /// Service tier used for the request.
+    pub enum ServiceTier {
+        Auto = "auto",
+        Default = "default",
+        Flex = "flex",
+        Scale = "scale",
+        Priority = "priority",
+    }
 }
 
-/// Reasoning effort level for o-series models.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-#[serde(rename_all = "snake_case")]
-#[non_exhaustive]
-pub enum ReasoningEffort {
-    Low,
-    Medium,
-    High,
+openai_enum! {
+    /// Reasoning effort level for o-series models.
+    pub enum ReasoningEffort {
+        Low = "low",
+        Medium = "medium",
+        High = "high",
+    }
 }
 
-/// Search context size for web search.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-#[serde(rename_all = "snake_case")]
-#[non_exhaustive]
-pub enum SearchContextSize {
-    Low,
-    Medium,
-    High,
+openai_enum! {
+    /// Search context size for web search.
+    pub enum SearchContextSize {
+        Low = "low",
+        Medium = "medium",
+        High = "high",
+    }
 }
 
 /// A value that is either "auto" or a fixed number.
@@ -157,13 +228,12 @@ impl<'de> Deserialize<'de> for MaxResponseTokens {
     }
 }
 
-/// Sort order for paginated list endpoints.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-#[serde(rename_all = "snake_case")]
-#[non_exhaustive]
-pub enum SortOrder {
-    Asc,
-    Desc,
+openai_enum! {
+    /// Sort order for paginated list endpoints.
+    pub enum SortOrder {
+        Asc = "asc",
+        Desc = "desc",
+    }
 }
 
 /// Detailed breakdown of completion token usage.
