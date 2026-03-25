@@ -91,7 +91,7 @@ pub struct Input {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
 pub struct LabelModelGrader {
-    pub input: Vec<serde_json::Value>,
+    pub input: Vec<Input>,
     /// The labels to assign to each item in the evaluation.
     pub labels: Vec<String>,
     /// The model to use for the evaluation. Must support structured outputs.
@@ -164,7 +164,7 @@ pub struct SamplingParams {
 #[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
 pub struct ScoreModelGrader {
     /// The input messages evaluated by the grader.
-    pub input: Vec<serde_json::Value>,
+    pub input: Vec<Input>,
     /// The model to use for the evaluation.
     pub model: String,
     /// The name of the grader.
@@ -177,7 +177,7 @@ pub struct ScoreModelGrader {
     pub range: Option<Vec<f64>>,
     /// The sampling parameters for the model.
     #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub sampling_params: Option<serde_json::Value>,
+    pub sampling_params: Option<SamplingParams>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]

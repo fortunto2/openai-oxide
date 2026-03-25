@@ -2,8 +2,6 @@
 //!
 //! Auto-managed by `py2rust.py`. Manual overrides in non-`_gen.rs` files are preserved.
 
-#![allow(clippy::all)]
-
 #[cfg(feature = "audio")]
 pub mod audio;
 #[cfg(feature = "batch")]

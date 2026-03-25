@@ -11,7 +11,7 @@ pub struct Completion {
     /// A unique identifier for the completion.
     pub id: String,
     /// The list of completion choices the model generated for the input prompt.
-    pub choices: Vec<serde_json::Value>,
+    pub choices: Vec<CompletionChoice>,
     /// The Unix timestamp (in seconds) of when the completion was created.
     pub created: i64,
     /// The model used for completion.
@@ -23,7 +23,7 @@ pub struct Completion {
     pub system_fingerprint: Option<String>,
     /// Usage statistics for the completion request.
     #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub usage: Option<serde_json::Value>,
+    pub usage: Option<CompletionUsage>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -58,7 +58,7 @@ pub struct CompletionChoice {
     pub finish_reason: CompletionChoiceFinishReason,
     pub index: i64,
     #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub logprobs: Option<serde_json::Value>,
+    pub logprobs: Option<Logprobs>,
     pub text: String,
 }
 
@@ -160,8 +160,8 @@ pub struct CompletionUsage {
     pub total_tokens: i64,
     /// Breakdown of tokens used in a completion.
     #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub completion_tokens_details: Option<serde_json::Value>,
+    pub completion_tokens_details: Option<CompletionTokensDetails>,
     /// Breakdown of tokens used in the prompt.
     #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub prompt_tokens_details: Option<serde_json::Value>,
+    pub prompt_tokens_details: Option<PromptTokensDetails>,
 }

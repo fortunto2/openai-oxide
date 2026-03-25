@@ -213,10 +213,10 @@ impl Response {
         for item in &self.output {
             if let Some(content) = &item.content {
                 for block in content {
-                    if block.type_ == "output_text" {
-                        if let Some(text) = &block.text {
-                            result.push_str(text);
-                        }
+                    if block.type_ == "output_text"
+                        && let Some(text) = &block.text
+                    {
+                        result.push_str(text);
                     }
                 }
             }

@@ -129,11 +129,11 @@ pub struct CategoryScores {
 #[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
 pub struct Moderation {
     /// A list of the categories, and whether they are flagged or not.
-    pub categories: serde_json::Value,
+    pub categories: Categories,
     /// A list of the categories along with the input type(s) that the score applies to.
-    pub category_applied_input_types: serde_json::Value,
+    pub category_applied_input_types: CategoryAppliedInputTypes,
     /// A list of the categories along with their scores as predicted by model.
-    pub category_scores: serde_json::Value,
+    pub category_scores: CategoryScores,
     /// Whether any of the below categories are flagged.
     pub flagged: bool,
 }
@@ -157,7 +157,7 @@ pub struct ModerationCreateResponse {
     /// The model used to generate the moderation results.
     pub model: String,
     /// A list of moderation objects.
-    pub results: Vec<serde_json::Value>,
+    pub results: Vec<Moderation>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]

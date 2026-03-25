@@ -40,7 +40,7 @@ pub struct SpeechCreateParams {
     /// One of the available [TTS models](https://platform.openai.com/docs/models#tts):
     pub model: String,
     /// The voice to use when generating the audio.
-    pub voice: serde_json::Value,
+    pub voice: Voice,
     /// Control the voice of your generated audio with additional instructions.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub instructions: Option<String>,
@@ -134,7 +134,7 @@ pub struct UsageTokens {
     pub type_: String,
     /// Details about the input tokens billed for this request.
     #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub input_token_details: Option<serde_json::Value>,
+    pub input_token_details: Option<UsageTokensInputTokenDetails>,
 }
 
 /// Usage statistics for models billed by audio input duration.
@@ -158,7 +158,7 @@ pub struct Transcription {
     pub text: String,
     /// The log probabilities of the tokens in the transcription.
     #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub logprobs: Option<Vec<serde_json::Value>>,
+    pub logprobs: Option<Vec<Logprob>>,
     /// Token usage statistics for the request.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub usage: Option<Usage>,
@@ -173,10 +173,10 @@ pub struct TranscriptionCreateParamsBase {
     pub model: String,
     /// Controls how the audio is cut into chunks.
     #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub chunking_strategy: Option<serde_json::Value>,
+    pub chunking_strategy: Option<ChunkingStrategy>,
     /// Additional information to include in the transcription response. `logprobs` will
     #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub include: Option<Vec<serde_json::Value>>,
+    pub include: Option<Vec<TranscriptionInclude>>,
     /// Optional list of speaker names that correspond to the audio samples provided in
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub known_speaker_names: Option<serde_json::Value>,
@@ -191,7 +191,7 @@ pub struct TranscriptionCreateParamsBase {
     pub prompt: Option<String>,
     /// The format of the output, in one of these options: `json`, `text`, `srt`,
     #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub response_format: Option<serde_json::Value>,
+    pub response_format: Option<AudioResponseFormat>,
     /// The sampling temperature, between 0 and 1.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub temperature: Option<f64>,
@@ -235,7 +235,7 @@ pub struct TranscriptionDiarized {
     /// Duration of the input audio in seconds.
     pub duration: f64,
     /// Segments of the transcript annotated with timestamps and speaker labels.
-    pub segments: Vec<serde_json::Value>,
+    pub segments: Vec<TranscriptionDiarizedSegment>,
     /// The type of task that was run. Always `transcribe`.
     pub task: String,
     /// The concatenated transcript text for the entire audio input.
@@ -310,7 +310,7 @@ pub struct TranscriptionTextDeltaEvent {
     pub type_: String,
     /// The log probabilities of the delta.
     #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub logprobs: Option<Vec<serde_json::Value>>,
+    pub logprobs: Option<Vec<Logprob>>,
     /// Identifier of the diarized segment that this delta belongs to.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub segment_id: Option<String>,
@@ -339,7 +339,7 @@ pub struct TranscriptionTextDoneEvent {
     pub type_: String,
     /// The log probabilities of the individual tokens in the transcription.
     #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub logprobs: Option<Vec<serde_json::Value>>,
+    pub logprobs: Option<Vec<Logprob>>,
     /// Usage statistics for models billed by token usage.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub usage: Option<Usage>,
@@ -376,13 +376,13 @@ pub struct TranscriptionVerbose {
     pub text: String,
     /// Segments of the transcribed text and their corresponding details.
     #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub segments: Option<Vec<serde_json::Value>>,
+    pub segments: Option<Vec<TranscriptionSegment>>,
     /// Usage statistics for models billed by audio input duration.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub usage: Option<Usage>,
     /// Extracted words and their corresponding timestamps.
     #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub words: Option<Vec<serde_json::Value>>,
+    pub words: Option<Vec<TranscriptionWord>>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -449,7 +449,7 @@ pub struct TranslationVerbose {
     pub text: String,
     /// Segments of the translated text and their corresponding details.
     #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub segments: Option<Vec<serde_json::Value>>,
+    pub segments: Option<Vec<TranscriptionSegment>>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]

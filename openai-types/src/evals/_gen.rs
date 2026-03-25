@@ -16,7 +16,7 @@ pub struct SourceFileContentContent {
 #[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
 pub struct SourceFileContent {
     /// The content of the jsonl file.
-    pub content: Vec<serde_json::Value>,
+    pub content: Vec<SourceFileContentContent>,
     /// The type of jsonl source. Always `file_content`.
     #[serde(rename = "type")]
     pub type_: String,
@@ -180,7 +180,7 @@ pub struct CreateEvalCompletionsRunDataSource {
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub model: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub sampling_params: Option<serde_json::Value>,
+    pub sampling_params: Option<SamplingParams>,
 }
 
 /// A JsonlRunDataSource object with that specifies a JSONL file that matches the eval
@@ -216,7 +216,7 @@ pub struct DataSourceResponsesSourceFileContentContent {
 #[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
 pub struct DataSourceResponsesSourceFileContent {
     /// The content of the jsonl file.
-    pub content: Vec<serde_json::Value>,
+    pub content: Vec<DataSourceResponsesSourceFileContentContent>,
     /// The type of jsonl source. Always `file_content`.
     #[serde(rename = "type")]
     pub type_: String,
@@ -386,7 +386,7 @@ pub struct DataSourceResponsesSamplingParams {
     pub temperature: Option<f64>,
     /// Configuration options for a text response from the model.
     #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub text: Option<serde_json::Value>,
+    pub text: Option<DataSourceResponsesSamplingParamsText>,
     /// An array of tools the model may call while generating a response.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub tools: Option<Vec<serde_json::Value>>,
@@ -411,7 +411,7 @@ pub struct DataSourceResponses {
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub model: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub sampling_params: Option<serde_json::Value>,
+    pub sampling_params: Option<DataSourceResponsesSamplingParams>,
 }
 
 pub type DataSource = serde_json::Value;
@@ -470,7 +470,7 @@ pub struct RunCancelResponse {
     /// Information about the run's data source.
     pub data_source: DataSource,
     /// An object representing an error response from the Eval API.
-    pub error: serde_json::Value,
+    pub error: EvalAPIError,
     /// The identifier of the associated evaluation.
     pub eval_id: String,
     /// Set of 16 key-value pairs that can be attached to an object.
@@ -483,13 +483,13 @@ pub struct RunCancelResponse {
     /// The type of the object. Always "eval.run".
     pub object: String,
     /// Usage statistics for each model during the evaluation run.
-    pub per_model_usage: Vec<serde_json::Value>,
+    pub per_model_usage: Vec<PerModelUsage>,
     /// Results per testing criteria applied during the evaluation run.
-    pub per_testing_criteria_results: Vec<serde_json::Value>,
+    pub per_testing_criteria_results: Vec<PerTestingCriteriaResult>,
     /// The URL to the rendered evaluation run report on the UI dashboard.
     pub report_url: String,
     /// Counters summarizing the outcomes of the evaluation run.
-    pub result_counts: serde_json::Value,
+    pub result_counts: ResultCounts,
     /// The status of the evaluation run.
     pub status: String,
 }
@@ -519,7 +519,7 @@ pub struct DataSourceCreateEvalResponsesRunDataSourceSourceFileContentContent {
 #[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
 pub struct DataSourceCreateEvalResponsesRunDataSourceSourceFileContent {
     /// The content of the jsonl file.
-    pub content: Vec<serde_json::Value>,
+    pub content: Vec<DataSourceCreateEvalResponsesRunDataSourceSourceFileContentContent>,
     /// The type of jsonl source. Always `file_content`.
     #[serde(rename = "type")]
     pub type_: String,
@@ -694,7 +694,7 @@ pub struct DataSourceCreateEvalResponsesRunDataSourceSamplingParams {
     pub temperature: Option<f64>,
     /// Configuration options for a text response from the model.
     #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub text: Option<serde_json::Value>,
+    pub text: Option<DataSourceCreateEvalResponsesRunDataSourceSamplingParamsText>,
     /// An array of tools the model may call while generating a response.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub tools: Option<Vec<serde_json::Value>>,
@@ -719,7 +719,7 @@ pub struct DataSourceCreateEvalResponsesRunDataSource {
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub model: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub sampling_params: Option<serde_json::Value>,
+    pub sampling_params: Option<DataSourceCreateEvalResponsesRunDataSourceSamplingParams>,
 }
 
 /// A schema representing an evaluation run.
@@ -733,7 +733,7 @@ pub struct RunCreateResponse {
     /// Information about the run's data source.
     pub data_source: DataSource,
     /// An object representing an error response from the Eval API.
-    pub error: serde_json::Value,
+    pub error: EvalAPIError,
     /// The identifier of the associated evaluation.
     pub eval_id: String,
     /// Set of 16 key-value pairs that can be attached to an object.
@@ -746,13 +746,13 @@ pub struct RunCreateResponse {
     /// The type of the object. Always "eval.run".
     pub object: String,
     /// Usage statistics for each model during the evaluation run.
-    pub per_model_usage: Vec<serde_json::Value>,
+    pub per_model_usage: Vec<PerModelUsage>,
     /// Results per testing criteria applied during the evaluation run.
-    pub per_testing_criteria_results: Vec<serde_json::Value>,
+    pub per_testing_criteria_results: Vec<PerTestingCriteriaResult>,
     /// The URL to the rendered evaluation run report on the UI dashboard.
     pub report_url: String,
     /// Counters summarizing the outcomes of the evaluation run.
-    pub result_counts: serde_json::Value,
+    pub result_counts: ResultCounts,
     /// The status of the evaluation run.
     pub status: String,
 }
@@ -822,7 +822,7 @@ pub struct RunListResponse {
     /// Information about the run's data source.
     pub data_source: DataSource,
     /// An object representing an error response from the Eval API.
-    pub error: serde_json::Value,
+    pub error: EvalAPIError,
     /// The identifier of the associated evaluation.
     pub eval_id: String,
     /// Set of 16 key-value pairs that can be attached to an object.
@@ -835,13 +835,13 @@ pub struct RunListResponse {
     /// The type of the object. Always "eval.run".
     pub object: String,
     /// Usage statistics for each model during the evaluation run.
-    pub per_model_usage: Vec<serde_json::Value>,
+    pub per_model_usage: Vec<PerModelUsage>,
     /// Results per testing criteria applied during the evaluation run.
-    pub per_testing_criteria_results: Vec<serde_json::Value>,
+    pub per_testing_criteria_results: Vec<PerTestingCriteriaResult>,
     /// The URL to the rendered evaluation run report on the UI dashboard.
     pub report_url: String,
     /// Counters summarizing the outcomes of the evaluation run.
-    pub result_counts: serde_json::Value,
+    pub result_counts: ResultCounts,
     /// The status of the evaluation run.
     pub status: String,
 }
@@ -857,7 +857,7 @@ pub struct RunRetrieveResponse {
     /// Information about the run's data source.
     pub data_source: DataSource,
     /// An object representing an error response from the Eval API.
-    pub error: serde_json::Value,
+    pub error: EvalAPIError,
     /// The identifier of the associated evaluation.
     pub eval_id: String,
     /// Set of 16 key-value pairs that can be attached to an object.
@@ -870,13 +870,13 @@ pub struct RunRetrieveResponse {
     /// The type of the object. Always "eval.run".
     pub object: String,
     /// Usage statistics for each model during the evaluation run.
-    pub per_model_usage: Vec<serde_json::Value>,
+    pub per_model_usage: Vec<PerModelUsage>,
     /// Results per testing criteria applied during the evaluation run.
-    pub per_testing_criteria_results: Vec<serde_json::Value>,
+    pub per_testing_criteria_results: Vec<PerTestingCriteriaResult>,
     /// The URL to the rendered evaluation run report on the UI dashboard.
     pub report_url: String,
     /// Counters summarizing the outcomes of the evaluation run.
-    pub result_counts: serde_json::Value,
+    pub result_counts: ResultCounts,
     /// The status of the evaluation run.
     pub status: String,
 }
@@ -885,9 +885,9 @@ pub struct RunRetrieveResponse {
 #[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
 pub struct EvalCreateParams {
     /// The configuration for the data source used for the evaluation runs.
-    pub data_source_config: serde_json::Value,
+    pub data_source_config: DataSourceConfig,
     /// A list of graders for all eval runs in this group.
-    pub testing_criteria: Vec<serde_json::Value>,
+    pub testing_criteria: Vec<TestingCriterion>,
     /// Set of 16 key-value pairs that can be attached to an object.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub metadata: Option<serde_json::Value>,

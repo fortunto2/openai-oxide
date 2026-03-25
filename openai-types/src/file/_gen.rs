@@ -14,10 +14,10 @@ pub struct FileCreateParams {
     /// The File object (not file name) to be uploaded.
     pub file: serde_json::Value,
     /// The intended purpose of the uploaded file. One of:
-    pub purpose: serde_json::Value,
+    pub purpose: FilePurpose,
     /// The expiration policy for a file.
     #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub expires_after: Option<serde_json::Value>,
+    pub expires_after: Option<ExpiresAfter>,
 }
 
 /// The expiration policy for a file.
@@ -165,7 +165,7 @@ pub struct StaticFileChunkingStrategy {
 #[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
 pub struct StaticFileChunkingStrategyObject {
     #[serde(rename = "static")]
-    pub static_: serde_json::Value,
+    pub static_: StaticFileChunkingStrategy,
     /// Always `static`.
     #[serde(rename = "type")]
     pub type_: String,

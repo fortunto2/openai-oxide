@@ -89,10 +89,10 @@ pub struct CallRejectParams {
 pub struct ClientSecretCreateParams {
     /// Configuration for the client secret expiration.
     #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub expires_after: Option<serde_json::Value>,
+    pub expires_after: Option<ExpiresAfter>,
     /// Session configuration to use for the client secret.
     #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub session: Option<serde_json::Value>,
+    pub session: Option<Session>,
 }
 
 /// Configuration for the client secret expiration.
@@ -138,7 +138,7 @@ pub struct Conversation {
 #[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
 pub struct ConversationCreatedEvent {
     /// The conversation resource.
-    pub conversation: serde_json::Value,
+    pub conversation: Conversation,
     /// The unique ID of the server event.
     pub event_id: String,
     /// The event type, must be `conversation.created`.
@@ -267,7 +267,7 @@ pub struct UsageTranscriptTextUsageTokens {
     pub type_: String,
     /// Details about the input tokens billed for this request.
     #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub input_token_details: Option<serde_json::Value>,
+    pub input_token_details: Option<UsageTranscriptTextUsageTokensInputTokenDetails>,
 }
 
 /// Usage statistics for models billed by audio input duration.
@@ -302,7 +302,7 @@ pub struct ConversationItemInputAudioTranscriptionCompletedEvent {
     pub usage: Usage,
     /// The log probabilities of the transcription.
     #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub logprobs: Option<Vec<serde_json::Value>>,
+    pub logprobs: Option<Vec<LogProbProperties>>,
 }
 
 /// Returned when the text value of an input audio transcription content part is updated with incremental transcription results.
@@ -324,7 +324,7 @@ pub struct ConversationItemInputAudioTranscriptionDeltaEvent {
     pub delta: Option<String>,
     /// The log probabilities of the transcription.
     #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub logprobs: Option<Vec<serde_json::Value>>,
+    pub logprobs: Option<Vec<LogProbProperties>>,
 }
 
 /// Details of the transcription error.
@@ -668,7 +668,7 @@ pub struct RateLimitsUpdatedEvent {
     /// The unique ID of the server event.
     pub event_id: String,
     /// List of rate limit information.
-    pub rate_limits: Vec<serde_json::Value>,
+    pub rate_limits: Vec<RateLimit>,
     /// The event type, must be `rate_limits.updated`.
     #[serde(rename = "type")]
     pub type_: String,
@@ -679,9 +679,9 @@ pub struct RateLimitsUpdatedEvent {
 #[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
 pub struct RealtimeAudioConfig {
     #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub input: Option<serde_json::Value>,
+    pub input: Option<RealtimeAudioConfigInput>,
     #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub output: Option<serde_json::Value>,
+    pub output: Option<RealtimeAudioConfigOutput>,
 }
 
 /// Configuration for input audio noise reduction.
@@ -698,16 +698,16 @@ pub struct NoiseReduction {
 pub struct RealtimeAudioConfigInput {
     /// The format of the input audio.
     #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub format: Option<serde_json::Value>,
+    pub format: Option<RealtimeAudioFormats>,
     /// Configuration for input audio noise reduction.
     #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub noise_reduction: Option<serde_json::Value>,
+    pub noise_reduction: Option<NoiseReduction>,
     /// Configuration for input audio transcription, defaults to off and can be set to
     #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub transcription: Option<serde_json::Value>,
+    pub transcription: Option<AudioTranscription>,
     /// Configuration for turn detection, ether Server VAD or Semantic VAD.
     #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub turn_detection: Option<serde_json::Value>,
+    pub turn_detection: Option<RealtimeAudioInputTurnDetection>,
 }
 
 /// Custom voice reference.
@@ -739,7 +739,7 @@ pub enum Voice {
 pub struct RealtimeAudioConfigOutput {
     /// The format of the output audio.
     #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub format: Option<serde_json::Value>,
+    pub format: Option<RealtimeAudioFormats>,
     /// The speed of the model's spoken response as a multiple of the original speed.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub speed: Option<f64>,
@@ -896,7 +896,7 @@ pub enum RealtimeConversationItemAssistantMessageStatus {
 #[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
 pub struct RealtimeConversationItemAssistantMessage {
     /// The content of the message.
-    pub content: Vec<serde_json::Value>,
+    pub content: Vec<RealtimeConversationContent>,
     /// The role of the message sender. Always `assistant`.
     pub role: String,
     /// The type of the item. Always `message`.
@@ -1001,7 +1001,7 @@ pub enum RealtimeConversationItemSystemMessageStatus {
 #[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
 pub struct RealtimeConversationItemSystemMessage {
     /// The content of the message.
-    pub content: Vec<serde_json::Value>,
+    pub content: Vec<RealtimeConversationContent>,
     /// The role of the message sender. Always `system`.
     pub role: String,
     /// The type of the item. Always `message`.
@@ -1047,7 +1047,7 @@ pub enum RealtimeConversationItemUserMessageStatus {
 #[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
 pub struct RealtimeConversationItemUserMessage {
     /// The content of the message.
-    pub content: Vec<serde_json::Value>,
+    pub content: Vec<RealtimeConversationContent>,
     /// The role of the message sender. Always `user`.
     pub role: String,
     /// The type of the item. Always `message`.
@@ -1089,7 +1089,7 @@ pub struct RealtimeError {
 #[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
 pub struct RealtimeErrorEvent {
     /// Details of the error.
-    pub error: serde_json::Value,
+    pub error: RealtimeError,
     /// The unique ID of the server event.
     pub event_id: String,
     /// The event type, must be `error`.
@@ -1172,7 +1172,7 @@ pub struct RealtimeMcpListTools {
     /// The label of the MCP server.
     pub server_label: String,
     /// The tools available on the server.
-    pub tools: Vec<serde_json::Value>,
+    pub tools: Vec<RealtimeMcpTool>,
     /// The type of the item. Always `mcp_list_tools`.
     #[serde(rename = "type")]
     pub type_: String,
@@ -1251,23 +1251,7 @@ pub struct AudioOutput {
 #[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
 pub struct Audio {
     #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub output: Option<serde_json::Value>,
-}
-
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
-#[non_exhaustive]
-pub enum RealtimeResponseStatus {
-    #[serde(rename = "completed")]
-    Completed,
-    #[serde(rename = "cancelled")]
-    Cancelled,
-    #[serde(rename = "failed")]
-    Failed,
-    #[serde(rename = "incomplete")]
-    Incomplete,
-    #[serde(rename = "in_progress")]
-    InProgress,
+    pub output: Option<AudioOutput>,
 }
 
 /// The response resource.
@@ -1279,7 +1263,7 @@ pub struct RealtimeResponse {
     pub id: Option<String>,
     /// Configuration for audio output.
     #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub audio: Option<serde_json::Value>,
+    pub audio: Option<Audio>,
     /// Which conversation the response is added to, determined by the `conversation`
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub conversation_id: Option<String>,
@@ -1306,7 +1290,7 @@ pub struct RealtimeResponse {
     pub status_details: Option<RealtimeResponseStatus>,
     /// Usage statistics for the Response, this will correspond to billing.
     #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub usage: Option<serde_json::Value>,
+    pub usage: Option<RealtimeResponseUsage>,
 }
 
 /// Custom voice reference.
@@ -1349,7 +1333,7 @@ pub struct RealtimeResponseOutput {
 #[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
 pub struct RealtimeResponseCreateAudioOutput {
     #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub output: Option<serde_json::Value>,
+    pub output: Option<RealtimeResponseOutput>,
 }
 
 /// A filter object to specify which tools are allowed.
@@ -1396,10 +1380,10 @@ pub struct RequireApprovalMcpToolApprovalFilterNever {
 pub struct RequireApprovalMcpToolApprovalFilter {
     /// A filter object to specify which tools are allowed.
     #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub always: Option<serde_json::Value>,
+    pub always: Option<RequireApprovalMcpToolApprovalFilterAlways>,
     /// A filter object to specify which tools are allowed.
     #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub never: Option<serde_json::Value>,
+    pub never: Option<RequireApprovalMcpToolApprovalFilterNever>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -1477,7 +1461,7 @@ pub type Tool = serde_json::Value;
 pub struct RealtimeResponseCreateParams {
     /// Configuration for audio input and output.
     #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub audio: Option<serde_json::Value>,
+    pub audio: Option<RealtimeResponseCreateAudioOutput>,
     /// Controls which conversation the response is added to.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub conversation: Option<String>,
@@ -1504,7 +1488,7 @@ pub struct RealtimeResponseCreateParams {
     pub tool_choice: Option<ToolChoice>,
     /// Tools available to the model.
     #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub tools: Option<Vec<Tool>>,
+    pub tools: Option<Vec<RealtimeMcpTool>>,
 }
 
 /// A description of the error that caused the response to fail,
@@ -1547,19 +1531,34 @@ pub enum RealtimeResponseStatusType {
     Failed,
 }
 
+/// Additional details about the status.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct RealtimeResponseStatus {
+    /// A description of the error that caused the response to fail, populated when the
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub error: Option<Error>,
+    /// The reason the Response did not complete.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub reason: Option<RealtimeResponseStatusReason>,
+    /// The type of error that caused the response to fail, corresponding with the
+    #[serde(rename = "type", skip_serializing_if = "Option::is_none", default)]
+    pub type_: Option<RealtimeResponseStatusType>,
+}
+
 /// Usage statistics for the Response, this will correspond to billing.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
 pub struct RealtimeResponseUsage {
     /// Details about the input tokens used in the Response.
     #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub input_token_details: Option<serde_json::Value>,
+    pub input_token_details: Option<RealtimeResponseUsageInputTokenDetails>,
     /// The number of input tokens used in the Response, including text and audio
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub input_tokens: Option<i64>,
     /// Details about the output tokens used in the Response.
     #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub output_token_details: Option<serde_json::Value>,
+    pub output_token_details: Option<RealtimeResponseUsageOutputTokenDetails>,
     /// The number of output tokens sent in the Response, including text and audio
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub output_tokens: Option<i64>,
@@ -1595,7 +1594,7 @@ pub struct RealtimeResponseUsageInputTokenDetails {
     pub cached_tokens: Option<i64>,
     /// Details about the cached tokens used as input for the Response.
     #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub cached_tokens_details: Option<serde_json::Value>,
+    pub cached_tokens_details: Option<CachedTokensDetails>,
     /// The number of image tokens used as input for the Response.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub image_tokens: Option<i64>,
@@ -1689,7 +1688,7 @@ pub struct RealtimeSessionCreateRequest {
     pub type_: String,
     /// Configuration for input and output audio.
     #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub audio: Option<serde_json::Value>,
+    pub audio: Option<RealtimeAudioConfig>,
     /// Additional fields to include in server outputs.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub include: Option<Vec<String>>,
@@ -1710,16 +1709,16 @@ pub struct RealtimeSessionCreateRequest {
     pub prompt: Option<serde_json::Value>,
     /// How the model chooses tools.
     #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub tool_choice: Option<serde_json::Value>,
+    pub tool_choice: Option<RealtimeToolChoiceConfig>,
     /// Tools available to the model.
     #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub tools: Option<serde_json::Value>,
+    pub tools: Option<RealtimeToolsConfig>,
     /// Realtime API can write session traces to the
     #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub tracing: Option<serde_json::Value>,
+    pub tracing: Option<RealtimeTracingConfig>,
     /// When the number of tokens in a conversation exceeds the model's input token
     #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub truncation: Option<serde_json::Value>,
+    pub truncation: Option<RealtimeTruncation>,
 }
 
 /// Configuration for input audio noise reduction.
@@ -1800,10 +1799,10 @@ pub struct AudioInput {
     pub format: Option<RealtimeAudioFormats>,
     /// Configuration for input audio noise reduction.
     #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub noise_reduction: Option<serde_json::Value>,
+    pub noise_reduction: Option<AudioInputNoiseReduction>,
     /// Configuration for input audio transcription, defaults to off and can be set to
     #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub transcription: Option<serde_json::Value>,
+    pub transcription: Option<AudioTranscription>,
     /// Configuration for turn detection, ether Server VAD or Semantic VAD.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub turn_detection: Option<AudioInputTurnDetection>,
@@ -1853,10 +1852,10 @@ pub struct ToolMcpToolRequireApprovalMcpToolApprovalFilterNever {
 pub struct ToolMcpToolRequireApprovalMcpToolApprovalFilter {
     /// A filter object to specify which tools are allowed.
     #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub always: Option<serde_json::Value>,
+    pub always: Option<ToolMcpToolRequireApprovalMcpToolApprovalFilterAlways>,
     /// A filter object to specify which tools are allowed.
     #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub never: Option<serde_json::Value>,
+    pub never: Option<ToolMcpToolRequireApprovalMcpToolApprovalFilterNever>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -1951,13 +1950,13 @@ pub enum Tracing {
 #[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
 pub struct RealtimeSessionCreateResponse {
     /// Ephemeral key returned by the API.
-    pub client_secret: serde_json::Value,
+    pub client_secret: RealtimeSessionClientSecret,
     /// The type of session to create. Always `realtime` for the Realtime API.
     #[serde(rename = "type")]
     pub type_: String,
     /// Configuration for input and output audio.
     #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub audio: Option<serde_json::Value>,
+    pub audio: Option<Audio>,
     /// Additional fields to include in server outputs.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub include: Option<Vec<String>>,
@@ -1981,18 +1980,18 @@ pub struct RealtimeSessionCreateResponse {
     pub tool_choice: Option<ToolChoice>,
     /// Tools available to the model.
     #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub tools: Option<Vec<Tool>>,
+    pub tools: Option<Vec<RealtimeMcpTool>>,
     /// Realtime API can write session traces to the
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub tracing: Option<Tracing>,
     /// When the number of tokens in a conversation exceeds the model's input token
     #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub truncation: Option<serde_json::Value>,
+    pub truncation: Option<RealtimeTruncation>,
 }
 
 pub type RealtimeToolChoiceConfig = serde_json::Value;
 
-pub type RealtimeToolsConfig = Vec<serde_json::Value>;
+pub type RealtimeToolsConfig = Vec<RealtimeToolsConfigUnion>;
 
 /// A filter object to specify which tools are allowed.
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -2038,10 +2037,10 @@ pub struct McpRequireApprovalMcpToolApprovalFilterNever {
 pub struct McpRequireApprovalMcpToolApprovalFilter {
     /// A filter object to specify which tools are allowed.
     #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub always: Option<serde_json::Value>,
+    pub always: Option<McpRequireApprovalMcpToolApprovalFilterAlways>,
     /// A filter object to specify which tools are allowed.
     #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub never: Option<serde_json::Value>,
+    pub never: Option<McpRequireApprovalMcpToolApprovalFilterNever>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -2138,7 +2137,7 @@ pub enum RealtimeTracingConfig {
 #[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
 pub struct RealtimeTranscriptionSessionAudio {
     #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub input: Option<serde_json::Value>,
+    pub input: Option<RealtimeTranscriptionSessionAudioInput>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -2149,13 +2148,13 @@ pub struct RealtimeTranscriptionSessionAudioInput {
     pub format: Option<RealtimeAudioFormats>,
     /// Configuration for input audio noise reduction.
     #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub noise_reduction: Option<serde_json::Value>,
+    pub noise_reduction: Option<NoiseReduction>,
     /// Configuration for input audio transcription, defaults to off and can be set to
     #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub transcription: Option<serde_json::Value>,
+    pub transcription: Option<AudioTranscription>,
     /// Configuration for turn detection, ether Server VAD or Semantic VAD.
     #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub turn_detection: Option<serde_json::Value>,
+    pub turn_detection: Option<RealtimeTranscriptionSessionAudioInputTurnDetection>,
 }
 
 pub type RealtimeTranscriptionSessionAudioInputTurnDetection = serde_json::Value;
@@ -2169,7 +2168,7 @@ pub struct RealtimeTranscriptionSessionCreateRequest {
     pub type_: String,
     /// Configuration for input and output audio.
     #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub audio: Option<serde_json::Value>,
+    pub audio: Option<RealtimeTranscriptionSessionAudio>,
     /// Additional fields to include in server outputs.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub include: Option<Vec<String>>,
@@ -2188,7 +2187,7 @@ pub struct RealtimeTranscriptionSessionCreateResponse {
     pub type_: String,
     /// Configuration for input audio for the session.
     #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub audio: Option<serde_json::Value>,
+    pub audio: Option<Audio>,
     /// Expiration timestamp for the session, in seconds since epoch.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub expires_at: Option<i64>,
@@ -2243,7 +2242,7 @@ pub struct RealtimeTruncationRetentionRatio {
     pub type_: String,
     /// Optional custom token limits for this truncation strategy.
     #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub token_limits: Option<serde_json::Value>,
+    pub token_limits: Option<TokenLimits>,
 }
 
 /// Returned when the model-generated audio is updated.
@@ -2384,7 +2383,7 @@ pub struct ResponseContentPartAddedEvent {
     /// The index of the output item in the response.
     pub output_index: i64,
     /// The content part that was added.
-    pub part: serde_json::Value,
+    pub part: ContentPartPart,
     /// The ID of the response.
     pub response_id: String,
     /// The event type, must be `response.content_part.added`.
@@ -2405,7 +2404,7 @@ pub struct ResponseContentPartDoneEvent {
     /// The index of the output item in the response.
     pub output_index: i64,
     /// The content part that is done.
-    pub part: serde_json::Value,
+    pub part: ContentPartPart,
     /// The ID of the response.
     pub response_id: String,
     /// The event type, must be `response.content_part.done`.
@@ -2425,7 +2424,7 @@ pub struct ResponseCreateEvent {
     pub event_id: Option<String>,
     /// Create a new Realtime response with these parameters
     #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub response: Option<serde_json::Value>,
+    pub response: Option<RealtimeResponseCreateParams>,
 }
 
 /// Returned when a new Response is created.
@@ -2435,7 +2434,7 @@ pub struct ResponseCreatedEvent {
     /// The unique ID of the server event.
     pub event_id: String,
     /// The response resource.
-    pub response: serde_json::Value,
+    pub response: RealtimeResponse,
     /// The event type, must be `response.created`.
     #[serde(rename = "type")]
     pub type_: String,
@@ -2448,7 +2447,7 @@ pub struct ResponseDoneEvent {
     /// The unique ID of the server event.
     pub event_id: String,
     /// The response resource.
-    pub response: serde_json::Value,
+    pub response: RealtimeResponse,
     /// The event type, must be `response.done`.
     #[serde(rename = "type")]
     pub type_: String,

@@ -162,7 +162,68 @@ class Parser:
 
     def __init__(self):
         self.known_types: set[str] = set()
+        # Maps original Python name → prefixed Rust name (for generic names)
+        self.name_map: dict[str, str] = {}
         self._pending_enums: list[RustEnum] = []
+
+    def prescan_file(self, path: Path, prefix: str = ""):
+        """Pass 0: collect type names without generating code.
+
+        This allows cross-file references within a domain to resolve
+        to proper type names instead of serde_json::Value.
+        Registers both original Python name AND prefixed Rust name.
+        """
+        source = path.read_text()
+        try:
+            tree = ast.parse(source)
+        except SyntaxError:
+            return
+
+        generic_names = {"Content", "Part", "Summary", "Action", "Output", "Result",
+                         "Tool", "Item", "Error", "Details", "Environment", "Operation",
+                         "Outcome", "Errors", "Choice", "Function"}
+
+        for node in ast.iter_child_nodes(tree):
+            # TypeAlias
+            if isinstance(node, ast.AnnAssign) and self._is_type_alias(node):
+                if isinstance(node.target, ast.Name) and node.target.id:
+                    self.known_types.add(node.target.id)
+            # Assignment alias
+            elif isinstance(node, ast.Assign) and len(node.targets) == 1:
+                target = node.targets[0]
+                if isinstance(target, ast.Name) and isinstance(node.value, ast.Subscript):
+                    self.known_types.add(target.id)
+            # Classes
+            elif isinstance(node, ast.ClassDef):
+                orig = node.name
+                name = orig
+                if prefix and name in generic_names:
+                    name = f"{prefix}{name}"
+                # Register BOTH original and prefixed name
+                self.known_types.add(orig)
+                self.known_types.add(name)
+                if orig != name:
+                    if orig in self.name_map and self.name_map[orig] != name:
+                        # Ambiguous: same original name maps to different prefixed names
+                        del self.name_map[orig]
+                        self.known_types.discard(orig)  # prevent using bare name
+                    else:
+                        self.name_map[orig] = name
+                # Also prescan nested classes
+                for inner in node.body:
+                    if isinstance(inner, ast.ClassDef):
+                        inner_orig = inner.name
+                        inner_name = inner_orig
+                        if inner_name in generic_names:
+                            inner_name = f"{name}{inner_name}"
+                        self.known_types.add(inner_orig)
+                        self.known_types.add(inner_name)
+                        if inner_orig != inner_name:
+                            if inner_orig in self.name_map and self.name_map[inner_orig] != inner_name:
+                                del self.name_map[inner_orig]
+                                self.known_types.discard(inner_orig)
+                            else:
+                                self.name_map[inner_orig] = inner_name
 
     def parse_file(self, path: Path, prefix: str = "") -> list[RustItem]:
         """Parse a single Python file, returning Rust items."""
@@ -179,14 +240,16 @@ class Parser:
             # TypeAlias = Literal[...] or TypeAlias = Union[...]
             if isinstance(node, ast.AnnAssign) and self._is_type_alias(node):
                 item = self._parse_type_alias(node, str(path))
-                if item and item.name not in self.known_types:
+                if item and item.name not in seen_in_file:
+                    seen_in_file.add(item.name)
                     self.known_types.add(item.name)
                     items.append(item)
 
             # Regular assignment: Foo = Literal[...] (older pattern)
             elif isinstance(node, ast.Assign) and len(node.targets) == 1:
                 item = self._parse_assign_alias(node, str(path))
-                if item and item.name not in self.known_types:
+                if item and item.name not in seen_in_file:
+                    seen_in_file.add(item.name)
                     self.known_types.add(item.name)
                     items.append(item)
 
@@ -266,7 +329,8 @@ class Parser:
         rust_type = self._convert_type(value)
         if rust_type and rust_type != "serde_json::Value":
             return RustTypeAlias(name=name, target=rust_type, source_file=source)
-        return None
+        # Still emit a Value alias so the name is defined (prevents compile errors)
+        return RustTypeAlias(name=name, target="serde_json::Value", source_file=source)
 
     def _convert_union_alias(self, name: str, node: ast.Subscript, source: str) -> Optional[RustItem]:
         """Convert Union[A, B, C] to enum or type alias."""
@@ -309,7 +373,7 @@ class Parser:
                     # Create type alias for now (proper tagged enum is complex)
                     return RustTypeAlias(
                         name=name,
-                        target=f"serde_json::Value /* Union: {', '.join(variant_names)} */",
+                        target="serde_json::Value",
                         source_file=source,
                     )
         return None
@@ -478,6 +542,10 @@ class Parser:
             name = node.id
             if name in TYPE_MAP:
                 return TYPE_MAP[name]
+            # Resolve prefixed name (e.g. Choice → ChatCompletionChoice)
+            resolved = self.name_map.get(name, name)
+            if resolved in self.known_types:
+                return resolved
             if name in self.known_types:
                 return name
             # Check if it's a builtins type we should map
@@ -799,34 +867,44 @@ class SyncEngine:
                 domain_data[name] = (Parser(), [], set())
             return domain_data[name]
 
-        # 1. Process subdirectory domains
+        # Collect all Python files per domain (used for both passes)
+        domain_files: dict[str, list[tuple[Path, str]]] = {}  # domain → [(path, prefix)]
+
         for subdir in sorted(self.python_root.iterdir()):
             if not subdir.is_dir() or subdir.name.startswith("_"):
                 continue
             if subdir.name in ("shared_params", "__pycache__"):
                 continue
             if subdir.name in SUBDIR_DOMAINS:
-                parser, items, seen = get_domain(subdir.name)
+                parser, _, _ = get_domain(subdir.name)
                 for pyfile in sorted(subdir.glob("*.py")):
                     if pyfile.name.startswith("_") or pyfile.name.endswith("_param.py"):
                         continue
                     prefix = parser.file_prefix(pyfile)
-                    for item in parser.parse_file(pyfile, prefix=prefix):
-                        if item.name not in seen:
-                            seen.add(item.name)
-                            items.append(item)
+                    domain_files.setdefault(subdir.name, []).append((pyfile, prefix))
 
-        # 2. Process top-level files → merge into domain collections
         for pyfile in sorted(self.python_root.glob("*.py")):
             if pyfile.name.startswith("_") or pyfile.name.endswith("_param.py"):
                 continue
             domain = route_toplevel_file(pyfile.name)
-            parser, items, seen = get_domain(domain)
+            parser, _, _ = get_domain(domain)
             prefix = parser.file_prefix(pyfile)
-            for item in parser.parse_file(pyfile, prefix=prefix):
-                if item.name not in seen:
-                    seen.add(item.name)
-                    items.append(item)
+            domain_files.setdefault(domain, []).append((pyfile, prefix))
+
+        # Pass 0: prescan domain files to collect type names (enables cross-file refs)
+        for domain, files in domain_files.items():
+            parser, _, _ = domain_data[domain]
+            for pyfile, prefix in files:
+                parser.prescan_file(pyfile, prefix=prefix)
+
+        # Pass 1: full parse with all type names known
+        for domain, files in domain_files.items():
+            parser, items, seen = domain_data[domain]
+            for pyfile, prefix in files:
+                for item in parser.parse_file(pyfile, prefix=prefix):
+                    if item.name not in seen:
+                        seen.add(item.name)
+                        items.append(item)
 
         # 3. Write all domains
         for domain in sorted(domain_data):

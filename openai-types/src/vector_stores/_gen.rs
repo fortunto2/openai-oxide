@@ -18,7 +18,7 @@ pub struct FileBatchCreateParams {
     pub file_ids: Option<serde_json::Value>,
     /// A list of objects that each include a `file_id` plus optional `attributes` or
     #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub files: Option<Vec<serde_json::Value>>,
+    pub files: Option<Vec<File>>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -201,7 +201,7 @@ pub struct VectorStoreFile {
     pub created_at: i64,
     /// The last error associated with this vector store file.
     #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub last_error: Option<serde_json::Value>,
+    pub last_error: Option<LastError>,
     /// The object type, which is always `vector_store.file`.
     pub object: String,
     /// The status of the vector store file, which can be either `in_progress`,
@@ -255,7 +255,7 @@ pub struct VectorStoreFileBatch {
     pub id: String,
     /// The Unix timestamp (in seconds) for when the vector store files batch was
     pub created_at: i64,
-    pub file_counts: serde_json::Value,
+    pub file_counts: FileCounts,
     /// The object type, which is always `vector_store.file_batch`.
     pub object: String,
     /// The status of the vector store files batch, which can be either `in_progress`,
@@ -302,7 +302,7 @@ pub struct VectorStore {
     pub id: String,
     /// The Unix timestamp (in seconds) for when the vector store was created.
     pub created_at: i64,
-    pub file_counts: serde_json::Value,
+    pub file_counts: FileCounts,
     /// The Unix timestamp (in seconds) for when the vector store was last active.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub last_active_at: Option<i64>,
@@ -319,7 +319,7 @@ pub struct VectorStore {
     pub usage_bytes: i64,
     /// The expiration policy for a vector store.
     #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub expires_after: Option<serde_json::Value>,
+    pub expires_after: Option<ExpiresAfter>,
     /// The Unix timestamp (in seconds) for when the vector store will expire.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub expires_at: Option<i64>,
@@ -336,7 +336,7 @@ pub struct VectorStoreCreateParams {
     pub description: Option<String>,
     /// The expiration policy for a vector store.
     #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub expires_after: Option<serde_json::Value>,
+    pub expires_after: Option<ExpiresAfter>,
     /// A list of [File](https://platform.openai.com/docs/api-reference/files) IDs that
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub file_ids: Option<serde_json::Value>,
@@ -390,13 +390,13 @@ pub struct VectorStoreSearchParams {
     pub query: String,
     /// A filter to apply based on file attributes.
     #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub filters: Option<serde_json::Value>,
+    pub filters: Option<Filters>,
     /// The maximum number of results to return.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub max_num_results: Option<i64>,
     /// Ranking options for search.
     #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub ranking_options: Option<serde_json::Value>,
+    pub ranking_options: Option<RankingOptions>,
     /// Whether to rewrite the natural language query for vector search.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub rewrite_query: Option<bool>,
@@ -444,7 +444,7 @@ pub struct VectorStoreSearchResponse {
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub attributes: Option<std::collections::HashMap<String, serde_json::Value>>,
     /// Content chunks from the file.
-    pub content: Vec<serde_json::Value>,
+    pub content: Vec<VectorStoreContent>,
     /// The ID of the vector store file.
     pub file_id: String,
     /// The name of the vector store file.
@@ -458,7 +458,7 @@ pub struct VectorStoreSearchResponse {
 pub struct VectorStoreUpdateParams {
     /// The expiration policy for a vector store.
     #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub expires_after: Option<serde_json::Value>,
+    pub expires_after: Option<ExpiresAfter>,
     /// Set of 16 key-value pairs that can be attached to an object.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub metadata: Option<serde_json::Value>,

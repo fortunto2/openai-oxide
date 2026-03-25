@@ -8,7 +8,7 @@ use serde::{Deserialize, Serialize};
 #[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
 pub struct BatchErrors {
     #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub data: Option<Vec<serde_json::Value>>,
+    pub data: Option<Vec<BatchError>>,
     /// The object type, which is always `list`.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub object: Option<String>,
@@ -65,7 +65,7 @@ pub struct Batch {
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub error_file_id: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub errors: Option<serde_json::Value>,
+    pub errors: Option<BatchErrors>,
     /// The Unix timestamp (in seconds) for when the batch expired.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub expired_at: Option<i64>,
@@ -92,10 +92,10 @@ pub struct Batch {
     pub output_file_id: Option<String>,
     /// The request counts for different statuses within the batch.
     #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub request_counts: Option<serde_json::Value>,
+    pub request_counts: Option<BatchRequestCounts>,
     /// Represents token usage details including input tokens, output tokens, a
     #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub usage: Option<serde_json::Value>,
+    pub usage: Option<BatchUsage>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -134,7 +134,7 @@ pub struct BatchCreateParams {
     pub metadata: Option<serde_json::Value>,
     /// The expiration policy for the output and/or error file that are generated for a
     #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub output_expires_after: Option<serde_json::Value>,
+    pub output_expires_after: Option<OutputExpiresAfter>,
 }
 
 /// The expiration policy for the output and/or error file that are generated for a batch.
@@ -210,11 +210,11 @@ pub struct BatchUsage {
     /// The number of input tokens.
     pub input_tokens: i64,
     /// A detailed breakdown of the input tokens.
-    pub input_tokens_details: serde_json::Value,
+    pub input_tokens_details: InputTokensDetails,
     /// The number of output tokens.
     pub output_tokens: i64,
     /// A detailed breakdown of the output tokens.
-    pub output_tokens_details: serde_json::Value,
+    pub output_tokens_details: OutputTokensDetails,
     /// The total number of tokens used.
     pub total_tokens: i64,
 }

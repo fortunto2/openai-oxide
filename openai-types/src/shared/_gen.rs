@@ -314,7 +314,7 @@ pub struct FunctionDefinition {
     pub description: Option<String>,
     /// The parameters the functions accepts, described as a JSON Schema object.
     #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub parameters: Option<serde_json::Value>,
+    pub parameters: Option<FunctionParameters>,
     /// Whether to enable strict schema adherence when generating the function call.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub strict: Option<bool>,
@@ -354,7 +354,7 @@ pub enum ReasoningSummary {
 pub struct Reasoning {
     /// Constrains effort on reasoning for
     #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub effort: Option<serde_json::Value>,
+    pub effort: Option<ReasoningEffort>,
     /// **Deprecated:** use `summary` instead.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub generate_summary: Option<ReasoningGenerateSummary>,
@@ -412,7 +412,7 @@ pub struct JSONSchema {
 #[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
 pub struct ResponseFormatJSONSchema {
     /// Structured Outputs configuration options, including a JSON Schema.
-    pub json_schema: serde_json::Value,
+    pub json_schema: JSONSchema,
     /// The type of response format being defined. Always `json_schema`.
     #[serde(rename = "type")]
     pub type_: String,

@@ -80,7 +80,7 @@ pub struct Usage {
     /// The number of tokens (images and text) in the input prompt.
     pub input_tokens: i64,
     /// The input tokens detailed information for the image generation.
-    pub input_tokens_details: serde_json::Value,
+    pub input_tokens_details: UsageInputTokensDetails,
     /// The number of image tokens in the output image.
     pub output_tokens: i64,
     /// The total number of tokens (images and text) used for the image generation.
@@ -159,7 +159,7 @@ pub struct ImageEditCompletedEvent {
     #[serde(rename = "type")]
     pub type_: String,
     /// For the GPT image models only, the token usage information for the image
-    pub usage: serde_json::Value,
+    pub usage: Usage,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -436,7 +436,7 @@ pub struct ImageGenCompletedEvent {
     #[serde(rename = "type")]
     pub type_: String,
     /// For the GPT image models only, the token usage information for the image
-    pub usage: serde_json::Value,
+    pub usage: Usage,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -738,7 +738,7 @@ pub struct ImagesResponse {
     pub background: Option<ImagesResponseBackground>,
     /// The list of generated images.
     #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub data: Option<Vec<serde_json::Value>>,
+    pub data: Option<Vec<Image>>,
     /// The output format of the image generation. Either `png`, `webp`, or `jpeg`.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub output_format: Option<ImagesResponseOutputFormat>,
@@ -750,5 +750,5 @@ pub struct ImagesResponse {
     pub size: Option<ImagesResponseSize>,
     /// For `gpt-image-1` only, the token usage information for the image generation.
     #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub usage: Option<serde_json::Value>,
+    pub usage: Option<Usage>,
 }

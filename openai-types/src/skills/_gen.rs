@@ -37,7 +37,7 @@ pub struct SkillVersion {
 #[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
 pub struct SkillVersionList {
     /// A list of items
-    pub data: Vec<serde_json::Value>,
+    pub data: Vec<SkillVersion>,
     /// The ID of the first item in the list.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub first_id: Option<String>,
@@ -124,7 +124,7 @@ pub struct SkillCreateParams {
 #[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
 pub struct SkillList {
     /// A list of items
-    pub data: Vec<serde_json::Value>,
+    pub data: Vec<Skill>,
     /// The ID of the first item in the list.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub first_id: Option<String>,

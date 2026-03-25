@@ -21,7 +21,7 @@ pub struct BatchCancelledWebhookEvent {
     /// The Unix timestamp (in seconds) of when the batch API request was cancelled.
     pub created_at: i64,
     /// Event data payload.
-    pub data: serde_json::Value,
+    pub data: Data,
     /// The type of the event. Always `batch.cancelled`.
     #[serde(rename = "type")]
     pub type_: String,
@@ -39,7 +39,7 @@ pub struct BatchCompletedWebhookEvent {
     /// The Unix timestamp (in seconds) of when the batch API request was completed.
     pub created_at: i64,
     /// Event data payload.
-    pub data: serde_json::Value,
+    pub data: Data,
     /// The type of the event. Always `batch.completed`.
     #[serde(rename = "type")]
     pub type_: String,
@@ -57,7 +57,7 @@ pub struct BatchExpiredWebhookEvent {
     /// The Unix timestamp (in seconds) of when the batch API request expired.
     pub created_at: i64,
     /// Event data payload.
-    pub data: serde_json::Value,
+    pub data: Data,
     /// The type of the event. Always `batch.expired`.
     #[serde(rename = "type")]
     pub type_: String,
@@ -75,7 +75,7 @@ pub struct BatchFailedWebhookEvent {
     /// The Unix timestamp (in seconds) of when the batch API request failed.
     pub created_at: i64,
     /// Event data payload.
-    pub data: serde_json::Value,
+    pub data: Data,
     /// The type of the event. Always `batch.failed`.
     #[serde(rename = "type")]
     pub type_: String,
@@ -93,7 +93,7 @@ pub struct EvalRunCanceledWebhookEvent {
     /// The Unix timestamp (in seconds) of when the eval run was canceled.
     pub created_at: i64,
     /// Event data payload.
-    pub data: serde_json::Value,
+    pub data: Data,
     /// The type of the event. Always `eval.run.canceled`.
     #[serde(rename = "type")]
     pub type_: String,
@@ -111,7 +111,7 @@ pub struct EvalRunFailedWebhookEvent {
     /// The Unix timestamp (in seconds) of when the eval run failed.
     pub created_at: i64,
     /// Event data payload.
-    pub data: serde_json::Value,
+    pub data: Data,
     /// The type of the event. Always `eval.run.failed`.
     #[serde(rename = "type")]
     pub type_: String,
@@ -129,7 +129,7 @@ pub struct EvalRunSucceededWebhookEvent {
     /// The Unix timestamp (in seconds) of when the eval run succeeded.
     pub created_at: i64,
     /// Event data payload.
-    pub data: serde_json::Value,
+    pub data: Data,
     /// The type of the event. Always `eval.run.succeeded`.
     #[serde(rename = "type")]
     pub type_: String,
@@ -147,7 +147,7 @@ pub struct FineTuningJobCancelledWebhookEvent {
     /// The Unix timestamp (in seconds) of when the fine-tuning job was cancelled.
     pub created_at: i64,
     /// Event data payload.
-    pub data: serde_json::Value,
+    pub data: Data,
     /// The type of the event. Always `fine_tuning.job.cancelled`.
     #[serde(rename = "type")]
     pub type_: String,
@@ -165,7 +165,7 @@ pub struct FineTuningJobFailedWebhookEvent {
     /// The Unix timestamp (in seconds) of when the fine-tuning job failed.
     pub created_at: i64,
     /// Event data payload.
-    pub data: serde_json::Value,
+    pub data: Data,
     /// The type of the event. Always `fine_tuning.job.failed`.
     #[serde(rename = "type")]
     pub type_: String,
@@ -183,7 +183,7 @@ pub struct FineTuningJobSucceededWebhookEvent {
     /// The Unix timestamp (in seconds) of when the fine-tuning job succeeded.
     pub created_at: i64,
     /// Event data payload.
-    pub data: serde_json::Value,
+    pub data: Data,
     /// The type of the event. Always `fine_tuning.job.succeeded`.
     #[serde(rename = "type")]
     pub type_: String,
@@ -211,7 +211,7 @@ pub struct RealtimeCallIncomingWebhookEvent {
     /// The Unix timestamp (in seconds) of when the model response was completed.
     pub created_at: i64,
     /// Event data payload.
-    pub data: serde_json::Value,
+    pub data: Data,
     /// The type of the event. Always `realtime.call.incoming`.
     #[serde(rename = "type")]
     pub type_: String,
@@ -229,7 +229,7 @@ pub struct ResponseCancelledWebhookEvent {
     /// The Unix timestamp (in seconds) of when the model response was cancelled.
     pub created_at: i64,
     /// Event data payload.
-    pub data: serde_json::Value,
+    pub data: Data,
     /// The type of the event. Always `response.cancelled`.
     #[serde(rename = "type")]
     pub type_: String,
@@ -247,7 +247,7 @@ pub struct ResponseCompletedWebhookEvent {
     /// The Unix timestamp (in seconds) of when the model response was completed.
     pub created_at: i64,
     /// Event data payload.
-    pub data: serde_json::Value,
+    pub data: Data,
     /// The type of the event. Always `response.completed`.
     #[serde(rename = "type")]
     pub type_: String,
@@ -265,7 +265,7 @@ pub struct ResponseFailedWebhookEvent {
     /// The Unix timestamp (in seconds) of when the model response failed.
     pub created_at: i64,
     /// Event data payload.
-    pub data: serde_json::Value,
+    pub data: Data,
     /// The type of the event. Always `response.failed`.
     #[serde(rename = "type")]
     pub type_: String,
@@ -283,7 +283,7 @@ pub struct ResponseIncompleteWebhookEvent {
     /// The Unix timestamp (in seconds) of when the model response was interrupted.
     pub created_at: i64,
     /// Event data payload.
-    pub data: serde_json::Value,
+    pub data: Data,
     /// The type of the event. Always `response.incomplete`.
     #[serde(rename = "type")]
     pub type_: String,

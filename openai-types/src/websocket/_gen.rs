@@ -27,3 +27,5 @@ pub struct WebSocketConnectionOptions {
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub write_limit: Option<serde_json::Value>,
 }
+
+pub type WebsocketConnectionOptions = WebSocketConnectionOptions;

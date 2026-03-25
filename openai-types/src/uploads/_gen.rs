@@ -87,7 +87,7 @@ pub struct UploadCreateParams {
     pub purpose: serde_json::Value,
     /// The expiration policy for a file.
     #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub expires_after: Option<serde_json::Value>,
+    pub expires_after: Option<ExpiresAfter>,
 }
 
 /// The expiration policy for a file.

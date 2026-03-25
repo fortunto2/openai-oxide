@@ -28,7 +28,7 @@ pub struct DpoHyperparameters {
 pub struct DpoMethod {
     /// The hyperparameters used for the DPO fine-tuning job.
     #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub hyperparameters: Option<serde_json::Value>,
+    pub hyperparameters: Option<DpoHyperparameters>,
 }
 
 /// For fine-tuning jobs that have `failed`, this will contain more information on the cause of the failure.
@@ -80,13 +80,13 @@ pub struct Method {
     pub type_: MethodType,
     /// Configuration for the DPO fine-tuning method.
     #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub dpo: Option<serde_json::Value>,
+    pub dpo: Option<DpoMethod>,
     /// Configuration for the reinforcement fine-tuning method.
     #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub reinforcement: Option<serde_json::Value>,
+    pub reinforcement: Option<ReinforcementMethod>,
     /// Configuration for the supervised fine-tuning method.
     #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub supervised: Option<serde_json::Value>,
+    pub supervised: Option<SupervisedMethod>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -117,7 +117,7 @@ pub struct FineTuningJob {
     pub created_at: i64,
     /// For fine-tuning jobs that have `failed`, this will contain more information on
     #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub error: Option<serde_json::Value>,
+    pub error: Option<JobError>,
     /// The name of the fine-tuned model that is being created.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub fine_tuned_model: Option<String>,
@@ -125,7 +125,7 @@ pub struct FineTuningJob {
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub finished_at: Option<i64>,
     /// The hyperparameters used for the fine-tuning job.
-    pub hyperparameters: serde_json::Value,
+    pub hyperparameters: Hyperparameters,
     /// The base model that is being fine-tuned.
     pub model: String,
     /// The object type, which is always "fine_tuning.job".
@@ -151,13 +151,13 @@ pub struct FineTuningJob {
     pub estimated_finish: Option<i64>,
     /// A list of integrations to enable for this fine-tuning job.
     #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub integrations: Option<Vec<serde_json::Value>>,
+    pub integrations: Option<Vec<FineTuningJobWandbIntegrationObject>>,
     /// Set of 16 key-value pairs that can be attached to an object.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub metadata: Option<serde_json::Value>,
     /// The method used for fine-tuning.
     #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub method: Option<serde_json::Value>,
+    pub method: Option<Method>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -228,7 +228,7 @@ pub struct FineTuningJobWandbIntegrationObject {
     #[serde(rename = "type")]
     pub type_: String,
     /// The settings for your integration with Weights and Biases.
-    pub wandb: serde_json::Value,
+    pub wandb: FineTuningJobWandbIntegration,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -240,16 +240,16 @@ pub struct JobCreateParams {
     pub training_file: String,
     /// The hyperparameters used for the fine-tuning job. This value is now deprecated
     #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub hyperparameters: Option<serde_json::Value>,
+    pub hyperparameters: Option<Hyperparameters>,
     /// A list of integrations to enable for your fine-tuning job.
     #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub integrations: Option<Vec<serde_json::Value>>,
+    pub integrations: Option<Vec<Integration>>,
     /// Set of 16 key-value pairs that can be attached to an object.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub metadata: Option<serde_json::Value>,
     /// The method used for fine-tuning.
     #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub method: Option<serde_json::Value>,
+    pub method: Option<Method>,
     /// The seed controls the reproducibility of the job.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub seed: Option<i64>,
@@ -285,7 +285,7 @@ pub struct Integration {
     #[serde(rename = "type")]
     pub type_: String,
     /// The settings for your integration with Weights and Biases.
-    pub wandb: serde_json::Value,
+    pub wandb: IntegrationWandb,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -364,7 +364,7 @@ pub struct ReinforcementMethod {
     pub grader: Grader,
     /// The hyperparameters used for the reinforcement fine-tuning job.
     #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub hyperparameters: Option<serde_json::Value>,
+    pub hyperparameters: Option<ReinforcementHyperparameters>,
 }
 
 /// The hyperparameters used for the fine-tuning job.
@@ -388,5 +388,5 @@ pub struct SupervisedHyperparameters {
 pub struct SupervisedMethod {
     /// The hyperparameters used for the fine-tuning job.
     #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub hyperparameters: Option<serde_json::Value>,
+    pub hyperparameters: Option<SupervisedHyperparameters>,
 }

@@ -31,12 +31,12 @@ pub struct Video {
     pub created_at: i64,
     /// Error payload that explains why generation failed, if applicable.
     #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub error: Option<serde_json::Value>,
+    pub error: Option<VideoCreateError>,
     /// Unix timestamp (seconds) for when the downloadable assets expire, if set.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub expires_at: Option<i64>,
     /// The video generation model that produced the job.
-    pub model: serde_json::Value,
+    pub model: VideoModel,
     /// The object type, which is always `video`.
     pub object: String,
     /// Approximate completion percentage for the generation task.
@@ -50,7 +50,7 @@ pub struct Video {
     /// Duration of the generated clip in seconds.
     pub seconds: String,
     /// The resolution of the generated video.
-    pub size: serde_json::Value,
+    pub size: VideoSize,
     /// Current lifecycle status of the video job.
     pub status: VideoStatus,
 }
@@ -94,16 +94,16 @@ pub struct VideoCreateParams {
     pub prompt: String,
     /// Optional reference asset upload or reference object that guides generation.
     #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub input_reference: Option<serde_json::Value>,
+    pub input_reference: Option<InputReference>,
     /// The video generation model to use (allowed values: sora-2, sora-2-pro).
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub model: Option<serde_json::Value>,
     /// Clip duration in seconds (allowed values: 4, 8, 12). Defaults to 4 seconds.
     #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub seconds: Option<serde_json::Value>,
+    pub seconds: Option<VideoSeconds>,
     /// Output resolution formatted as width x height (allowed values: 720x1280,
     #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub size: Option<serde_json::Value>,
+    pub size: Option<VideoSize>,
 }
 
 pub type InputReference = serde_json::Value;
@@ -146,7 +146,7 @@ pub struct VideoEditParams {
     /// Text prompt that describes how to edit the source video.
     pub prompt: String,
     /// Reference to the completed video to edit.
-    pub video: serde_json::Value,
+    pub video: Video,
 }
 
 /// Reference to the completed video.
@@ -163,7 +163,7 @@ pub struct VideoExtendParams {
     /// Updated text prompt that directs the extension generation.
     pub prompt: String,
     /// Length of the newly generated extension segment in seconds (allowed values: 4,
-    pub seconds: serde_json::Value,
+    pub seconds: VideoSeconds,
     /// Reference to the completed video to extend.
     pub video: Video,
 }

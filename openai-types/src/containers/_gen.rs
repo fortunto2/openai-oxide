@@ -117,7 +117,7 @@ pub struct ContainerCreateParams {
     pub name: String,
     /// Container expiration time in seconds relative to the 'anchor' time.
     #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub expires_after: Option<serde_json::Value>,
+    pub expires_after: Option<ExpiresAfter>,
     /// IDs of files to copy to the container.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub file_ids: Option<serde_json::Value>,
@@ -126,10 +126,10 @@ pub struct ContainerCreateParams {
     pub memory_limit: Option<ContainerCreateParamsMemoryLimit>,
     /// Network access policy for the container.
     #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub network_policy: Option<serde_json::Value>,
+    pub network_policy: Option<NetworkPolicy>,
     /// An optional list of skills referenced by id or inline data.
     #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub skills: Option<Vec<serde_json::Value>>,
+    pub skills: Option<Vec<Skill>>,
 }
 
 /// Container expiration time in seconds relative to the 'anchor' time.
@@ -184,7 +184,7 @@ pub struct ContainerCreateResponse {
     pub status: String,
     /// The container will expire after this time period. The anchor is the reference
     #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub expires_after: Option<serde_json::Value>,
+    pub expires_after: Option<ExpiresAfter>,
     /// Unix timestamp (in seconds) when the container was last active.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub last_active_at: Option<i64>,
@@ -252,7 +252,7 @@ pub struct ContainerListResponse {
     pub status: String,
     /// The container will expire after this time period. The anchor is the reference
     #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub expires_after: Option<serde_json::Value>,
+    pub expires_after: Option<ExpiresAfter>,
     /// Unix timestamp (in seconds) when the container was last active.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub last_active_at: Option<i64>,
@@ -293,7 +293,7 @@ pub struct ContainerRetrieveResponse {
     pub status: String,
     /// The container will expire after this time period. The anchor is the reference
     #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub expires_after: Option<serde_json::Value>,
+    pub expires_after: Option<ExpiresAfter>,
     /// Unix timestamp (in seconds) when the container was last active.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub last_active_at: Option<i64>,

@@ -25,9 +25,9 @@ pub struct ToolResourcesFileSearch {
 #[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
 pub struct ToolResources {
     #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub code_interpreter: Option<serde_json::Value>,
+    pub code_interpreter: Option<ToolResourcesCodeInterpreter>,
     #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub file_search: Option<serde_json::Value>,
+    pub file_search: Option<ToolResourcesFileSearch>,
 }
 
 /// Represents an `assistant` that can call the model and use tools.
@@ -55,16 +55,16 @@ pub struct Assistant {
     /// The object type, which is always `assistant`.
     pub object: String,
     /// A list of tool enabled on the assistant.
-    pub tools: Vec<serde_json::Value>,
+    pub tools: Vec<AssistantTool>,
     /// Specifies the format that the model must output.
     #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub response_format: Option<serde_json::Value>,
+    pub response_format: Option<AssistantResponseFormatOption>,
     /// What sampling temperature to use, between 0 and 2.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub temperature: Option<f64>,
     /// A set of resources that are used by the assistant's tools.
     #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub tool_resources: Option<serde_json::Value>,
+    pub tool_resources: Option<ToolResources>,
     /// An alternative to sampling with temperature, called nucleus sampling, where the
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub top_p: Option<f64>,
@@ -98,7 +98,7 @@ pub struct AssistantCreateParams {
     pub temperature: Option<f64>,
     /// A set of resources that are used by the assistant's tools.
     #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub tool_resources: Option<serde_json::Value>,
+    pub tool_resources: Option<ToolResources>,
     /// A list of tool enabled on the assistant.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub tools: Option<Vec<serde_json::Value>>,
@@ -129,7 +129,7 @@ pub struct ToolResourcesFileSearchVectorStoreChunkingStrategyStaticStatic {
 #[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
 pub struct ToolResourcesFileSearchVectorStoreChunkingStrategyStatic {
     #[serde(rename = "static")]
-    pub static_: serde_json::Value,
+    pub static_: ToolResourcesFileSearchVectorStoreChunkingStrategyStaticStatic,
     /// Always `static`.
     #[serde(rename = "type")]
     pub type_: String,
@@ -198,7 +198,7 @@ pub enum AssistantResponseFormatOption {
 #[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
 pub struct ThreadCreated {
     /// Represents a thread that contains
-    pub data: serde_json::Value,
+    pub data: Thread,
     pub event: String,
     /// Whether to enable input audio transcription.
     #[serde(skip_serializing_if = "Option::is_none", default)]
@@ -363,7 +363,7 @@ pub struct ThreadRunStepExpired {
 #[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
 pub struct ThreadMessageCreated {
     /// Represents a message within a
-    pub data: serde_json::Value,
+    pub data: Message,
     pub event: String,
 }
 
@@ -372,7 +372,7 @@ pub struct ThreadMessageCreated {
 #[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
 pub struct ThreadMessageInProgress {
     /// Represents a message within a
-    pub data: serde_json::Value,
+    pub data: Message,
     pub event: String,
 }
 
@@ -390,7 +390,7 @@ pub struct ThreadMessageDelta {
 #[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
 pub struct ThreadMessageCompleted {
     /// Represents a message within a
-    pub data: serde_json::Value,
+    pub data: Message,
     pub event: String,
 }
 
@@ -399,7 +399,7 @@ pub struct ThreadMessageCompleted {
 #[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
 pub struct ThreadMessageIncomplete {
     /// Represents a message within a
-    pub data: serde_json::Value,
+    pub data: Message,
     pub event: String,
 }
 
@@ -435,7 +435,7 @@ pub struct AssistantToolChoice {
     #[serde(rename = "type")]
     pub type_: AssistantToolChoiceType,
     #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub function: Option<serde_json::Value>,
+    pub function: Option<AssistantToolChoiceFunction>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -483,7 +483,7 @@ pub struct AssistantUpdateParams {
     pub temperature: Option<f64>,
     /// A set of resources that are used by the assistant's tools.
     #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub tool_resources: Option<serde_json::Value>,
+    pub tool_resources: Option<ToolResources>,
     /// A list of tool enabled on the assistant.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub tools: Option<Vec<serde_json::Value>>,
@@ -510,7 +510,7 @@ pub struct ChatKitWorkflow {
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub state_variables: Option<std::collections::HashMap<String, serde_json::Value>>,
     /// Tracing settings applied to the workflow.
-    pub tracing: serde_json::Value,
+    pub tracing: Tracing,
     /// Specific workflow version used for the session.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub version: Option<String>,
@@ -554,7 +554,7 @@ pub struct FileSearch {
     pub max_num_results: Option<i64>,
     /// The ranking options for the file search.
     #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub ranking_options: Option<serde_json::Value>,
+    pub ranking_options: Option<FileSearchRankingOptions>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -565,7 +565,7 @@ pub struct FileSearchTool {
     pub type_: String,
     /// Overrides for the file search tool.
     #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub file_search: Option<serde_json::Value>,
+    pub file_search: Option<FileSearch>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -592,7 +592,7 @@ pub struct Thread {
     pub object: String,
     /// A set of resources that are made available to the assistant's tools in this
     #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub tool_resources: Option<serde_json::Value>,
+    pub tool_resources: Option<ToolResources>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -626,13 +626,13 @@ pub struct ThreadCreateAndRunParamsBase {
     pub temperature: Option<f64>,
     /// Options to create a new thread.
     #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub thread: Option<serde_json::Value>,
+    pub thread: Option<Thread>,
     /// Controls which (if any) tool is called by the model. `none` means the model will
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub tool_choice: Option<serde_json::Value>,
     /// A set of resources that are used by the assistant's tools.
     #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub tool_resources: Option<serde_json::Value>,
+    pub tool_resources: Option<ToolResources>,
     /// Override the tools the assistant can use for this run.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub tools: Option<Vec<serde_json::Value>>,
@@ -641,7 +641,7 @@ pub struct ThreadCreateAndRunParamsBase {
     pub top_p: Option<f64>,
     /// Controls for how a thread will be truncated prior to the run.
     #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub truncation_strategy: Option<serde_json::Value>,
+    pub truncation_strategy: Option<TruncationStrategy>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -684,7 +684,7 @@ pub struct ThreadMessage {
     pub role: ThreadMessageRole,
     /// A list of files attached to the message, and the tools they should be added to.
     #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub attachments: Option<Vec<serde_json::Value>>,
+    pub attachments: Option<Vec<ThreadMessageAttachment>>,
     /// Set of 16 key-value pairs that can be attached to an object.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub metadata: Option<serde_json::Value>,
@@ -720,7 +720,7 @@ pub struct ThreadToolResourcesFileSearchVectorStoreChunkingStrategyStaticStatic 
 #[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
 pub struct ThreadToolResourcesFileSearchVectorStoreChunkingStrategyStatic {
     #[serde(rename = "static")]
-    pub static_: serde_json::Value,
+    pub static_: ThreadToolResourcesFileSearchVectorStoreChunkingStrategyStaticStatic,
     /// Always `static`.
     #[serde(rename = "type")]
     pub type_: String,
@@ -750,7 +750,7 @@ pub struct ThreadToolResourcesFileSearch {
     pub vector_store_ids: Option<serde_json::Value>,
     /// A helper to create a
     #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub vector_stores: Option<Vec<serde_json::Value>>,
+    pub vector_stores: Option<Vec<ThreadToolResourcesFileSearchVectorStore>>,
 }
 
 /// A set of resources that are made available to the assistant's tools in this thread. The resources are specific to the type of tool. For example, the `code_interpreter` tool requires a list of file IDs, while the `file_search` tool requires a list of vector store IDs.
@@ -758,9 +758,9 @@ pub struct ThreadToolResourcesFileSearch {
 #[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
 pub struct ThreadToolResources {
     #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub code_interpreter: Option<serde_json::Value>,
+    pub code_interpreter: Option<ThreadToolResourcesCodeInterpreter>,
     #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub file_search: Option<serde_json::Value>,
+    pub file_search: Option<ThreadToolResourcesFileSearch>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -792,13 +792,13 @@ pub type ThreadCreateAndRunParams = serde_json::Value;
 pub struct ThreadCreateParams {
     /// A list of [messages](https://platform.openai.com/docs/api-reference/messages) to
     #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub messages: Option<Vec<serde_json::Value>>,
+    pub messages: Option<Vec<Message>>,
     /// Set of 16 key-value pairs that can be attached to an object.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub metadata: Option<serde_json::Value>,
     /// A set of resources that are made available to the assistant's tools in this
     #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub tool_resources: Option<serde_json::Value>,
+    pub tool_resources: Option<ToolResources>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -841,7 +841,7 @@ pub struct Message {
     pub role: MessageRole,
     /// A list of files attached to the message, and the tools they should be added to.
     #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub attachments: Option<Vec<serde_json::Value>>,
+    pub attachments: Option<Vec<MessageAttachment>>,
     /// Set of 16 key-value pairs that can be attached to an object.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub metadata: Option<serde_json::Value>,
@@ -863,5 +863,5 @@ pub struct ThreadUpdateParams {
     pub metadata: Option<serde_json::Value>,
     /// A set of resources that are made available to the assistant's tools in this
     #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub tool_resources: Option<serde_json::Value>,
+    pub tool_resources: Option<ToolResources>,
 }
