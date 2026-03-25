@@ -108,6 +108,10 @@ name = "websocket"
 required-features = ["websocket", "responses"]
 
 [[example]]
+name = "ws_stress"
+required-features = ["websocket", "responses"]
+
+[[example]]
 name = "integration_test"
 required-features = ["websocket", "responses"]
 
