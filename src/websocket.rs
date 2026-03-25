@@ -89,6 +89,7 @@ impl WsSession {
                     .map(|u| u.host_str().unwrap_or("api.openai.com").to_string())
                     .unwrap_or_else(|_| "api.openai.com".to_string()),
             )
+            .header("OpenAI-Beta", "responses=v1")
             .header("Connection", "Upgrade")
             .header("Upgrade", "websocket")
             .body(())
