@@ -2,11 +2,14 @@
 
 use serde::{Deserialize, Serialize};
 
-use super::common::Role;
+// Re-export Role from common so `types::responses::Role` works (async-openai compat).
+pub use super::common::ReasoningEffort;
+pub use super::common::Role;
 
 // Compat aliases for async-openai migration (their names differ from OpenAPI spec).
 // Users switching from async-openai can use these to minimize code changes.
 pub type CreateResponse = ResponseCreateRequest;
+pub type CreateResponseArgs = ResponseCreateRequest;
 pub type InputTokenDetails = InputTokensDetails;
 pub type OutputTokenDetails = OutputTokensDetails;
 
@@ -625,9 +628,10 @@ pub struct ResponseToolChoiceFunction {
 }
 
 /// Request body for `POST /responses`.
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, Default, Serialize)]
 pub struct ResponseCreateRequest {
     /// Model to use.
+    #[serde(default)]
     pub model: String,
 
     /// Input text or messages.
@@ -875,16 +879,49 @@ impl ResponseCreateRequest {
     }
 }
 
-/// Reasoning configuration for o-series models.
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct Reasoning {
-    /// Effort level: "none", "minimal", "low", "medium", "high", "xhigh".
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub effort: Option<String>,
-    /// Summary mode: "auto", "concise", "detailed".
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub summary: Option<String>,
+/// Summary mode for reasoning output.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "lowercase")]
+#[non_exhaustive]
+pub enum ReasoningSummary {
+    /// Automatically determine summary level.
+    Auto,
+    /// Brief summary.
+    Concise,
+    /// Detailed summary.
+    Detailed,
 }
+
+/// Reasoning configuration for o-series models.
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct Reasoning {
+    /// Effort level for reasoning.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub effort: Option<ReasoningEffort>,
+    /// Summary mode for reasoning output.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub summary: Option<ReasoningSummary>,
+}
+
+impl Reasoning {
+    /// Builder-style: set effort.
+    pub fn effort(&mut self, effort: ReasoningEffort) -> &mut Self {
+        self.effort = Some(effort);
+        self
+    }
+    /// Builder-style: set summary.
+    pub fn summary(&mut self, summary: ReasoningSummary) -> &mut Self {
+        self.summary = Some(summary);
+        self
+    }
+    /// Compat with async-openai's derive_builder pattern.
+    pub fn build(&self) -> Result<Self, String> {
+        Ok(self.clone())
+    }
+}
+
+/// Compat alias for async-openai builder pattern.
+pub type ReasoningArgs = Reasoning;
 
 /// Text output configuration.
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -1387,8 +1424,8 @@ mod tests {
             },
         ]);
         req.reasoning = Some(Reasoning {
-            effort: Some("high".into()),
-            summary: Some("auto".into()),
+            effort: Some(ReasoningEffort::High),
+            summary: Some(ReasoningSummary::Auto),
         });
         req.truncation = Some("auto".into());
         req.include = Some(vec!["file_search_call.results".into()]);
@@ -1533,7 +1570,7 @@ mod tests {
         assert_eq!(resp.service_tier, Some("default".into()));
         assert_eq!(resp.truncation, Some("auto".into()));
         let reasoning = resp.reasoning.as_ref().unwrap();
-        assert_eq!(reasoning.effort, Some("high".into()));
+        assert_eq!(reasoning.effort, Some(ReasoningEffort::High));
         assert_eq!(resp.parallel_tool_calls, Some(true));
         assert_eq!(resp.completed_at, Some(1677610605.0));
         assert_eq!(resp.instructions, Some("Be helpful".into()));
@@ -1673,8 +1710,8 @@ mod tests {
             .temperature(0.5)
             .max_output_tokens(2048)
             .reasoning(Reasoning {
-                effort: Some("high".into()),
-                summary: Some("concise".into()),
+                effort: Some(ReasoningEffort::High),
+                summary: Some(ReasoningSummary::Concise),
             })
             .truncation("auto")
             .store(true)

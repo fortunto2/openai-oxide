@@ -489,7 +489,7 @@ mod tests {
             user_location: None,
         }]);
         request.reasoning = Some(Reasoning {
-            effort: Some("high".into()),
+            effort: Some(crate::types::common::ReasoningEffort::High),
             summary: None,
         });
         request.truncation = Some("auto".into());
