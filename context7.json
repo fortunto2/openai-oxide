@@ -1,5 +1,7 @@
 {
   "$schema": "https://context7.com/schema/context7.json",
+  "url": "https://context7.com/fortunto2/openai-oxide",
+  "public_key": "pk_r3YAlM2GbNhuxOy5F8ls4",
   "projectTitle": "openai-oxide",
   "description": "High-performance OpenAI client for Rust, Node.js, and Python. 1:1 parity with official Python SDK. WebSocket sessions, streaming, hedged requests, WASM support.",
   "folders": ["docs/src", "examples", "src"],
