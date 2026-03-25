@@ -4,6 +4,573 @@ use serde::{Deserialize, Serialize};
 
 use super::common::Role;
 
+// Compat aliases for async-openai migration (their names differ from OpenAPI spec).
+// Users switching from async-openai can use these to minimize code changes.
+pub type CreateResponse = ResponseCreateRequest;
+pub type InputTokenDetails = InputTokensDetails;
+pub type OutputTokenDetails = OutputTokensDetails;
+
+// ── Granular input types (mirrors async-openai 0.33 / Python SDK) ──
+
+/// A simplified message input with role and content.
+///
+/// Used for easy construction of user/assistant/system/developer messages.
+/// Maps to Python SDK `EasyInputMessage`.
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub struct EasyInputMessage {
+    /// The type of the message input. Always `message`.
+    #[serde(rename = "type")]
+    pub r#type: MessageType,
+    /// The role of the message.
+    pub role: Role,
+    /// Text or structured content.
+    pub content: EasyInputContent,
+}
+
+/// Message type marker — always "message".
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[non_exhaustive]
+pub enum MessageType {
+    /// Message type.
+    #[serde(rename = "message")]
+    Message,
+}
+
+/// Content for an `EasyInputMessage` — either plain text or a structured content list.
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[serde(untagged)]
+#[non_exhaustive]
+pub enum EasyInputContent {
+    /// Plain text content.
+    Text(String),
+    /// Structured content list (text + images + files).
+    ContentList(Vec<InputContent>),
+}
+
+/// A single content item within an input message content list.
+///
+/// Maps to Python SDK `ResponseInputContent` union.
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[serde(tag = "type")]
+#[non_exhaustive]
+pub enum InputContent {
+    /// Text content.
+    #[serde(rename = "input_text")]
+    InputText(InputTextContent),
+    /// Image content.
+    #[serde(rename = "input_image")]
+    InputImage(InputImageContent),
+}
+
+/// Text content within an input message.
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct InputTextContent {
+    /// The text input.
+    pub text: String,
+}
+
+/// Image content within an input message.
+///
+/// Maps to Python SDK `ResponseInputImageContent`.
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub struct InputImageContent {
+    /// Image detail level.
+    pub detail: ImageDetail,
+    /// File ID for uploaded images.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub file_id: Option<String>,
+    /// URL or base64 data URL.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub image_url: Option<String>,
+}
+
+/// Image detail level for vision inputs.
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "snake_case")]
+#[non_exhaustive]
+pub enum ImageDetail {
+    /// Let the model decide.
+    Auto,
+    /// Low resolution — faster, fewer tokens.
+    Low,
+    /// High resolution — more detail, more tokens.
+    High,
+}
+
+/// An input item for the Responses API.
+///
+/// Union of easy messages and typed items (function calls, reasoning, etc.).
+/// Maps to async-openai `InputItem`.
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[serde(untagged)]
+#[non_exhaustive]
+pub enum InputItem {
+    /// A simplified message input.
+    EasyMessage(EasyInputMessage),
+    /// A typed item (function call, function call output, reasoning, etc.).
+    Item(Item),
+}
+
+/// A typed input item — function call, function call output, or reasoning.
+///
+/// Maps to the discriminated union in the Python SDK `ResponseInputItem`.
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[serde(tag = "type")]
+#[non_exhaustive]
+pub enum Item {
+    /// A function call from the model.
+    #[serde(rename = "function_call")]
+    FunctionCall(FunctionToolCall),
+    /// Output from a function call (sent back by the client).
+    #[serde(rename = "function_call_output")]
+    FunctionCallOutput(FunctionCallOutputItemParam),
+    /// Reasoning chain-of-thought item.
+    #[serde(rename = "reasoning")]
+    Reasoning(ReasoningItem),
+}
+
+/// A function tool call from the model.
+///
+/// Maps to Python SDK `ResponseFunctionToolCall`.
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct FunctionToolCall {
+    /// JSON-encoded arguments string.
+    pub arguments: String,
+    /// Unique call ID for matching with function_call_output.
+    pub call_id: String,
+    /// Function name.
+    pub name: String,
+    /// Unique ID of the function tool call (populated when returned via API).
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    /// Item status.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub status: Option<String>,
+}
+
+/// Output from a function call, sent back to the model.
+///
+/// Maps to Python SDK `FunctionCallOutput` input item.
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct FunctionCallOutputItemParam {
+    /// The call ID matching the function call.
+    pub call_id: String,
+    /// The output content.
+    pub output: FunctionCallOutput,
+    /// Unique ID (populated when returned via API).
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    /// Item status.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub status: Option<String>,
+}
+
+/// The output content of a function call.
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(untagged)]
+#[non_exhaustive]
+pub enum FunctionCallOutput {
+    /// Plain text output.
+    Text(String),
+}
+
+/// A reasoning chain-of-thought item.
+///
+/// Contains summary, optional content, and optional encrypted content for
+/// multi-turn replay. Maps to Python SDK `ResponseReasoningItem`.
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub struct ReasoningItem {
+    /// Unique identifier.
+    pub id: String,
+    /// Reasoning summary parts.
+    pub summary: Vec<SummaryPart>,
+    /// Reasoning text content.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub content: Option<Vec<ReasoningContent>>,
+    /// Encrypted content for multi-turn replay.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub encrypted_content: Option<String>,
+    /// Item status.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub status: Option<String>,
+}
+
+/// A part of a reasoning summary.
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(tag = "type")]
+#[non_exhaustive]
+pub enum SummaryPart {
+    /// Summary text content.
+    #[serde(rename = "summary_text")]
+    SummaryText(SummaryTextContent),
+}
+
+/// Text content within a reasoning summary.
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct SummaryTextContent {
+    /// The summary text.
+    pub text: String,
+}
+
+/// Reasoning text content within a reasoning item.
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct ReasoningContent {
+    /// The reasoning text.
+    pub text: String,
+    /// Content type — always "reasoning_text".
+    #[serde(rename = "type")]
+    #[serde(default = "default_reasoning_text_type")]
+    pub type_: String,
+}
+
+fn default_reasoning_text_type() -> String {
+    "reasoning_text".to_string()
+}
+
+/// A function tool definition for the Responses API.
+///
+/// Maps to Python SDK `FunctionTool`. Standalone struct for typed tool definitions.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct FunctionTool {
+    /// The name of the function.
+    pub name: String,
+    /// JSON Schema object describing the parameters.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub parameters: Option<serde_json::Value>,
+    /// Whether to enforce strict parameter validation.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub strict: Option<bool>,
+    /// A description of the function.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub description: Option<String>,
+}
+
+/// Tool definition for the Responses API (standalone enum).
+///
+/// Typed variant of `ResponseTool` for use in `CreateResponse` builder.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(tag = "type")]
+#[non_exhaustive]
+pub enum Tool {
+    /// Function tool.
+    #[serde(rename = "function")]
+    Function(FunctionTool),
+    /// Web search tool.
+    #[serde(rename = "web_search")]
+    WebSearch {
+        /// Search context size.
+        #[serde(skip_serializing_if = "Option::is_none")]
+        search_context_size: Option<String>,
+        /// User location.
+        #[serde(skip_serializing_if = "Option::is_none")]
+        user_location: Option<crate::types::chat::WebSearchUserLocation>,
+    },
+    /// File search tool.
+    #[serde(rename = "file_search")]
+    FileSearch {
+        /// Vector store IDs.
+        vector_store_ids: Vec<String>,
+        /// Max results.
+        #[serde(skip_serializing_if = "Option::is_none")]
+        max_num_results: Option<i64>,
+        /// Ranking options.
+        #[serde(skip_serializing_if = "Option::is_none")]
+        ranking_options: Option<ResponseRankingOptions>,
+    },
+    /// Code interpreter tool.
+    #[serde(rename = "code_interpreter")]
+    CodeInterpreter {
+        /// Container ID.
+        #[serde(skip_serializing_if = "Option::is_none")]
+        container: Option<String>,
+    },
+}
+
+/// Additional data to include in the response.
+///
+/// Maps to Python SDK `ResponseIncludable`.
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[non_exhaustive]
+pub enum IncludeEnum {
+    /// Include file search call results.
+    #[serde(rename = "file_search_call.results")]
+    FileSearchCallResults,
+    /// Include web search call results.
+    #[serde(rename = "web_search_call.results")]
+    WebSearchCallResults,
+    /// Include reasoning encrypted content.
+    #[serde(rename = "reasoning.encrypted_content")]
+    ReasoningEncryptedContent,
+    /// Include message input image URLs.
+    #[serde(rename = "message.input_image.image_url")]
+    MessageInputImageUrl,
+    /// Include computer call output image URLs.
+    #[serde(rename = "computer_call_output.output.image_url")]
+    ComputerCallOutputImageUrl,
+    /// Include code interpreter call outputs.
+    #[serde(rename = "code_interpreter_call.outputs")]
+    CodeInterpreterCallOutputs,
+    /// Include message output text log probabilities.
+    #[serde(rename = "message.output_text.logprobs")]
+    MessageOutputTextLogprobs,
+}
+
+/// How the model selects tools — typed version.
+///
+/// Maps to Python SDK `ToolChoiceOptions` + `ToolChoiceFunction`.
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(untagged)]
+#[non_exhaustive]
+pub enum ToolChoiceParam {
+    /// Predefined mode: none, auto, or required.
+    Mode(ToolChoiceOptions),
+    /// Force a specific function by name.
+    Function(ToolChoiceFunction),
+}
+
+/// Predefined tool choice modes.
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "snake_case")]
+#[non_exhaustive]
+pub enum ToolChoiceOptions {
+    /// Do not use any tools.
+    None,
+    /// Let the model decide.
+    Auto,
+    /// Force tool use.
+    Required,
+}
+
+/// Force a specific function tool by name (typed version).
+///
+/// Note: The existing `ResponseToolChoiceFunction` is kept for backward compatibility.
+/// This is the typed version used by `ToolChoiceParam`.
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct ToolChoiceFunction {
+    /// The name of the function to call.
+    pub name: String,
+    /// The type — always "function".
+    #[serde(rename = "type")]
+    #[serde(default = "default_function_type")]
+    pub type_: String,
+}
+
+fn default_function_type() -> String {
+    "function".to_string()
+}
+
+/// Input parameter for the Responses API — text or structured items.
+///
+/// Used in `CreateResponse` builder.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(untagged)]
+#[non_exhaustive]
+pub enum InputParam {
+    /// Plain text input.
+    Text(String),
+    /// Structured input items.
+    Items(Vec<InputItem>),
+}
+
+// ── Typed output items (for Response.output) ──
+
+/// A typed output item in a Response.
+///
+/// Discriminated union matching the Python SDK `ResponseOutputItem`.
+/// Covers message, function_call, reasoning, and other output types.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(tag = "type")]
+#[non_exhaustive]
+pub enum OutputItem {
+    /// Output message from the model.
+    #[serde(rename = "message")]
+    Message {
+        /// Unique ID.
+        #[serde(default)]
+        id: Option<String>,
+        /// Role — always "assistant".
+        #[serde(default)]
+        role: Option<Role>,
+        /// Content blocks.
+        #[serde(default)]
+        content: Option<Vec<ResponseOutputContent>>,
+        /// Item status.
+        #[serde(default)]
+        status: Option<String>,
+    },
+    /// Function call from the model.
+    #[serde(rename = "function_call")]
+    FunctionCall(FunctionToolCall),
+    /// Reasoning chain-of-thought.
+    #[serde(rename = "reasoning")]
+    Reasoning(ReasoningItem),
+    /// Web search call.
+    #[serde(rename = "web_search_call")]
+    WebSearchCall(serde_json::Value),
+    /// File search call.
+    #[serde(rename = "file_search_call")]
+    FileSearchCall(serde_json::Value),
+    /// Catch-all for unknown output item types.
+    #[serde(other)]
+    Other,
+}
+
+// ── Individual stream event structs ──
+
+/// Emitted when there is a text delta.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ResponseTextDeltaEvent {
+    /// Sequence number.
+    #[serde(default)]
+    pub sequence_number: i64,
+    /// The ID of the output item.
+    #[serde(default)]
+    pub item_id: String,
+    /// Index of the output item.
+    #[serde(default)]
+    pub output_index: i64,
+    /// Index of the content part.
+    #[serde(default)]
+    pub content_index: i64,
+    /// The text delta.
+    pub delta: String,
+    /// Log probabilities (if requested).
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub logprobs: Option<serde_json::Value>,
+}
+
+/// Emitted when there is a reasoning text delta.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ResponseReasoningTextDeltaEvent {
+    /// Sequence number.
+    #[serde(default)]
+    pub sequence_number: i64,
+    /// The ID of the item.
+    #[serde(default)]
+    pub item_id: String,
+    /// Index of the output item.
+    #[serde(default)]
+    pub output_index: i64,
+    /// Index of the content part.
+    #[serde(default)]
+    pub content_index: i64,
+    /// The reasoning text delta.
+    pub delta: String,
+}
+
+/// Emitted when there is a reasoning summary text delta.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ResponseReasoningSummaryTextDeltaEvent {
+    /// Sequence number.
+    #[serde(default)]
+    pub sequence_number: i64,
+    /// The ID of the item.
+    #[serde(default)]
+    pub item_id: String,
+    /// Index of the output item.
+    #[serde(default)]
+    pub output_index: i64,
+    /// Index of the summary part.
+    #[serde(default)]
+    pub summary_index: i64,
+    /// The summary text delta.
+    pub delta: String,
+}
+
+/// Emitted when a new output item is added.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ResponseOutputItemAddedEvent {
+    /// Sequence number.
+    #[serde(default)]
+    pub sequence_number: i64,
+    /// Index of the output item.
+    #[serde(default)]
+    pub output_index: i64,
+    /// The output item.
+    pub item: OutputItem,
+}
+
+/// Emitted when there is a function call arguments delta.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ResponseFunctionCallArgumentsDeltaEvent {
+    /// Sequence number.
+    #[serde(default)]
+    pub sequence_number: i64,
+    /// The ID of the item.
+    #[serde(default)]
+    pub item_id: String,
+    /// Index of the output item.
+    #[serde(default)]
+    pub output_index: u32,
+    /// The arguments delta.
+    pub delta: String,
+}
+
+/// Emitted when function call arguments are finalized.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ResponseFunctionCallArgumentsDoneEvent {
+    /// Sequence number.
+    #[serde(default)]
+    pub sequence_number: i64,
+    /// The ID of the item.
+    #[serde(default)]
+    pub item_id: String,
+    /// Index of the output item.
+    #[serde(default)]
+    pub output_index: u32,
+    /// The complete arguments JSON.
+    pub arguments: String,
+    /// The function name.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
+}
+
+/// Emitted when the response is complete.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ResponseCompletedEvent {
+    /// Sequence number.
+    #[serde(default)]
+    pub sequence_number: i64,
+    /// The completed response.
+    pub response: Response,
+}
+
+/// Emitted when the response fails.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ResponseFailedEvent {
+    /// Sequence number.
+    #[serde(default)]
+    pub sequence_number: i64,
+    /// The failed response.
+    pub response: Response,
+}
+
+/// Emitted when the response is incomplete.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ResponseIncompleteEvent {
+    /// Sequence number.
+    #[serde(default)]
+    pub sequence_number: i64,
+    /// The incomplete response.
+    pub response: Response,
+}
+
+/// Emitted when an error occurs during streaming.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ResponseErrorEvent {
+    /// Sequence number.
+    #[serde(default)]
+    pub sequence_number: i64,
+    /// Error message.
+    pub message: String,
+    /// Error code.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub code: Option<String>,
+    /// Error parameter.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub param: Option<String>,
+}
+
 // ── Request types ──
 
 /// Input for the Responses API.
@@ -667,6 +1234,9 @@ impl Response {
 ///
 /// Uses `#[serde(tag = "type")]` for typed deserialization. Unknown event types
 /// fall through to the `Other` variant to ensure forward compatibility.
+///
+/// Variants use named event structs (e.g. `ResponseCompletedEvent`) for the
+/// most commonly consumed events, matching the async-openai 0.33 interface.
 #[derive(Debug, Clone, Deserialize, Serialize)]
 #[serde(tag = "type")]
 #[non_exhaustive]
@@ -676,19 +1246,20 @@ pub enum ResponseStreamEvent {
     ResponseCreated { response: Response },
     #[serde(rename = "response.in_progress")]
     ResponseInProgress { response: Response },
+    /// Response completed — wraps `ResponseCompletedEvent`.
     #[serde(rename = "response.completed")]
-    ResponseCompleted { response: Response },
+    ResponseCompleted(ResponseCompletedEvent),
+    /// Response failed — wraps `ResponseFailedEvent`.
     #[serde(rename = "response.failed")]
-    ResponseFailed { response: Response },
+    ResponseFailed(ResponseFailedEvent),
+    /// Response incomplete — wraps `ResponseIncompleteEvent`.
     #[serde(rename = "response.incomplete")]
-    ResponseIncomplete { response: Response },
+    ResponseIncomplete(ResponseIncompleteEvent),
 
     // ── Output item events ──
+    /// New output item added — wraps `ResponseOutputItemAddedEvent`.
     #[serde(rename = "response.output_item.added")]
-    OutputItemAdded {
-        output_index: i64,
-        item: ResponseOutputItem,
-    },
+    ResponseOutputItemAdded(ResponseOutputItemAddedEvent),
     #[serde(rename = "response.output_item.done")]
     OutputItemDone {
         output_index: i64,
@@ -710,12 +1281,9 @@ pub enum ResponseStreamEvent {
     },
 
     // ── Text delta events ──
+    /// Text output delta — wraps `ResponseTextDeltaEvent`.
     #[serde(rename = "response.output_text.delta")]
-    OutputTextDelta {
-        output_index: i64,
-        content_index: i64,
-        delta: String,
-    },
+    ResponseOutputTextDelta(ResponseTextDeltaEvent),
     #[serde(rename = "response.output_text.done")]
     OutputTextDone {
         output_index: i64,
@@ -724,29 +1292,20 @@ pub enum ResponseStreamEvent {
     },
 
     // ── Function call events ──
+    /// Function call arguments delta — wraps `ResponseFunctionCallArgumentsDeltaEvent`.
     #[serde(rename = "response.function_call_arguments.delta")]
-    FunctionCallArgumentsDelta {
-        output_index: i64,
-        #[serde(default)]
-        item_id: Option<String>,
-        delta: String,
-    },
+    ResponseFunctionCallArgumentsDelta(ResponseFunctionCallArgumentsDeltaEvent),
+    /// Function call arguments done — wraps `ResponseFunctionCallArgumentsDoneEvent`.
     #[serde(rename = "response.function_call_arguments.done")]
-    FunctionCallArgumentsDone {
-        output_index: i64,
-        #[serde(default)]
-        item_id: Option<String>,
-        arguments: String,
-    },
+    ResponseFunctionCallArgumentsDone(ResponseFunctionCallArgumentsDoneEvent),
 
     // ── Reasoning events ──
+    /// Reasoning text delta.
+    #[serde(rename = "response.reasoning_text.delta")]
+    ResponseReasoningTextDelta(ResponseReasoningTextDeltaEvent),
+    /// Reasoning summary text delta — wraps `ResponseReasoningSummaryTextDeltaEvent`.
     #[serde(rename = "response.reasoning_summary_text.delta")]
-    ReasoningSummaryTextDelta {
-        output_index: i64,
-        #[serde(default)]
-        summary_index: Option<i64>,
-        delta: String,
-    },
+    ResponseReasoningSummaryTextDelta(ResponseReasoningSummaryTextDeltaEvent),
     #[serde(rename = "response.reasoning_summary_text.done")]
     ReasoningSummaryTextDone {
         output_index: i64,
@@ -756,13 +1315,9 @@ pub enum ResponseStreamEvent {
     },
 
     // ── Error event ──
+    /// Error event — wraps `ResponseErrorEvent`.
     #[serde(rename = "error")]
-    Error {
-        #[serde(default)]
-        message: Option<String>,
-        #[serde(default)]
-        code: Option<String>,
-    },
+    ResponseError(ResponseErrorEvent),
 
     // ── Catch-all for unknown/new event types ──
     /// Unknown event type. Contains the raw JSON data for forward compatibility.
@@ -779,17 +1334,24 @@ impl ResponseStreamEvent {
             Self::ResponseCompleted { .. } => "response.completed",
             Self::ResponseFailed { .. } => "response.failed",
             Self::ResponseIncomplete { .. } => "response.incomplete",
-            Self::OutputItemAdded { .. } => "response.output_item.added",
+            Self::ResponseOutputItemAdded { .. } => "response.output_item.added",
             Self::OutputItemDone { .. } => "response.output_item.done",
             Self::ContentPartAdded { .. } => "response.content_part.added",
             Self::ContentPartDone { .. } => "response.content_part.done",
-            Self::OutputTextDelta { .. } => "response.output_text.delta",
+            Self::ResponseOutputTextDelta { .. } => "response.output_text.delta",
             Self::OutputTextDone { .. } => "response.output_text.done",
-            Self::FunctionCallArgumentsDelta { .. } => "response.function_call_arguments.delta",
-            Self::FunctionCallArgumentsDone { .. } => "response.function_call_arguments.done",
-            Self::ReasoningSummaryTextDelta { .. } => "response.reasoning_summary_text.delta",
+            Self::ResponseFunctionCallArgumentsDelta { .. } => {
+                "response.function_call_arguments.delta"
+            }
+            Self::ResponseFunctionCallArgumentsDone { .. } => {
+                "response.function_call_arguments.done"
+            }
+            Self::ResponseReasoningTextDelta { .. } => "response.reasoning_text.delta",
+            Self::ResponseReasoningSummaryTextDelta { .. } => {
+                "response.reasoning_summary_text.delta"
+            }
             Self::ReasoningSummaryTextDone { .. } => "response.reasoning_summary_text.done",
-            Self::Error { .. } => "error",
+            Self::ResponseError { .. } => "error",
             Self::Other(v) => v.get("type").and_then(|t| t.as_str()).unwrap_or("unknown"),
         }
     }
@@ -1055,21 +1617,19 @@ mod tests {
             "type": "response.output_text.delta",
             "delta": "Hello",
             "output_index": 0,
-            "content_index": 0
+            "content_index": 0,
+            "item_id": "item_1",
+            "sequence_number": 1
         }"#;
         let event: ResponseStreamEvent = serde_json::from_str(json).unwrap();
         assert_eq!(event.event_type(), "response.output_text.delta");
         match event {
-            ResponseStreamEvent::OutputTextDelta {
-                delta,
-                output_index,
-                content_index,
-            } => {
-                assert_eq!(delta, "Hello");
-                assert_eq!(output_index, 0);
-                assert_eq!(content_index, 0);
+            ResponseStreamEvent::ResponseOutputTextDelta(evt) => {
+                assert_eq!(evt.delta, "Hello");
+                assert_eq!(evt.output_index, 0);
+                assert_eq!(evt.content_index, 0);
             }
-            other => panic!("expected OutputTextDelta, got: {other:?}"),
+            other => panic!("expected ResponseOutputTextDelta, got: {other:?}"),
         }
     }
 
@@ -1077,6 +1637,7 @@ mod tests {
     fn test_deserialize_stream_event_completed() {
         let json = r#"{
             "type": "response.completed",
+            "sequence_number": 5,
             "response": {
                 "id": "resp-1",
                 "object": "response",
@@ -1088,8 +1649,9 @@ mod tests {
         }"#;
         let event: ResponseStreamEvent = serde_json::from_str(json).unwrap();
         match event {
-            ResponseStreamEvent::ResponseCompleted { response } => {
-                assert_eq!(response.id, "resp-1");
+            ResponseStreamEvent::ResponseCompleted(evt) => {
+                assert_eq!(evt.response.id, "resp-1");
+                assert_eq!(evt.sequence_number, 5);
             }
             other => panic!("expected ResponseCompleted, got: {other:?}"),
         }

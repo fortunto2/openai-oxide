@@ -242,25 +242,18 @@ impl<'a> Responses<'a> {
                             error: None,
                         });
                     }
-                    ResponseStreamEvent::OutputItemAdded {
-                        output_index, item, ..
-                    } => {
-                        if item.type_ == "function_call" {
-                            if let Some(name) = &item.name {
-                                pending_name.insert(output_index, name.clone());
-                            }
-                            let cid = item.call_id.as_deref().or(item.id.as_deref()).unwrap_or("");
-                            pending_call_id.insert(output_index, cid.to_string());
+                    ResponseStreamEvent::ResponseOutputItemAdded(evt) => {
+                        if let crate::types::responses::OutputItem::FunctionCall(fc) = &evt.item {
+                            pending_name.insert(evt.output_index, fc.name.clone());
+                            let cid = fc.id.as_deref().unwrap_or(&fc.call_id);
+                            pending_call_id.insert(evt.output_index, cid.to_string());
                         }
                     }
-                    ResponseStreamEvent::FunctionCallArgumentsDone {
-                        output_index,
-                        arguments,
-                        ..
-                    } => {
-                        let name = pending_name.remove(&output_index).unwrap_or_default();
-                        let call_id = pending_call_id.remove(&output_index).unwrap_or_default();
-                        let parsed_args = serde_json::from_str(&arguments)
+                    ResponseStreamEvent::ResponseFunctionCallArgumentsDone(evt) => {
+                        let idx = i64::from(evt.output_index);
+                        let name = pending_name.remove(&idx).unwrap_or_default();
+                        let call_id = pending_call_id.remove(&idx).unwrap_or_default();
+                        let parsed_args = serde_json::from_str(&evt.arguments)
                             .unwrap_or(serde_json::Value::Object(Default::default()));
 
                         let fc = crate::types::responses::FunctionCall {
@@ -273,8 +266,9 @@ impl<'a> Responses<'a> {
                             break; // receiver dropped
                         }
                     }
-                    ResponseStreamEvent::ResponseFailed { response: resp } => {
-                        let msg = resp
+                    ResponseStreamEvent::ResponseFailed(evt) => {
+                        let msg = evt
+                            .response
                             .error
                             .as_ref()
                             .map(|e| e.message.clone())
@@ -285,7 +279,7 @@ impl<'a> Responses<'a> {
                         });
                         break;
                     }
-                    ResponseStreamEvent::ResponseCompleted { .. } => {
+                    ResponseStreamEvent::ResponseCompleted(_) => {
                         let _ = meta_tx.send(StreamFcMeta {
                             response_id: response_id.clone(),
                             error: None,

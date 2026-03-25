@@ -389,7 +389,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             let ev = event?;
             if matches!(
                 ev,
-                openai_oxide::types::responses::ResponseStreamEvent::OutputTextDelta { .. }
+                openai_oxide::types::responses::ResponseStreamEvent::ResponseOutputTextDelta(_)
             ) {
                 times.push(t0.elapsed().as_millis());
                 break;

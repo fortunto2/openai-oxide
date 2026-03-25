@@ -276,10 +276,10 @@ impl ChatDurableObject {
                             if let Ok(worker::WebsocketEvent::Message(msg)) = openai_event {
                                 if let Some(text) = msg.text() {
                                     if let Ok(event) = serde_json::from_str::<ResponseStreamEvent>(&text) {
-                                        if let ResponseStreamEvent::OutputTextDelta { delta, .. } = &event {
+                                        if let ResponseStreamEvent::ResponseOutputTextDelta(evt) = &event {
                                             let reply = WsMessage {
                                                 action: "chunk".into(),
-                                                content: Some(delta.clone()),
+                                                content: Some(evt.delta.clone()),
                                                 messages: None,
                                                 model: None,
                                                 base_url: None,
@@ -287,7 +287,7 @@ impl ChatDurableObject {
                                             if let Ok(json) = serde_json::to_string(&reply) {
                                                 let _ = browser_ws.send_with_str(json);
                                             }
-                                        } else if matches!(event, ResponseStreamEvent::ResponseCompleted { .. }) {
+                                        } else if matches!(event, ResponseStreamEvent::ResponseCompleted(_)) {
                                             let done_msg = WsMessage {
                                                 action: "done".into(),
                                                 content: None,

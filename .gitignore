@@ -29,3 +29,4 @@ openai-oxide-node/artifacts/
 openai-oxide-node/npm/
 openai-oxide-node/target-node/
 docs/book/
+data/

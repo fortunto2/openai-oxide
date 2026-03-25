@@ -239,12 +239,12 @@ data: [DONE]
             "response.output_text.delta"
         );
         match events[1].as_ref().unwrap() {
-            ResponseStreamEvent::OutputTextDelta { delta, .. } => assert_eq!(delta, "Hello"),
-            other => panic!("expected OutputTextDelta, got: {other:?}"),
+            ResponseStreamEvent::ResponseOutputTextDelta(evt) => assert_eq!(evt.delta, "Hello"),
+            other => panic!("expected ResponseOutputTextDelta, got: {other:?}"),
         }
         match events[2].as_ref().unwrap() {
-            ResponseStreamEvent::OutputTextDelta { delta, .. } => assert_eq!(delta, " world"),
-            other => panic!("expected OutputTextDelta, got: {other:?}"),
+            ResponseStreamEvent::ResponseOutputTextDelta(evt) => assert_eq!(evt.delta, " world"),
+            other => panic!("expected ResponseOutputTextDelta, got: {other:?}"),
         }
         assert_eq!(
             events[3].as_ref().unwrap().event_type(),

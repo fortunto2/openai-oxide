@@ -207,8 +207,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             while let Some(Ok(event)) = stream.next().await {
                 use openai_oxide::types::responses::ResponseStreamEvent::*;
                 match event {
-                    OutputTextDelta { .. } => got_text = true,
-                    ResponseCompleted { .. } => got_completed = true,
+                    ResponseOutputTextDelta(_) => got_text = true,
+                    ResponseCompleted(_) => got_completed = true,
                     _ => {}
                 }
             }

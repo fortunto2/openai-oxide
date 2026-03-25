@@ -51,8 +51,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         let event = event?;
         use openai_oxide::types::responses::ResponseStreamEvent::*;
         match event {
-            OutputTextDelta { delta, .. } => print!("{delta}"),
-            ResponseCompleted { .. } => println!("\n\n[completed]"),
+            ResponseOutputTextDelta(evt) => print!("{}", evt.delta),
+            ResponseCompleted(_) => println!("\n\n[completed]"),
             _ => {} // Other events: created, output_item.added, etc.
         }
     }

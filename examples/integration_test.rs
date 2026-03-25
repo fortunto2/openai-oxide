@@ -169,14 +169,14 @@ async fn main() {
                 let ev = ev?;
                 if matches!(
                     ev,
-                    openai_oxide::types::responses::ResponseStreamEvent::OutputTextDelta { .. }
+                    openai_oxide::types::responses::ResponseStreamEvent::ResponseOutputTextDelta(_)
                 ) && ttft.is_none()
                 {
                     ttft = Some(t0.elapsed().as_millis());
                 }
                 if matches!(
                     ev,
-                    openai_oxide::types::responses::ResponseStreamEvent::ResponseCompleted { .. }
+                    openai_oxide::types::responses::ResponseStreamEvent::ResponseCompleted(_)
                 ) {
                     break;
                 }
