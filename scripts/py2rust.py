@@ -36,6 +36,10 @@ TYPE_MAP = {
 }
 
 
+# Tracks struct names we've generated — used to resolve cross-references
+_known_types: set[str] = set()
+
+
 def python_type_to_rust(type_node: ast.expr, optional: bool = False) -> str:
     """Convert a Python type annotation AST node to Rust type string."""
 
@@ -46,8 +50,11 @@ def python_type_to_rust(type_node: ast.expr, optional: bool = False) -> str:
         name = type_node.id
         if name in TYPE_MAP:
             return TYPE_MAP[name]
-        # Pydantic model reference — use as-is
-        return name
+        # Known types we've already generated — use as-is
+        if name in _known_types:
+            return name
+        # Unknown type — use Value with hint for manual resolution
+        return f"serde_json::Value /* TODO: {name} */"
 
     if isinstance(type_node, ast.Attribute):
         # e.g. Literal["foo"] shows up differently
@@ -249,31 +256,55 @@ def process_class(cls: ast.ClassDef) -> str:
     return "\n".join(lines)
 
 
-def process_file(path: Path) -> str:
-    """Parse a Python file and generate Rust code for all BaseModel classes."""
+def process_file(path: Path, prefix: str = "") -> list[tuple[str, str]]:
+    """Parse a Python file and return list of (struct_name, rust_code) tuples."""
     source = path.read_text()
     try:
         tree = ast.parse(source)
-    except SyntaxError as e:
-        return f"// ERROR parsing {path}: {e}"
+    except SyntaxError:
+        return []
 
     results = []
     for node in ast.walk(tree):
         if isinstance(node, ast.ClassDef):
-            # Check if inherits from BaseModel
             for base in node.bases:
                 if (isinstance(base, ast.Name) and base.id == "BaseModel") or (
                     isinstance(base, ast.Attribute) and base.attr == "BaseModel"
                 ):
-                    results.append(process_class(node))
+                    # Prefix inner classes to avoid name collisions across files
+                    name = node.name
+                    if prefix and name[0].isupper() and len(name) < 20:
+                        # Short generic names like "Content", "Part", "Summary"
+                        # get prefixed with parent type name
+                        generic_names = {
+                            "Content", "Part", "Summary", "Action", "Output",
+                            "Result", "Tool", "Item", "Error", "Details",
+                            "Environment", "Operation", "Outcome",
+                        }
+                        if name in generic_names:
+                            name = f"{prefix}{name}"
+                            node = ast.parse(
+                                ast.unparse(node).replace(
+                                    f"class {node.name}",
+                                    f"class {name}",
+                                )
+                            ).body[0]
+                    _known_types.add(name)
+                    results.append((name, process_class(node)))
                     break
 
-    if not results:
-        return f"// No BaseModel classes found in {path.name}"
+    return results
 
-    header = f"// Generated from {path.name} — do not edit manually.\n"
-    header += "// Re-generate: python3 scripts/py2rust.py " + str(path) + "\n"
-    return header + "\n\n".join(results)
+
+def file_prefix(path: Path) -> str:
+    """Derive a prefix from filename for dedup: response_reasoning_item.py → ResponseReasoning."""
+    stem = path.stem
+    # Remove common prefixes
+    for p in ("response_", "responses_"):
+        if stem.startswith(p):
+            stem = stem[len(p):]
+    parts = stem.split("_")
+    return "".join(p.capitalize() for p in parts[:2])
 
 
 def main():
@@ -286,25 +317,35 @@ def main():
     if "--out" in sys.argv:
         out_file = Path(sys.argv[sys.argv.index("--out") + 1])
 
-    results = []
+    all_structs: list[tuple[str, str]] = []  # (name, code)
+    seen_names: set[str] = set()
 
     if target.is_file():
-        results.append(process_file(target))
+        all_structs.extend(process_file(target))
     elif target.is_dir():
         for f in sorted(target.glob("*.py")):
             if f.name.startswith("_"):
                 continue
             if f.name.endswith("_param.py"):
-                continue  # Skip *_param.py — those are input types, often duplicates
-            result = process_file(f)
-            if "No BaseModel" not in result:
-                results.append(result)
+                continue
+            prefix = file_prefix(f)
+            structs = process_file(f, prefix=prefix)
+            for name, code in structs:
+                if name in seen_names:
+                    continue  # Skip duplicate across files
+                seen_names.add(name)
+                all_structs.append((name, code))
 
-    output = "\nuse serde::{Deserialize, Serialize};\n\n" + "\n\n".join(results)
+    header = "// Auto-generated from Python OpenAI SDK. Do not edit manually.\n"
+    header += f"// Re-generate: python3 scripts/py2rust.py {target}\n"
+    header += f"// Structs: {len(all_structs)}\n\n"
+    header += "use serde::{Deserialize, Serialize};\n"
+
+    output = header + "\n\n".join(code for _, code in all_structs)
 
     if out_file:
-        out_file.write_text(output)
-        print(f"Wrote {len(results)} structs to {out_file}")
+        out_file.write_text(output + "\n")
+        print(f"Wrote {len(all_structs)} structs to {out_file}")
     else:
         print(output)
 
