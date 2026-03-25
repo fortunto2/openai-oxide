@@ -6,6 +6,25 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [0.10.0]
+
+### Added
+- 35 new Responses API types — stream event structs, OutputItem enum, EasyInputMessage, ReasoningItem, FunctionToolCall, IncludeEnum, InputContent variants
+- `ReasoningSummary` enum (Auto, Concise, Detailed)
+- Compat aliases for async-openai migration (`CreateResponse`, `ReasoningArgs`, `InputTokenDetails`, `OutputTokenDetails`)
+- `reqwest-012` feature flag — supports reqwest 0.12 workspaces without dual compilation
+- Re-export `Role` and `ReasoningEffort` from responses module
+- `Default` impl for `ResponseCreateRequest`
+- `Reasoning::build()` for derive_builder compat
+
+### Changed
+- **Breaking:** `Reasoning.effort` is now `Option<ReasoningEffort>` (was `Option<String>`)
+- **Breaking:** `Reasoning.summary` is now `Option<ReasoningSummary>` (was `Option<String>`)
+- `ResponseStreamEvent` variants are now tuple structs wrapping typed event structs
+- `OutputItem` is now a tagged enum (Message, FunctionCall, Reasoning) instead of flat struct
+
+---
+
 ## [0.9.8]
 
 ### Added
