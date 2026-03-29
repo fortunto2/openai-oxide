@@ -1,9 +1,15 @@
 // File types — mirrors openai-python types/file_object.py
 
+use crate::openai_enum;
 use serde::{Deserialize, Serialize};
 
 use super::common::SortOrder;
-use crate::openai_enum;
+
+// Re-export new types from openai-types
+pub use openai_types::file::{
+    ExpiresAfter, OtherFileChunkingStrategyObject, StaticFileChunkingStrategy,
+    StaticFileChunkingStrategyObject,
+};
 
 /// Wrapper to adapt &String to &str for serialize_other.
 #[allow(clippy::ptr_arg)]

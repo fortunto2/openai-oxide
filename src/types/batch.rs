@@ -3,6 +3,12 @@
 use crate::openai_enum;
 use serde::{Deserialize, Serialize};
 
+// Re-export new types from openai-types
+pub use openai_types::batch::{
+    BatchError, BatchErrors, BatchUsage, InputTokensDetails, OutputExpiresAfter,
+    OutputTokensDetails,
+};
+
 /// Request body for `POST /batches`.
 #[derive(Debug, Clone, Serialize)]
 pub struct BatchCreateRequest {

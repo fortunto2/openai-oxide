@@ -3,6 +3,9 @@
 use crate::openai_enum;
 use serde::{Deserialize, Serialize};
 
+// Re-export new types from openai-types
+pub use openai_types::uploads::UploadPart;
+
 /// Request body for `POST /uploads`.
 #[derive(Debug, Clone, Serialize)]
 pub struct UploadCreateRequest {

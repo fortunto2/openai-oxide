@@ -3,6 +3,9 @@
 use crate::openai_enum;
 use serde::{Deserialize, Serialize};
 
+// Re-export new types from openai-types
+pub use openai_types::embedding::EmbeddingModel;
+
 openai_enum! {
     /// Encoding format for embedding output.
     pub enum EncodingFormat {

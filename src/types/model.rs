@@ -1,36 +1,13 @@
-// Model types — mirrors openai-python types/model.py
+// Model types — re-exported from openai-types + pagination wrapper
 
+pub use openai_types::model::{Model, ModelDeleted};
 use serde::Deserialize;
 
-/// A model object from the API.
-#[derive(Debug, Clone, Deserialize)]
-pub struct Model {
-    /// Model identifier (e.g. "gpt-4o").
-    pub id: String,
-
-    /// Unix timestamp (seconds) when created.
-    pub created: i64,
-
-    /// Always "model".
-    pub object: String,
-
-    /// Organization that owns the model.
-    pub owned_by: String,
-}
-
-/// Response from listing models.
+/// Response from listing models (pagination wrapper, not in openai-types).
 #[derive(Debug, Clone, Deserialize)]
 pub struct ModelList {
     pub object: String,
     pub data: Vec<Model>,
-}
-
-/// Response from deleting a model.
-#[derive(Debug, Clone, Deserialize)]
-pub struct ModelDeleted {
-    pub id: String,
-    pub deleted: bool,
-    pub object: String,
 }
 
 #[cfg(test)]

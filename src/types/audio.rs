@@ -2,6 +2,15 @@
 
 use serde::{Deserialize, Serialize};
 
+// Re-export new types from openai-types (verbose transcriptions, streaming events, etc.)
+pub use openai_types::audio::{
+    AudioModel, ChunkingStrategy, ChunkingStrategyVadConfig, Logprob, SpeechModel,
+    TranscriptionDiarized, TranscriptionDiarizedSegment, TranscriptionInclude,
+    TranscriptionSegment, TranscriptionTextDeltaEvent, TranscriptionTextDoneEvent,
+    TranscriptionTextSegmentEvent, TranscriptionVerbose, TranscriptionWord, TranslationVerbose,
+    UsageDuration, UsageInputTokenDetails, UsageTokens, UsageTokensInputTokenDetails, VoiceID,
+};
+
 /// Response format for audio transcription/translation.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
