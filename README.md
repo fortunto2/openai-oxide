@@ -222,6 +222,35 @@ Reproduce: `cd openai-oxide-python && uv run python ../examples/bench_python.py`
 Reproduce: `cd openai-oxide-node && BENCH_ITERATIONS=5 node examples/bench_node.js`
 <!-- BENCH:node:END -->
 
+### SDK Overhead (synthetic, Node.js)
+
+The live benchmarks above include network latency and model inference, which adds noise.
+To isolate **pure SDK overhead**, we also run a synthetic benchmark with a localhost mock
+server (zero network, zero inference). Fixtures are captured from a real coding agent session
+(320 messages, 42 tools, 718KB request body).
+
+| Test | `openai-oxide` | `openai` npm | oxide faster |
+| :--- | :--- | :--- | :--- |
+| Tiny req → Tiny resp | 172µs | 443µs | **+61%** |
+| Tiny req → Structured 5KB | 161µs | 499µs | **+68%** |
+| Medium 150KB → Tool call | 1.1ms | 1.7ms | **+37%** |
+| Heavy 657KB → Real agent resp | 4.9ms | 6.2ms | **+21%** |
+| SSE stream (114 real chunks) | 283µs | 742µs | **+62%** |
+| Agent 20x sequential (tiny) | 2.1ms | 5.4ms | **+61%** |
+| Agent 10x sequential (heavy) | 51.7ms | 62.2ms | **+17%** |
+
+*50 iterations, 20 warmup, `--expose-gc`, Welch's t-test — all p<0.001.*
+
+**Where this matters:** high-throughput pipelines, local/cached model backends, agent loops
+with many sequential calls. On light payloads, oxide is 2-3x faster. On heavy 657KB agent
+requests, the gap narrows to 1.2x because `JSON.stringify` (~2ms) is shared by both SDKs.
+
+**Where this doesn't matter:** single API calls to OpenAI with 200ms-2s latency.
+SDK overhead (0.1-5ms) is <1% of total time. Live tests with gpt-5.4 show +8% on
+a 3-step agent, but results are not statistically significant at n=10 due to API variance.
+
+Reproduce: `node --expose-gc benchmarks/bench_science.js`
+
 ---
 
 ## Python Usage

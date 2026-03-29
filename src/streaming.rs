@@ -23,7 +23,7 @@ pub struct SseStream<T> {
 }
 
 impl<T> SseStream<T> {
-    pub(crate) fn new(response: reqwest::Response) -> Self {
+    pub fn new(response: reqwest::Response) -> Self {
         Self {
             inner: Box::pin(response.bytes_stream()),
             buffer: String::new(),

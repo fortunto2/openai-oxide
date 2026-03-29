@@ -1,10 +1,13 @@
 #![deny(clippy::all)]
 
+use bytes::Bytes;
 use futures_util::StreamExt;
 use napi::bindgen_prelude::*;
 use napi::threadsafe_function::{ThreadsafeFunction, ThreadsafeFunctionCallMode};
 use napi_derive::napi;
 use openai_oxide::OpenAI;
+use openai_oxide::config::ClientConfig;
+use openai_oxide::streaming::SseStream;
 use openai_oxide::types::responses::ResponseCreateRequest;
 use openai_oxide::websocket::WsSession;
 use std::sync::Arc;
@@ -50,11 +53,30 @@ pub struct NodeWsSession {
     inner: Arc<Mutex<Option<WsSession>>>,
 }
 
+#[napi(object)]
+pub struct ClientOptions {
+    pub base_url: Option<String>,
+    pub api_key: Option<String>,
+}
+
 #[napi]
 impl Client {
     #[napi(constructor)]
-    pub fn new() -> Result<Self> {
-        let inner = OpenAI::from_env().map_err(|e| Error::from_reason(e.to_string()))?;
+    pub fn new(options: Option<ClientOptions>) -> Result<Self> {
+        let inner = match options {
+            Some(opts) => {
+                let api_key = opts
+                    .api_key
+                    .or_else(|| std::env::var("OPENAI_API_KEY").ok())
+                    .ok_or_else(|| Error::from_reason("OPENAI_API_KEY not set"))?;
+                let mut config = ClientConfig::new(api_key);
+                if let Some(url) = opts.base_url {
+                    config = config.base_url(url);
+                }
+                OpenAI::with_config(config)
+            }
+            None => OpenAI::from_env().map_err(|e| Error::from_reason(e.to_string()))?,
+        };
         Ok(Self { inner })
     }
 
@@ -242,6 +264,62 @@ impl Client {
             .await
             .map_err(|e| Error::from_reason(e.to_string()))?;
         Ok(res)
+    }
+
+    /// Fast path: accepts pre-serialized JSON string, avoids napi object→Value copy.
+    /// JS does JSON.stringify once, Rust sends bytes directly — single pass.
+    #[napi(
+        ts_args_type = "jsonBody: string",
+        ts_return_type = "Promise<Record<string, any>>"
+    )]
+    pub async fn create_response_fast(&self, json_body: String) -> Result<serde_json::Value> {
+        let res = self
+            .inner
+            .client()
+            .post_json_bytes("/responses", Bytes::from(json_body))
+            .await
+            .map_err(|e| Error::from_reason(e.to_string()))?;
+        Ok(res)
+    }
+
+    /// Fast path for streaming: accepts pre-serialized JSON string.
+    #[napi(
+        ts_args_type = "jsonBody: string, tsfn: (err: Error | null, event: Record<string, any> | null) => void",
+        ts_return_type = "Promise<void>"
+    )]
+    pub async fn create_stream_fast(
+        &self,
+        json_body: String,
+        tsfn: ThreadsafeFunction<serde_json::Value>,
+    ) -> Result<()> {
+        let response = self
+            .inner
+            .client()
+            .post_stream_json_bytes("/responses", Bytes::from(json_body))
+            .await
+            .map_err(|e| Error::from_reason(e.to_string()))?;
+
+        let mut stream = SseStream::<serde_json::Value>::new(response);
+
+        while let Some(item) = stream.next().await {
+            match item {
+                Ok(event) => {
+                    tsfn.call(Ok(event), ThreadsafeFunctionCallMode::Blocking);
+                }
+                Err(e) => {
+                    tsfn.call(
+                        Err(Error::from_reason(e.to_string())),
+                        ThreadsafeFunctionCallMode::Blocking,
+                    );
+                    break;
+                }
+            }
+        }
+        tsfn.call(
+            Ok(serde_json::json!({"type": "done"})),
+            ThreadsafeFunctionCallMode::Blocking,
+        );
+        Ok(())
     }
 
     #[napi(

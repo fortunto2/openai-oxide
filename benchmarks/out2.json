@@ -1,0 +1,4298 @@
+{
+  "id": "id-1774458929330",
+  "model": "@cf/moonshotai/kimi-k2.5",
+  "choices": [
+    {
+      "index": 0,
+      "delta": {
+        "role": "assistant",
+        "content": "",
+        "reasoning_content": null
+      },
+      "logprobs": null,
+      "finish_reason": null
+    },
+    {
+      "index": 0,
+      "delta": {
+        "reasoning": "  ",
+        "reasoning_content": "  "
+      },
+      "logprobs": null,
+      "finish_reason": null,
+      "token_ids": null
+    },
+    {
+      "index": 0,
+      "delta": {
+        "reasoning": " I",
+        "reasoning_content": " I"
+      },
+      "logprobs": null,
+      "finish_reason": null,
+      "token_ids": null
+    },
+    {
+      "index": 0,
+      "delta": {
+        "reasoning": " should",
+        "reasoning_content": " should"
+      },
+      "logprobs": null,
+      "finish_reason": null,
+      "token_ids": null
+    },
+    {
+      "index": 0,
+      "delta": {
+        "reasoning": " read",
+        "reasoning_content": " read"
+      },
+      "logprobs": null,
+      "finish_reason": null,
+      "token_ids": null
+    },
+    {
+      "index": 0,
+      "delta": {
+        "reasoning": " the",
+        "reasoning_content": " the"
+      },
+      "logprobs": null,
+      "finish_reason": null,
+      "token_ids": null
+    },
+    {
+      "index": 0,
+      "delta": {
+        "reasoning": " existing",
+        "reasoning_content": " existing"
+      },
+      "logprobs": null,
+      "finish_reason": null,
+      "token_ids": null
+    },
+    {
+      "index": 0,
+      "delta": {
+        "reasoning": " files",
+        "reasoning_content": " files"
+      },
+      "logprobs": null,
+      "finish_reason": null,
+      "token_ids": null
+    },
+    {
+      "index": 0,
+      "delta": {
+        "reasoning": " first",
+        "reasoning_content": " first"
+      },
+      "logprobs": null,
+      "finish_reason": null,
+      "token_ids": null
+    },
+    {
+      "index": 0,
+      "delta": {
+        "reasoning": " to",
+        "reasoning_content": " to"
+      },
+      "logprobs": null,
+      "finish_reason": null,
+      "token_ids": null
+    },
+    {
+      "index": 0,
+      "delta": {
+        "reasoning": " see",
+        "reasoning_content": " see"
+      },
+      "logprobs": null,
+      "finish_reason": null,
+      "token_ids": null
+    },
+    {
+      "index": 0,
+      "delta": {
+        "reasoning": " what",
+        "reasoning_content": " what"
+      },
+      "logprobs": null,
+      "finish_reason": null,
+      "token_ids": null
+    },
+    {
+      "index": 0,
+      "delta": {
+        "reasoning": " types",
+        "reasoning_content": " types"
+      },
+      "logprobs": null,
+      "finish_reason": null,
+      "token_ids": null
+    },
+    {
+      "index": 0,
+      "delta": {
+        "reasoning": " are",
+        "reasoning_content": " are"
+      },
+      "logprobs": null,
+      "finish_reason": null,
+      "token_ids": null
+    },
+    {
+      "index": 0,
+      "delta": {
+        "reasoning": " being",
+        "reasoning_content": " being"
+      },
+      "logprobs": null,
+      "finish_reason": null,
+      "token_ids": null
+    },
+    {
+      "index": 0,
+      "delta": {
+        "reasoning": " used",
+        "reasoning_content": " used"
+      },
+      "logprobs": null,
+      "finish_reason": null,
+      "token_ids": null
+    },
+    {
+      "index": 0,
+      "delta": {
+        "reasoning": " so",
+        "reasoning_content": " so"
+      },
+      "logprobs": null,
+      "finish_reason": null,
+      "token_ids": null
+    },
+    {
+      "index": 0,
+      "delta": {
+        "reasoning": " can",
+        "reasoning_content": " can"
+      },
+      "logprobs": null,
+      "finish_reason": null,
+      "token_ids": null
+    },
+    {
+      "index": 0,
+      "delta": {
+        "reasoning": " properly",
+        "reasoning_content": " properly"
+      },
+      "logprobs": null,
+      "finish_reason": null,
+      "token_ids": null
+    },
+    {
+      "index": 0,
+      "delta": {
+        "reasoning": " create",
+        "reasoning_content": " create"
+      },
+      "logprobs": null,
+      "finish_reason": null,
+      "token_ids": null
+    },
+    {
+      "index": 0,
+      "delta": {
+        "reasoning": " aliases",
+        "reasoning_content": " aliases"
+      },
+      "logprobs": null,
+      "finish_reason": null,
+      "token_ids": null
+    },
+    {
+      "index": 0,
+      "delta": {
+        "reasoning": ".",
+        "reasoning_content": "."
+      },
+      "logprobs": null,
+      "finish_reason": null,
+      "token_ids": null
+    },
+    {
+      "index": 0,
+      "delta": {
+        "content": "",
+        "reasoning_content": null
+      },
+      "logprobs": null,
+      "finish_reason": null,
+      "token_ids": null
+    },
+    {
+      "index": 0,
+      "delta": {
+        "reasoning_content": null,
+        "tool_calls": [
+          {
+            "id": "functions.read:184",
+            "type": "function",
+            "index": 0,
+            "function": {
+              "name": "read"
+            }
+          }
+        ]
+      },
+      "logprobs": null,
+      "finish_reason": null,
+      "token_ids": null
+    },
+    {
+      "index": 0,
+      "delta": {
+        "reasoning_content": null,
+        "tool_calls": [
+          {
+            "index": 0,
+            "function": {
+              "arguments": "{\""
+            }
+          }
+        ]
+      },
+      "logprobs": null,
+      "finish_reason": null,
+      "token_ids": null
+    },
+    {
+      "index": 0,
+      "delta": {
+        "reasoning_content": null,
+        "tool_calls": [
+          {
+            "index": 0,
+            "function": {
+              "arguments": "file"
+            }
+          }
+        ]
+      },
+      "logprobs": null,
+      "finish_reason": null,
+      "token_ids": null
+    },
+    {
+      "index": 0,
+      "delta": {
+        "reasoning_content": null,
+        "tool_calls": [
+          {
+            "index": 0,
+            "function": {
+              "arguments": "Path"
+            }
+          }
+        ]
+      },
+      "logprobs": null,
+      "finish_reason": null,
+      "token_ids": null
+    },
+    {
+      "index": 0,
+      "delta": {
+        "reasoning_content": null,
+        "tool_calls": [
+          {
+            "index": 0,
+            "function": {
+              "arguments": "\":"
+            }
+          }
+        ]
+      },
+      "logprobs": null,
+      "finish_reason": null,
+      "token_ids": null
+    },
+    {
+      "index": 0,
+      "delta": {
+        "reasoning_content": null,
+        "tool_calls": [
+          {
+            "index": 0,
+            "function": {
+              "arguments": " \"/"
+            }
+          }
+        ]
+      },
+      "logprobs": null,
+      "finish_reason": null,
+      "token_ids": null
+    },
+    {
+      "index": 0,
+      "delta": {
+        "reasoning_content": null,
+        "tool_calls": [
+          {
+            "index": 0,
+            "function": {
+              "arguments": "Users"
+            }
+          }
+        ]
+      },
+      "logprobs": null,
+      "finish_reason": null,
+      "token_ids": null
+    },
+    {
+      "index": 0,
+      "delta": {
+        "reasoning_content": null,
+        "tool_calls": [
+          {
+            "index": 0,
+            "function": {
+              "arguments": "/rust"
+            }
+          }
+        ]
+      },
+      "logprobs": null,
+      "finish_reason": null,
+      "token_ids": null
+    },
+    {
+      "index": 0,
+      "delta": {
+        "reasoning_content": null,
+        "tool_calls": [
+          {
+            "index": 0,
+            "function": {
+              "arguments": "am"
+            }
+          }
+        ]
+      },
+      "logprobs": null,
+      "finish_reason": null,
+      "token_ids": null
+    },
+    {
+      "index": 0,
+      "delta": {
+        "reasoning_content": null,
+        "tool_calls": [
+          {
+            "index": 0,
+            "function": {
+              "arguments": "/start"
+            }
+          }
+        ]
+      },
+      "logprobs": null,
+      "finish_reason": null,
+      "token_ids": null
+    },
+    {
+      "index": 0,
+      "delta": {
+        "reasoning_content": null,
+        "tool_calls": [
+          {
+            "index": 0,
+            "function": {
+              "arguments": "ups"
+            }
+          }
+        ]
+      },
+      "logprobs": null,
+      "finish_reason": null,
+      "token_ids": null
+    },
+    {
+      "index": 0,
+      "delta": {
+        "reasoning_content": null,
+        "tool_calls": [
+          {
+            "index": 0,
+            "function": {
+              "arguments": "/active"
+            }
+          }
+        ]
+      },
+      "logprobs": null,
+      "finish_reason": null,
+      "token_ids": null
+    },
+    {
+      "index": 0,
+      "delta": {
+        "reasoning_content": null,
+        "tool_calls": [
+          {
+            "index": 0,
+            "function": {
+              "arguments": "/open"
+            }
+          }
+        ]
+      },
+      "logprobs": null,
+      "finish_reason": null,
+      "token_ids": null
+    },
+    {
+      "index": 0,
+      "delta": {
+        "reasoning_content": null,
+        "tool_calls": [
+          {
+            "index": 0,
+            "function": {
+              "arguments": "ai"
+            }
+          }
+        ]
+      },
+      "logprobs": null,
+      "finish_reason": null,
+      "token_ids": null
+    },
+    {
+      "index": 0,
+      "delta": {
+        "reasoning_content": null,
+        "tool_calls": [
+          {
+            "index": 0,
+            "function": {
+              "arguments": "-r"
+            }
+          }
+        ]
+      },
+      "logprobs": null,
+      "finish_reason": null,
+      "token_ids": null
+    },
+    {
+      "index": 0,
+      "delta": {
+        "reasoning_content": null,
+        "tool_calls": [
+          {
+            "index": 0,
+            "function": {
+              "arguments": "ust"
+            }
+          }
+        ]
+      },
+      "logprobs": null,
+      "finish_reason": null,
+      "token_ids": null
+    },
+    {
+      "index": 0,
+      "delta": {
+        "reasoning_content": null,
+        "tool_calls": [
+          {
+            "index": 0,
+            "function": {
+              "arguments": "/src"
+            }
+          }
+        ]
+      },
+      "logprobs": null,
+      "finish_reason": null,
+      "token_ids": null
+    },
+    {
+      "index": 0,
+      "delta": {
+        "reasoning_content": null,
+        "tool_calls": [
+          {
+            "index": 0,
+            "function": {
+              "arguments": "/types"
+            }
+          }
+        ]
+      },
+      "logprobs": null,
+      "finish_reason": null,
+      "token_ids": null
+    },
+    {
+      "index": 0,
+      "delta": {
+        "reasoning_content": null,
+        "tool_calls": [
+          {
+            "index": 0,
+            "function": {
+              "arguments": "/res"
+            }
+          }
+        ]
+      },
+      "logprobs": null,
+      "finish_reason": null,
+      "token_ids": null
+    },
+    {
+      "index": 0,
+      "delta": {
+        "reasoning_content": null,
+        "tool_calls": [
+          {
+            "index": 0,
+            "function": {
+              "arguments": "ponses"
+            }
+          }
+        ]
+      },
+      "logprobs": null,
+      "finish_reason": null,
+      "token_ids": null
+    },
+    {
+      "index": 0,
+      "delta": {
+        "reasoning_content": null,
+        "tool_calls": [
+          {
+            "index": 0,
+            "function": {
+              "arguments": ".rs"
+            }
+          }
+        ]
+      },
+      "logprobs": null,
+      "finish_reason": null,
+      "token_ids": null
+    },
+    {
+      "index": 0,
+      "delta": {
+        "reasoning_content": null,
+        "tool_calls": [
+          {
+            "index": 0,
+            "function": {
+              "arguments": "\","
+            }
+          }
+        ]
+      },
+      "logprobs": null,
+      "finish_reason": null,
+      "token_ids": null
+    },
+    {
+      "index": 0,
+      "delta": {
+        "reasoning_content": null,
+        "tool_calls": [
+          {
+            "index": 0,
+            "function": {
+              "arguments": " \""
+            }
+          }
+        ]
+      },
+      "logprobs": null,
+      "finish_reason": null,
+      "token_ids": null
+    },
+    {
+      "index": 0,
+      "delta": {
+        "reasoning_content": null,
+        "tool_calls": [
+          {
+            "index": 0,
+            "function": {
+              "arguments": "limit"
+            }
+          }
+        ]
+      },
+      "logprobs": null,
+      "finish_reason": null,
+      "token_ids": null
+    },
+    {
+      "index": 0,
+      "delta": {
+        "reasoning_content": null,
+        "tool_calls": [
+          {
+            "index": 0,
+            "function": {
+              "arguments": " "
+            }
+          }
+        ]
+      },
+      "logprobs": null,
+      "finish_reason": null,
+      "token_ids": null
+    },
+    {
+      "index": 0,
+      "delta": {
+        "reasoning_content": null,
+        "tool_calls": [
+          {
+            "index": 0,
+            "function": {
+              "arguments": "100"
+            }
+          }
+        ]
+      },
+      "logprobs": null,
+      "finish_reason": null,
+      "token_ids": null
+    },
+    {
+      "index": 0,
+      "delta": {
+        "reasoning_content": null,
+        "tool_calls": [
+          {
+            "index": 0,
+            "function": {
+              "arguments": "}"
+            }
+          }
+        ]
+      },
+      "logprobs": null,
+      "finish_reason": null,
+      "token_ids": null
+    },
+    {
+      "index": 0,
+      "delta": {
+        "reasoning_content": null,
+        "tool_calls": [
+          {
+            "id": "functions.read:185",
+            "type": "function",
+            "index": 1,
+            "function": {
+              "name": "read"
+            }
+          }
+        ]
+      },
+      "logprobs": null,
+      "finish_reason": null,
+      "token_ids": null
+    },
+    {
+      "index": 0,
+      "delta": {
+        "reasoning_content": null,
+        "tool_calls": [
+          {
+            "index": 1,
+            "function": {
+              "arguments": "{\""
+            }
+          }
+        ]
+      },
+      "logprobs": null,
+      "finish_reason": null,
+      "token_ids": null
+    },
+    {
+      "index": 0,
+      "delta": {
+        "reasoning_content": null,
+        "tool_calls": [
+          {
+            "index": 1,
+            "function": {
+              "arguments": "file"
+            }
+          }
+        ]
+      },
+      "logprobs": null,
+      "finish_reason": null,
+      "token_ids": null
+    },
+    {
+      "index": 0,
+      "delta": {
+        "reasoning_content": null,
+        "tool_calls": [
+          {
+            "index": 1,
+            "function": {
+              "arguments": "Path"
+            }
+          }
+        ]
+      },
+      "logprobs": null,
+      "finish_reason": null,
+      "token_ids": null
+    },
+    {
+      "index": 0,
+      "delta": {
+        "reasoning_content": null,
+        "tool_calls": [
+          {
+            "index": 1,
+            "function": {
+              "arguments": "\":"
+            }
+          }
+        ]
+      },
+      "logprobs": null,
+      "finish_reason": null,
+      "token_ids": null
+    },
+    {
+      "index": 0,
+      "delta": {
+        "reasoning_content": null,
+        "tool_calls": [
+          {
+            "index": 1,
+            "function": {
+              "arguments": " \"/"
+            }
+          }
+        ]
+      },
+      "logprobs": null,
+      "finish_reason": null,
+      "token_ids": null
+    },
+    {
+      "index": 0,
+      "delta": {
+        "reasoning_content": null,
+        "tool_calls": [
+          {
+            "index": 1,
+            "function": {
+              "arguments": "Users"
+            }
+          }
+        ]
+      },
+      "logprobs": null,
+      "finish_reason": null,
+      "token_ids": null
+    },
+    {
+      "index": 0,
+      "delta": {
+        "reasoning_content": null,
+        "tool_calls": [
+          {
+            "index": 1,
+            "function": {
+              "arguments": "/rust"
+            }
+          }
+        ]
+      },
+      "logprobs": null,
+      "finish_reason": null,
+      "token_ids": null
+    },
+    {
+      "index": 0,
+      "delta": {
+        "reasoning_content": null,
+        "tool_calls": [
+          {
+            "index": 1,
+            "function": {
+              "arguments": "am"
+            }
+          }
+        ]
+      },
+      "logprobs": null,
+      "finish_reason": null,
+      "token_ids": null
+    },
+    {
+      "index": 0,
+      "delta": {
+        "reasoning_content": null,
+        "tool_calls": [
+          {
+            "index": 1,
+            "function": {
+              "arguments": "/start"
+            }
+          }
+        ]
+      },
+      "logprobs": null,
+      "finish_reason": null,
+      "token_ids": null
+    },
+    {
+      "index": 0,
+      "delta": {
+        "reasoning_content": null,
+        "tool_calls": [
+          {
+            "index": 1,
+            "function": {
+              "arguments": "ups"
+            }
+          }
+        ]
+      },
+      "logprobs": null,
+      "finish_reason": null,
+      "token_ids": null
+    },
+    {
+      "index": 0,
+      "delta": {
+        "reasoning_content": null,
+        "tool_calls": [
+          {
+            "index": 1,
+            "function": {
+              "arguments": "/active"
+            }
+          }
+        ]
+      },
+      "logprobs": null,
+      "finish_reason": null,
+      "token_ids": null
+    },
+    {
+      "index": 0,
+      "delta": {
+        "reasoning_content": null,
+        "tool_calls": [
+          {
+            "index": 1,
+            "function": {
+              "arguments": "/open"
+            }
+          }
+        ]
+      },
+      "logprobs": null,
+      "finish_reason": null,
+      "token_ids": null
+    },
+    {
+      "index": 0,
+      "delta": {
+        "reasoning_content": null,
+        "tool_calls": [
+          {
+            "index": 1,
+            "function": {
+              "arguments": "ai"
+            }
+          }
+        ]
+      },
+      "logprobs": null,
+      "finish_reason": null,
+      "token_ids": null
+    },
+    {
+      "index": 0,
+      "delta": {
+        "reasoning_content": null,
+        "tool_calls": [
+          {
+            "index": 1,
+            "function": {
+              "arguments": "-r"
+            }
+          }
+        ]
+      },
+      "logprobs": null,
+      "finish_reason": null,
+      "token_ids": null
+    },
+    {
+      "index": 0,
+      "delta": {
+        "reasoning_content": null,
+        "tool_calls": [
+          {
+            "index": 1,
+            "function": {
+              "arguments": "ust"
+            }
+          }
+        ]
+      },
+      "logprobs": null,
+      "finish_reason": null,
+      "token_ids": null
+    },
+    {
+      "index": 0,
+      "delta": {
+        "reasoning_content": null,
+        "tool_calls": [
+          {
+            "index": 1,
+            "function": {
+              "arguments": "/src"
+            }
+          }
+        ]
+      },
+      "logprobs": null,
+      "finish_reason": null,
+      "token_ids": null
+    },
+    {
+      "index": 0,
+      "delta": {
+        "reasoning_content": null,
+        "tool_calls": [
+          {
+            "index": 1,
+            "function": {
+              "arguments": "/types"
+            }
+          }
+        ]
+      },
+      "logprobs": null,
+      "finish_reason": null,
+      "token_ids": null
+    },
+    {
+      "index": 0,
+      "delta": {
+        "reasoning_content": null,
+        "tool_calls": [
+          {
+            "index": 1,
+            "function": {
+              "arguments": "/chat"
+            }
+          }
+        ]
+      },
+      "logprobs": null,
+      "finish_reason": null,
+      "token_ids": null
+    },
+    {
+      "index": 0,
+      "delta": {
+        "reasoning_content": null,
+        "tool_calls": [
+          {
+            "index": 1,
+            "function": {
+              "arguments": ".rs"
+            }
+          }
+        ]
+      },
+      "logprobs": null,
+      "finish_reason": null,
+      "token_ids": null
+    },
+    {
+      "index": 0,
+      "delta": {
+        "reasoning_content": null,
+        "tool_calls": [
+          {
+            "index": 1,
+            "function": {
+              "arguments": "\","
+            }
+          }
+        ]
+      },
+      "logprobs": null,
+      "finish_reason": null,
+      "token_ids": null
+    },
+    {
+      "index": 0,
+      "delta": {
+        "reasoning_content": null,
+        "tool_calls": [
+          {
+            "index": 1,
+            "function": {
+              "arguments": " \""
+            }
+          }
+        ]
+      },
+      "logprobs": null,
+      "finish_reason": null,
+      "token_ids": null
+    },
+    {
+      "index": 0,
+      "delta": {
+        "reasoning_content": null,
+        "tool_calls": [
+          {
+            "index": 1,
+            "function": {
+              "arguments": "limit"
+            }
+          }
+        ]
+      },
+      "logprobs": null,
+      "finish_reason": null,
+      "token_ids": null
+    },
+    {
+      "index": 0,
+      "delta": {
+        "reasoning_content": null,
+        "tool_calls": [
+          {
+            "index": 1,
+            "function": {
+              "arguments": " "
+            }
+          }
+        ]
+      },
+      "logprobs": null,
+      "finish_reason": null,
+      "token_ids": null
+    },
+    {
+      "index": 0,
+      "delta": {
+        "reasoning_content": null,
+        "tool_calls": [
+          {
+            "index": 1,
+            "function": {
+              "arguments": "100"
+            }
+          }
+        ]
+      },
+      "logprobs": null,
+      "finish_reason": null,
+      "token_ids": null
+    },
+    {
+      "index": 0,
+      "delta": {
+        "reasoning_content": null,
+        "tool_calls": [
+          {
+            "index": 1,
+            "function": {
+              "arguments": "}"
+            }
+          }
+        ]
+      },
+      "logprobs": null,
+      "finish_reason": null,
+      "token_ids": null
+    },
+    {
+      "index": 0,
+      "delta": {
+        "reasoning_content": null,
+        "tool_calls": [
+          {
+            "id": "functions.read:186",
+            "type": "function",
+            "index": 2,
+            "function": {
+              "name": "read"
+            }
+          }
+        ]
+      },
+      "logprobs": null,
+      "finish_reason": null,
+      "token_ids": null
+    },
+    {
+      "index": 0,
+      "delta": {
+        "reasoning_content": null,
+        "tool_calls": [
+          {
+            "index": 2,
+            "function": {
+              "arguments": "{\""
+            }
+          }
+        ]
+      },
+      "logprobs": null,
+      "finish_reason": null,
+      "token_ids": null
+    },
+    {
+      "index": 0,
+      "delta": {
+        "reasoning_content": null,
+        "tool_calls": [
+          {
+            "index": 2,
+            "function": {
+              "arguments": "file"
+            }
+          }
+        ]
+      },
+      "logprobs": null,
+      "finish_reason": null,
+      "token_ids": null
+    },
+    {
+      "index": 0,
+      "delta": {
+        "reasoning_content": null,
+        "tool_calls": [
+          {
+            "index": 2,
+            "function": {
+              "arguments": "Path"
+            }
+          }
+        ]
+      },
+      "logprobs": null,
+      "finish_reason": null,
+      "token_ids": null
+    },
+    {
+      "index": 0,
+      "delta": {
+        "reasoning_content": null,
+        "tool_calls": [
+          {
+            "index": 2,
+            "function": {
+              "arguments": "\":"
+            }
+          }
+        ]
+      },
+      "logprobs": null,
+      "finish_reason": null,
+      "token_ids": null
+    },
+    {
+      "index": 0,
+      "delta": {
+        "reasoning_content": null,
+        "tool_calls": [
+          {
+            "index": 2,
+            "function": {
+              "arguments": " \"/"
+            }
+          }
+        ]
+      },
+      "logprobs": null,
+      "finish_reason": null,
+      "token_ids": null
+    },
+    {
+      "index": 0,
+      "delta": {
+        "reasoning_content": null,
+        "tool_calls": [
+          {
+            "index": 2,
+            "function": {
+              "arguments": "Users"
+            }
+          }
+        ]
+      },
+      "logprobs": null,
+      "finish_reason": null,
+      "token_ids": null
+    },
+    {
+      "index": 0,
+      "delta": {
+        "reasoning_content": null,
+        "tool_calls": [
+          {
+            "index": 2,
+            "function": {
+              "arguments": "/rust"
+            }
+          }
+        ]
+      },
+      "logprobs": null,
+      "finish_reason": null,
+      "token_ids": null
+    },
+    {
+      "index": 0,
+      "delta": {
+        "reasoning_content": null,
+        "tool_calls": [
+          {
+            "index": 2,
+            "function": {
+              "arguments": "am"
+            }
+          }
+        ]
+      },
+      "logprobs": null,
+      "finish_reason": null,
+      "token_ids": null
+    },
+    {
+      "index": 0,
+      "delta": {
+        "reasoning_content": null,
+        "tool_calls": [
+          {
+            "index": 2,
+            "function": {
+              "arguments": "/start"
+            }
+          }
+        ]
+      },
+      "logprobs": null,
+      "finish_reason": null,
+      "token_ids": null
+    },
+    {
+      "index": 0,
+      "delta": {
+        "reasoning_content": null,
+        "tool_calls": [
+          {
+            "index": 2,
+            "function": {
+              "arguments": "ups"
+            }
+          }
+        ]
+      },
+      "logprobs": null,
+      "finish_reason": null,
+      "token_ids": null
+    },
+    {
+      "index": 0,
+      "delta": {
+        "reasoning_content": null,
+        "tool_calls": [
+          {
+            "index": 2,
+            "function": {
+              "arguments": "/active"
+            }
+          }
+        ]
+      },
+      "logprobs": null,
+      "finish_reason": null,
+      "token_ids": null
+    },
+    {
+      "index": 0,
+      "delta": {
+        "reasoning_content": null,
+        "tool_calls": [
+          {
+            "index": 2,
+            "function": {
+              "arguments": "/open"
+            }
+          }
+        ]
+      },
+      "logprobs": null,
+      "finish_reason": null,
+      "token_ids": null
+    },
+    {
+      "index": 0,
+      "delta": {
+        "reasoning_content": null,
+        "tool_calls": [
+          {
+            "index": 2,
+            "function": {
+              "arguments": "ai"
+            }
+          }
+        ]
+      },
+      "logprobs": null,
+      "finish_reason": null,
+      "token_ids": null
+    },
+    {
+      "index": 0,
+      "delta": {
+        "reasoning_content": null,
+        "tool_calls": [
+          {
+            "index": 2,
+            "function": {
+              "arguments": "-r"
+            }
+          }
+        ]
+      },
+      "logprobs": null,
+      "finish_reason": null,
+      "token_ids": null
+    },
+    {
+      "index": 0,
+      "delta": {
+        "reasoning_content": null,
+        "tool_calls": [
+          {
+            "index": 2,
+            "function": {
+              "arguments": "ust"
+            }
+          }
+        ]
+      },
+      "logprobs": null,
+      "finish_reason": null,
+      "token_ids": null
+    },
+    {
+      "index": 0,
+      "delta": {
+        "reasoning_content": null,
+        "tool_calls": [
+          {
+            "index": 2,
+            "function": {
+              "arguments": "/src"
+            }
+          }
+        ]
+      },
+      "logprobs": null,
+      "finish_reason": null,
+      "token_ids": null
+    },
+    {
+      "index": 0,
+      "delta": {
+        "reasoning_content": null,
+        "tool_calls": [
+          {
+            "index": 2,
+            "function": {
+              "arguments": "/types"
+            }
+          }
+        ]
+      },
+      "logprobs": null,
+      "finish_reason": null,
+      "token_ids": null
+    },
+    {
+      "index": 0,
+      "delta": {
+        "reasoning_content": null,
+        "tool_calls": [
+          {
+            "index": 2,
+            "function": {
+              "arguments": "/re"
+            }
+          }
+        ]
+      },
+      "logprobs": null,
+      "finish_reason": null,
+      "token_ids": null
+    },
+    {
+      "index": 0,
+      "delta": {
+        "reasoning_content": null,
+        "tool_calls": [
+          {
+            "index": 2,
+            "function": {
+              "arguments": "al"
+            }
+          }
+        ]
+      },
+      "logprobs": null,
+      "finish_reason": null,
+      "token_ids": null
+    },
+    {
+      "index": 0,
+      "delta": {
+        "reasoning_content": null,
+        "tool_calls": [
+          {
+            "index": 2,
+            "function": {
+              "arguments": "time"
+            }
+          }
+        ]
+      },
+      "logprobs": null,
+      "finish_reason": null,
+      "token_ids": null
+    },
+    {
+      "index": 0,
+      "delta": {
+        "reasoning_content": null,
+        "tool_calls": [
+          {
+            "index": 2,
+            "function": {
+              "arguments": ".rs"
+            }
+          }
+        ]
+      },
+      "logprobs": null,
+      "finish_reason": null,
+      "token_ids": null
+    },
+    {
+      "index": 0,
+      "delta": {
+        "reasoning_content": null,
+        "tool_calls": [
+          {
+            "index": 2,
+            "function": {
+              "arguments": "\","
+            }
+          }
+        ]
+      },
+      "logprobs": null,
+      "finish_reason": null,
+      "token_ids": null
+    },
+    {
+      "index": 0,
+      "delta": {
+        "reasoning_content": null,
+        "tool_calls": [
+          {
+            "index": 2,
+            "function": {
+              "arguments": " \""
+            }
+          }
+        ]
+      },
+      "logprobs": null,
+      "finish_reason": null,
+      "token_ids": null
+    },
+    {
+      "index": 0,
+      "delta": {
+        "reasoning_content": null,
+        "tool_calls": [
+          {
+            "index": 2,
+            "function": {
+              "arguments": "limit"
+            }
+          }
+        ]
+      },
+      "logprobs": null,
+      "finish_reason": null,
+      "token_ids": null
+    },
+    {
+      "index": 0,
+      "delta": {
+        "reasoning_content": null,
+        "tool_calls": [
+          {
+            "index": 2,
+            "function": {
+              "arguments": " "
+            }
+          }
+        ]
+      },
+      "logprobs": null,
+      "finish_reason": null,
+      "token_ids": null
+    },
+    {
+      "index": 0,
+      "delta": {
+        "reasoning_content": null,
+        "tool_calls": [
+          {
+            "index": 2,
+            "function": {
+              "arguments": "100"
+            }
+          }
+        ]
+      },
+      "logprobs": null,
+      "finish_reason": null,
+      "token_ids": null
+    },
+    {
+      "index": 0,
+      "delta": {
+        "reasoning_content": null,
+        "tool_calls": [
+          {
+            "index": 2,
+            "function": {
+              "arguments": "}"
+            }
+          }
+        ]
+      },
+      "logprobs": null,
+      "finish_reason": null,
+      "token_ids": null
+    },
+    {
+      "index": 0,
+      "delta": {
+        "content": "",
+        "reasoning_content": null
+      },
+      "logprobs": null,
+      "finish_reason": "tool_calls",
+      "stop_reason": 163586,
+      "token_ids": null
+    },
+    {
+      "index": 0,
+      "delta": {},
+      "finish_reason": "tool_calls"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 152831,
+    "total_tokens": 152960,
+    "completion_tokens": 129,
+    "prompt_tokens_details": {
+      "cached_tokens": 148544
+    }
+  },
+  "streamed_data": [
+    {
+      "id": "id-1774458929330",
+      "created": 1774458929,
+      "model": "@cf/moonshotai/kimi-k2.5",
+      "object": "chat.completion.chunk",
+      "choices": [
+        {
+          "index": 0,
+          "delta": {
+            "role": "assistant",
+            "content": "",
+            "reasoning_content": null
+          },
+          "logprobs": null,
+          "finish_reason": null
+        }
+      ]
+    },
+    {
+      "id": "id-1774458929330",
+      "created": 1774458929,
+      "model": "@cf/moonshotai/kimi-k2.5",
+      "object": "chat.completion.chunk",
+      "choices": [
+        {
+          "index": 0,
+          "delta": {
+            "reasoning": "  ",
+            "reasoning_content": "  "
+          },
+          "logprobs": null,
+          "finish_reason": null,
+          "token_ids": null
+        }
+      ]
+    },
+    {
+      "id": "id-1774458929330",
+      "created": 1774458929,
+      "model": "@cf/moonshotai/kimi-k2.5",
+      "object": "chat.completion.chunk",
+      "choices": [
+        {
+          "index": 0,
+          "delta": {
+            "reasoning": " I",
+            "reasoning_content": " I"
+          },
+          "logprobs": null,
+          "finish_reason": null,
+          "token_ids": null
+        }
+      ]
+    },
+    {
+      "id": "id-1774458929330",
+      "created": 1774458929,
+      "model": "@cf/moonshotai/kimi-k2.5",
+      "object": "chat.completion.chunk",
+      "choices": [
+        {
+          "index": 0,
+          "delta": {
+            "reasoning": " should",
+            "reasoning_content": " should"
+          },
+          "logprobs": null,
+          "finish_reason": null,
+          "token_ids": null
+        }
+      ]
+    },
+    {
+      "id": "id-1774458929330",
+      "created": 1774458929,
+      "model": "@cf/moonshotai/kimi-k2.5",
+      "object": "chat.completion.chunk",
+      "choices": [
+        {
+          "index": 0,
+          "delta": {
+            "reasoning": " read",
+            "reasoning_content": " read"
+          },
+          "logprobs": null,
+          "finish_reason": null,
+          "token_ids": null
+        }
+      ]
+    },
+    {
+      "id": "id-1774458929330",
+      "created": 1774458929,
+      "model": "@cf/moonshotai/kimi-k2.5",
+      "object": "chat.completion.chunk",
+      "choices": [
+        {
+          "index": 0,
+          "delta": {
+            "reasoning": " the",
+            "reasoning_content": " the"
+          },
+          "logprobs": null,
+          "finish_reason": null,
+          "token_ids": null
+        }
+      ]
+    },
+    {
+      "id": "id-1774458929330",
+      "created": 1774458929,
+      "model": "@cf/moonshotai/kimi-k2.5",
+      "object": "chat.completion.chunk",
+      "choices": [
+        {
+          "index": 0,
+          "delta": {
+            "reasoning": " existing",
+            "reasoning_content": " existing"
+          },
+          "logprobs": null,
+          "finish_reason": null,
+          "token_ids": null
+        }
+      ]
+    },
+    {
+      "id": "id-1774458929330",
+      "created": 1774458929,
+      "model": "@cf/moonshotai/kimi-k2.5",
+      "object": "chat.completion.chunk",
+      "choices": [
+        {
+          "index": 0,
+          "delta": {
+            "reasoning": " files",
+            "reasoning_content": " files"
+          },
+          "logprobs": null,
+          "finish_reason": null,
+          "token_ids": null
+        }
+      ]
+    },
+    {
+      "id": "id-1774458929330",
+      "created": 1774458929,
+      "model": "@cf/moonshotai/kimi-k2.5",
+      "object": "chat.completion.chunk",
+      "choices": [
+        {
+          "index": 0,
+          "delta": {
+            "reasoning": " first",
+            "reasoning_content": " first"
+          },
+          "logprobs": null,
+          "finish_reason": null,
+          "token_ids": null
+        }
+      ]
+    },
+    {
+      "id": "id-1774458929330",
+      "created": 1774458929,
+      "model": "@cf/moonshotai/kimi-k2.5",
+      "object": "chat.completion.chunk",
+      "choices": [
+        {
+          "index": 0,
+          "delta": {
+            "reasoning": " to",
+            "reasoning_content": " to"
+          },
+          "logprobs": null,
+          "finish_reason": null,
+          "token_ids": null
+        }
+      ]
+    },
+    {
+      "id": "id-1774458929330",
+      "created": 1774458929,
+      "model": "@cf/moonshotai/kimi-k2.5",
+      "object": "chat.completion.chunk",
+      "choices": [
+        {
+          "index": 0,
+          "delta": {
+            "reasoning": " see",
+            "reasoning_content": " see"
+          },
+          "logprobs": null,
+          "finish_reason": null,
+          "token_ids": null
+        }
+      ]
+    },
+    {
+      "id": "id-1774458929330",
+      "created": 1774458929,
+      "model": "@cf/moonshotai/kimi-k2.5",
+      "object": "chat.completion.chunk",
+      "choices": [
+        {
+          "index": 0,
+          "delta": {
+            "reasoning": " what",
+            "reasoning_content": " what"
+          },
+          "logprobs": null,
+          "finish_reason": null,
+          "token_ids": null
+        }
+      ]
+    },
+    {
+      "id": "id-1774458929330",
+      "created": 1774458929,
+      "model": "@cf/moonshotai/kimi-k2.5",
+      "object": "chat.completion.chunk",
+      "choices": [
+        {
+          "index": 0,
+          "delta": {
+            "reasoning": " types",
+            "reasoning_content": " types"
+          },
+          "logprobs": null,
+          "finish_reason": null,
+          "token_ids": null
+        }
+      ]
+    },
+    {
+      "id": "id-1774458929330",
+      "created": 1774458929,
+      "model": "@cf/moonshotai/kimi-k2.5",
+      "object": "chat.completion.chunk",
+      "choices": [
+        {
+          "index": 0,
+          "delta": {
+            "reasoning": " are",
+            "reasoning_content": " are"
+          },
+          "logprobs": null,
+          "finish_reason": null,
+          "token_ids": null
+        }
+      ]
+    },
+    {
+      "id": "id-1774458929330",
+      "created": 1774458929,
+      "model": "@cf/moonshotai/kimi-k2.5",
+      "object": "chat.completion.chunk",
+      "choices": [
+        {
+          "index": 0,
+          "delta": {
+            "reasoning": " being",
+            "reasoning_content": " being"
+          },
+          "logprobs": null,
+          "finish_reason": null,
+          "token_ids": null
+        }
+      ]
+    },
+    {
+      "id": "id-1774458929330",
+      "created": 1774458929,
+      "model": "@cf/moonshotai/kimi-k2.5",
+      "object": "chat.completion.chunk",
+      "choices": [
+        {
+          "index": 0,
+          "delta": {
+            "reasoning": " used",
+            "reasoning_content": " used"
+          },
+          "logprobs": null,
+          "finish_reason": null,
+          "token_ids": null
+        }
+      ]
+    },
+    {
+      "id": "id-1774458929330",
+      "created": 1774458929,
+      "model": "@cf/moonshotai/kimi-k2.5",
+      "object": "chat.completion.chunk",
+      "choices": [
+        {
+          "index": 0,
+          "delta": {
+            "reasoning": " so",
+            "reasoning_content": " so"
+          },
+          "logprobs": null,
+          "finish_reason": null,
+          "token_ids": null
+        }
+      ]
+    },
+    {
+      "id": "id-1774458929330",
+      "created": 1774458929,
+      "model": "@cf/moonshotai/kimi-k2.5",
+      "object": "chat.completion.chunk",
+      "choices": [
+        {
+          "index": 0,
+          "delta": {
+            "reasoning": " I",
+            "reasoning_content": " I"
+          },
+          "logprobs": null,
+          "finish_reason": null,
+          "token_ids": null
+        }
+      ]
+    },
+    {
+      "id": "id-1774458929330",
+      "created": 1774458929,
+      "model": "@cf/moonshotai/kimi-k2.5",
+      "object": "chat.completion.chunk",
+      "choices": [
+        {
+          "index": 0,
+          "delta": {
+            "reasoning": " can",
+            "reasoning_content": " can"
+          },
+          "logprobs": null,
+          "finish_reason": null,
+          "token_ids": null
+        }
+      ]
+    },
+    {
+      "id": "id-1774458929330",
+      "created": 1774458929,
+      "model": "@cf/moonshotai/kimi-k2.5",
+      "object": "chat.completion.chunk",
+      "choices": [
+        {
+          "index": 0,
+          "delta": {
+            "reasoning": " properly",
+            "reasoning_content": " properly"
+          },
+          "logprobs": null,
+          "finish_reason": null,
+          "token_ids": null
+        }
+      ]
+    },
+    {
+      "id": "id-1774458929330",
+      "created": 1774458929,
+      "model": "@cf/moonshotai/kimi-k2.5",
+      "object": "chat.completion.chunk",
+      "choices": [
+        {
+          "index": 0,
+          "delta": {
+            "reasoning": " create",
+            "reasoning_content": " create"
+          },
+          "logprobs": null,
+          "finish_reason": null,
+          "token_ids": null
+        }
+      ]
+    },
+    {
+      "id": "id-1774458929330",
+      "created": 1774458929,
+      "model": "@cf/moonshotai/kimi-k2.5",
+      "object": "chat.completion.chunk",
+      "choices": [
+        {
+          "index": 0,
+          "delta": {
+            "reasoning": " the",
+            "reasoning_content": " the"
+          },
+          "logprobs": null,
+          "finish_reason": null,
+          "token_ids": null
+        }
+      ]
+    },
+    {
+      "id": "id-1774458929330",
+      "created": 1774458929,
+      "model": "@cf/moonshotai/kimi-k2.5",
+      "object": "chat.completion.chunk",
+      "choices": [
+        {
+          "index": 0,
+          "delta": {
+            "reasoning": " aliases",
+            "reasoning_content": " aliases"
+          },
+          "logprobs": null,
+          "finish_reason": null,
+          "token_ids": null
+        }
+      ]
+    },
+    {
+      "id": "id-1774458929330",
+      "created": 1774458929,
+      "model": "@cf/moonshotai/kimi-k2.5",
+      "object": "chat.completion.chunk",
+      "choices": [
+        {
+          "index": 0,
+          "delta": {
+            "reasoning": ".",
+            "reasoning_content": "."
+          },
+          "logprobs": null,
+          "finish_reason": null,
+          "token_ids": null
+        }
+      ]
+    },
+    {
+      "id": "id-1774458929330",
+      "created": 1774458929,
+      "model": "@cf/moonshotai/kimi-k2.5",
+      "object": "chat.completion.chunk",
+      "choices": [
+        {
+          "index": 0,
+          "delta": {
+            "content": "",
+            "reasoning_content": null
+          },
+          "logprobs": null,
+          "finish_reason": null,
+          "token_ids": null
+        }
+      ]
+    },
+    {
+      "id": "id-1774458929330",
+      "created": 1774458929,
+      "model": "@cf/moonshotai/kimi-k2.5",
+      "object": "chat.completion.chunk",
+      "choices": [
+        {
+          "index": 0,
+          "delta": {
+            "content": "",
+            "reasoning_content": null
+          },
+          "logprobs": null,
+          "finish_reason": null,
+          "token_ids": null
+        }
+      ]
+    },
+    {
+      "id": "id-1774458929330",
+      "created": 1774458929,
+      "model": "@cf/moonshotai/kimi-k2.5",
+      "object": "chat.completion.chunk",
+      "choices": [
+        {
+          "index": 0,
+          "delta": {
+            "reasoning_content": null,
+            "tool_calls": [
+              {
+                "id": "functions.read:184",
+                "type": "function",
+                "index": 0,
+                "function": {
+                  "name": "read"
+                }
+              }
+            ]
+          },
+          "logprobs": null,
+          "finish_reason": null,
+          "token_ids": null
+        }
+      ]
+    },
+    {
+      "id": "id-1774458929330",
+      "created": 1774458929,
+      "model": "@cf/moonshotai/kimi-k2.5",
+      "object": "chat.completion.chunk",
+      "choices": [
+        {
+          "index": 0,
+          "delta": {
+            "reasoning_content": null,
+            "tool_calls": [
+              {
+                "index": 0,
+                "function": {
+                  "arguments": "{\""
+                }
+              }
+            ]
+          },
+          "logprobs": null,
+          "finish_reason": null,
+          "token_ids": null
+        }
+      ]
+    },
+    {
+      "id": "id-1774458929330",
+      "created": 1774458929,
+      "model": "@cf/moonshotai/kimi-k2.5",
+      "object": "chat.completion.chunk",
+      "choices": [
+        {
+          "index": 0,
+          "delta": {
+            "reasoning_content": null,
+            "tool_calls": [
+              {
+                "index": 0,
+                "function": {
+                  "arguments": "file"
+                }
+              }
+            ]
+          },
+          "logprobs": null,
+          "finish_reason": null,
+          "token_ids": null
+        }
+      ]
+    },
+    {
+      "id": "id-1774458929330",
+      "created": 1774458929,
+      "model": "@cf/moonshotai/kimi-k2.5",
+      "object": "chat.completion.chunk",
+      "choices": [
+        {
+          "index": 0,
+          "delta": {
+            "reasoning_content": null,
+            "tool_calls": [
+              {
+                "index": 0,
+                "function": {
+                  "arguments": "Path"
+                }
+              }
+            ]
+          },
+          "logprobs": null,
+          "finish_reason": null,
+          "token_ids": null
+        }
+      ]
+    },
+    {
+      "id": "id-1774458929330",
+      "created": 1774458929,
+      "model": "@cf/moonshotai/kimi-k2.5",
+      "object": "chat.completion.chunk",
+      "choices": [
+        {
+          "index": 0,
+          "delta": {
+            "reasoning_content": null,
+            "tool_calls": [
+              {
+                "index": 0,
+                "function": {
+                  "arguments": "\":"
+                }
+              }
+            ]
+          },
+          "logprobs": null,
+          "finish_reason": null,
+          "token_ids": null
+        }
+      ]
+    },
+    {
+      "id": "id-1774458929330",
+      "created": 1774458929,
+      "model": "@cf/moonshotai/kimi-k2.5",
+      "object": "chat.completion.chunk",
+      "choices": [
+        {
+          "index": 0,
+          "delta": {
+            "reasoning_content": null,
+            "tool_calls": [
+              {
+                "index": 0,
+                "function": {
+                  "arguments": " \"/"
+                }
+              }
+            ]
+          },
+          "logprobs": null,
+          "finish_reason": null,
+          "token_ids": null
+        }
+      ]
+    },
+    {
+      "id": "id-1774458929330",
+      "created": 1774458929,
+      "model": "@cf/moonshotai/kimi-k2.5",
+      "object": "chat.completion.chunk",
+      "choices": [
+        {
+          "index": 0,
+          "delta": {
+            "reasoning_content": null,
+            "tool_calls": [
+              {
+                "index": 0,
+                "function": {
+                  "arguments": "Users"
+                }
+              }
+            ]
+          },
+          "logprobs": null,
+          "finish_reason": null,
+          "token_ids": null
+        }
+      ]
+    },
+    {
+      "id": "id-1774458929330",
+      "created": 1774458929,
+      "model": "@cf/moonshotai/kimi-k2.5",
+      "object": "chat.completion.chunk",
+      "choices": [
+        {
+          "index": 0,
+          "delta": {
+            "reasoning_content": null,
+            "tool_calls": [
+              {
+                "index": 0,
+                "function": {
+                  "arguments": "/rust"
+                }
+              }
+            ]
+          },
+          "logprobs": null,
+          "finish_reason": null,
+          "token_ids": null
+        }
+      ]
+    },
+    {
+      "id": "id-1774458929330",
+      "created": 1774458929,
+      "model": "@cf/moonshotai/kimi-k2.5",
+      "object": "chat.completion.chunk",
+      "choices": [
+        {
+          "index": 0,
+          "delta": {
+            "reasoning_content": null,
+            "tool_calls": [
+              {
+                "index": 0,
+                "function": {
+                  "arguments": "am"
+                }
+              }
+            ]
+          },
+          "logprobs": null,
+          "finish_reason": null,
+          "token_ids": null
+        }
+      ]
+    },
+    {
+      "id": "id-1774458929330",
+      "created": 1774458929,
+      "model": "@cf/moonshotai/kimi-k2.5",
+      "object": "chat.completion.chunk",
+      "choices": [
+        {
+          "index": 0,
+          "delta": {
+            "reasoning_content": null,
+            "tool_calls": [
+              {
+                "index": 0,
+                "function": {
+                  "arguments": "/start"
+                }
+              }
+            ]
+          },
+          "logprobs": null,
+          "finish_reason": null,
+          "token_ids": null
+        }
+      ]
+    },
+    {
+      "id": "id-1774458929330",
+      "created": 1774458929,
+      "model": "@cf/moonshotai/kimi-k2.5",
+      "object": "chat.completion.chunk",
+      "choices": [
+        {
+          "index": 0,
+          "delta": {
+            "reasoning_content": null,
+            "tool_calls": [
+              {
+                "index": 0,
+                "function": {
+                  "arguments": "ups"
+                }
+              }
+            ]
+          },
+          "logprobs": null,
+          "finish_reason": null,
+          "token_ids": null
+        }
+      ]
+    },
+    {
+      "id": "id-1774458929330",
+      "created": 1774458929,
+      "model": "@cf/moonshotai/kimi-k2.5",
+      "object": "chat.completion.chunk",
+      "choices": [
+        {
+          "index": 0,
+          "delta": {
+            "reasoning_content": null,
+            "tool_calls": [
+              {
+                "index": 0,
+                "function": {
+                  "arguments": "/active"
+                }
+              }
+            ]
+          },
+          "logprobs": null,
+          "finish_reason": null,
+          "token_ids": null
+        }
+      ]
+    },
+    {
+      "id": "id-1774458929330",
+      "created": 1774458929,
+      "model": "@cf/moonshotai/kimi-k2.5",
+      "object": "chat.completion.chunk",
+      "choices": [
+        {
+          "index": 0,
+          "delta": {
+            "reasoning_content": null,
+            "tool_calls": [
+              {
+                "index": 0,
+                "function": {
+                  "arguments": "/open"
+                }
+              }
+            ]
+          },
+          "logprobs": null,
+          "finish_reason": null,
+          "token_ids": null
+        }
+      ]
+    },
+    {
+      "id": "id-1774458929330",
+      "created": 1774458929,
+      "model": "@cf/moonshotai/kimi-k2.5",
+      "object": "chat.completion.chunk",
+      "choices": [
+        {
+          "index": 0,
+          "delta": {
+            "reasoning_content": null,
+            "tool_calls": [
+              {
+                "index": 0,
+                "function": {
+                  "arguments": "ai"
+                }
+              }
+            ]
+          },
+          "logprobs": null,
+          "finish_reason": null,
+          "token_ids": null
+        }
+      ]
+    },
+    {
+      "id": "id-1774458929330",
+      "created": 1774458929,
+      "model": "@cf/moonshotai/kimi-k2.5",
+      "object": "chat.completion.chunk",
+      "choices": [
+        {
+          "index": 0,
+          "delta": {
+            "reasoning_content": null,
+            "tool_calls": [
+              {
+                "index": 0,
+                "function": {
+                  "arguments": "-r"
+                }
+              }
+            ]
+          },
+          "logprobs": null,
+          "finish_reason": null,
+          "token_ids": null
+        }
+      ]
+    },
+    {
+      "id": "id-1774458929330",
+      "created": 1774458929,
+      "model": "@cf/moonshotai/kimi-k2.5",
+      "object": "chat.completion.chunk",
+      "choices": [
+        {
+          "index": 0,
+          "delta": {
+            "reasoning_content": null,
+            "tool_calls": [
+              {
+                "index": 0,
+                "function": {
+                  "arguments": "ust"
+                }
+              }
+            ]
+          },
+          "logprobs": null,
+          "finish_reason": null,
+          "token_ids": null
+        }
+      ]
+    },
+    {
+      "id": "id-1774458929330",
+      "created": 1774458929,
+      "model": "@cf/moonshotai/kimi-k2.5",
+      "object": "chat.completion.chunk",
+      "choices": [
+        {
+          "index": 0,
+          "delta": {
+            "reasoning_content": null,
+            "tool_calls": [
+              {
+                "index": 0,
+                "function": {
+                  "arguments": "/src"
+                }
+              }
+            ]
+          },
+          "logprobs": null,
+          "finish_reason": null,
+          "token_ids": null
+        }
+      ]
+    },
+    {
+      "id": "id-1774458929330",
+      "created": 1774458929,
+      "model": "@cf/moonshotai/kimi-k2.5",
+      "object": "chat.completion.chunk",
+      "choices": [
+        {
+          "index": 0,
+          "delta": {
+            "reasoning_content": null,
+            "tool_calls": [
+              {
+                "index": 0,
+                "function": {
+                  "arguments": "/types"
+                }
+              }
+            ]
+          },
+          "logprobs": null,
+          "finish_reason": null,
+          "token_ids": null
+        }
+      ]
+    },
+    {
+      "id": "id-1774458929330",
+      "created": 1774458929,
+      "model": "@cf/moonshotai/kimi-k2.5",
+      "object": "chat.completion.chunk",
+      "choices": [
+        {
+          "index": 0,
+          "delta": {
+            "reasoning_content": null,
+            "tool_calls": [
+              {
+                "index": 0,
+                "function": {
+                  "arguments": "/res"
+                }
+              }
+            ]
+          },
+          "logprobs": null,
+          "finish_reason": null,
+          "token_ids": null
+        }
+      ]
+    },
+    {
+      "id": "id-1774458929330",
+      "created": 1774458929,
+      "model": "@cf/moonshotai/kimi-k2.5",
+      "object": "chat.completion.chunk",
+      "choices": [
+        {
+          "index": 0,
+          "delta": {
+            "reasoning_content": null,
+            "tool_calls": [
+              {
+                "index": 0,
+                "function": {
+                  "arguments": "ponses"
+                }
+              }
+            ]
+          },
+          "logprobs": null,
+          "finish_reason": null,
+          "token_ids": null
+        }
+      ]
+    },
+    {
+      "id": "id-1774458929330",
+      "created": 1774458929,
+      "model": "@cf/moonshotai/kimi-k2.5",
+      "object": "chat.completion.chunk",
+      "choices": [
+        {
+          "index": 0,
+          "delta": {
+            "reasoning_content": null,
+            "tool_calls": [
+              {
+                "index": 0,
+                "function": {
+                  "arguments": ".rs"
+                }
+              }
+            ]
+          },
+          "logprobs": null,
+          "finish_reason": null,
+          "token_ids": null
+        }
+      ]
+    },
+    {
+      "id": "id-1774458929330",
+      "created": 1774458929,
+      "model": "@cf/moonshotai/kimi-k2.5",
+      "object": "chat.completion.chunk",
+      "choices": [
+        {
+          "index": 0,
+          "delta": {
+            "reasoning_content": null,
+            "tool_calls": [
+              {
+                "index": 0,
+                "function": {
+                  "arguments": "\","
+                }
+              }
+            ]
+          },
+          "logprobs": null,
+          "finish_reason": null,
+          "token_ids": null
+        }
+      ]
+    },
+    {
+      "id": "id-1774458929330",
+      "created": 1774458929,
+      "model": "@cf/moonshotai/kimi-k2.5",
+      "object": "chat.completion.chunk",
+      "choices": [
+        {
+          "index": 0,
+          "delta": {
+            "reasoning_content": null,
+            "tool_calls": [
+              {
+                "index": 0,
+                "function": {
+                  "arguments": " \""
+                }
+              }
+            ]
+          },
+          "logprobs": null,
+          "finish_reason": null,
+          "token_ids": null
+        }
+      ]
+    },
+    {
+      "id": "id-1774458929330",
+      "created": 1774458929,
+      "model": "@cf/moonshotai/kimi-k2.5",
+      "object": "chat.completion.chunk",
+      "choices": [
+        {
+          "index": 0,
+          "delta": {
+            "reasoning_content": null,
+            "tool_calls": [
+              {
+                "index": 0,
+                "function": {
+                  "arguments": "limit"
+                }
+              }
+            ]
+          },
+          "logprobs": null,
+          "finish_reason": null,
+          "token_ids": null
+        }
+      ]
+    },
+    {
+      "id": "id-1774458929330",
+      "created": 1774458929,
+      "model": "@cf/moonshotai/kimi-k2.5",
+      "object": "chat.completion.chunk",
+      "choices": [
+        {
+          "index": 0,
+          "delta": {
+            "reasoning_content": null,
+            "tool_calls": [
+              {
+                "index": 0,
+                "function": {
+                  "arguments": "\":"
+                }
+              }
+            ]
+          },
+          "logprobs": null,
+          "finish_reason": null,
+          "token_ids": null
+        }
+      ]
+    },
+    {
+      "id": "id-1774458929330",
+      "created": 1774458929,
+      "model": "@cf/moonshotai/kimi-k2.5",
+      "object": "chat.completion.chunk",
+      "choices": [
+        {
+          "index": 0,
+          "delta": {
+            "reasoning_content": null,
+            "tool_calls": [
+              {
+                "index": 0,
+                "function": {
+                  "arguments": " "
+                }
+              }
+            ]
+          },
+          "logprobs": null,
+          "finish_reason": null,
+          "token_ids": null
+        }
+      ]
+    },
+    {
+      "id": "id-1774458929330",
+      "created": 1774458929,
+      "model": "@cf/moonshotai/kimi-k2.5",
+      "object": "chat.completion.chunk",
+      "choices": [
+        {
+          "index": 0,
+          "delta": {
+            "reasoning_content": null,
+            "tool_calls": [
+              {
+                "index": 0,
+                "function": {
+                  "arguments": "100"
+                }
+              }
+            ]
+          },
+          "logprobs": null,
+          "finish_reason": null,
+          "token_ids": null
+        }
+      ]
+    },
+    {
+      "id": "id-1774458929330",
+      "created": 1774458929,
+      "model": "@cf/moonshotai/kimi-k2.5",
+      "object": "chat.completion.chunk",
+      "choices": [
+        {
+          "index": 0,
+          "delta": {
+            "reasoning_content": null,
+            "tool_calls": [
+              {
+                "index": 0,
+                "function": {
+                  "arguments": "}"
+                }
+              }
+            ]
+          },
+          "logprobs": null,
+          "finish_reason": null,
+          "token_ids": null
+        }
+      ]
+    },
+    {
+      "id": "id-1774458929330",
+      "created": 1774458929,
+      "model": "@cf/moonshotai/kimi-k2.5",
+      "object": "chat.completion.chunk",
+      "choices": [
+        {
+          "index": 0,
+          "delta": {
+            "reasoning_content": null,
+            "tool_calls": [
+              {
+                "id": "functions.read:185",
+                "type": "function",
+                "index": 1,
+                "function": {
+                  "name": "read"
+                }
+              }
+            ]
+          },
+          "logprobs": null,
+          "finish_reason": null,
+          "token_ids": null
+        }
+      ]
+    },
+    {
+      "id": "id-1774458929330",
+      "created": 1774458929,
+      "model": "@cf/moonshotai/kimi-k2.5",
+      "object": "chat.completion.chunk",
+      "choices": [
+        {
+          "index": 0,
+          "delta": {
+            "reasoning_content": null,
+            "tool_calls": [
+              {
+                "index": 1,
+                "function": {
+                  "arguments": "{\""
+                }
+              }
+            ]
+          },
+          "logprobs": null,
+          "finish_reason": null,
+          "token_ids": null
+        }
+      ]
+    },
+    {
+      "id": "id-1774458929330",
+      "created": 1774458929,
+      "model": "@cf/moonshotai/kimi-k2.5",
+      "object": "chat.completion.chunk",
+      "choices": [
+        {
+          "index": 0,
+          "delta": {
+            "reasoning_content": null,
+            "tool_calls": [
+              {
+                "index": 1,
+                "function": {
+                  "arguments": "file"
+                }
+              }
+            ]
+          },
+          "logprobs": null,
+          "finish_reason": null,
+          "token_ids": null
+        }
+      ]
+    },
+    {
+      "id": "id-1774458929330",
+      "created": 1774458929,
+      "model": "@cf/moonshotai/kimi-k2.5",
+      "object": "chat.completion.chunk",
+      "choices": [
+        {
+          "index": 0,
+          "delta": {
+            "reasoning_content": null,
+            "tool_calls": [
+              {
+                "index": 1,
+                "function": {
+                  "arguments": "Path"
+                }
+              }
+            ]
+          },
+          "logprobs": null,
+          "finish_reason": null,
+          "token_ids": null
+        }
+      ]
+    },
+    {
+      "id": "id-1774458929330",
+      "created": 1774458929,
+      "model": "@cf/moonshotai/kimi-k2.5",
+      "object": "chat.completion.chunk",
+      "choices": [
+        {
+          "index": 0,
+          "delta": {
+            "reasoning_content": null,
+            "tool_calls": [
+              {
+                "index": 1,
+                "function": {
+                  "arguments": "\":"
+                }
+              }
+            ]
+          },
+          "logprobs": null,
+          "finish_reason": null,
+          "token_ids": null
+        }
+      ]
+    },
+    {
+      "id": "id-1774458929330",
+      "created": 1774458929,
+      "model": "@cf/moonshotai/kimi-k2.5",
+      "object": "chat.completion.chunk",
+      "choices": [
+        {
+          "index": 0,
+          "delta": {
+            "reasoning_content": null,
+            "tool_calls": [
+              {
+                "index": 1,
+                "function": {
+                  "arguments": " \"/"
+                }
+              }
+            ]
+          },
+          "logprobs": null,
+          "finish_reason": null,
+          "token_ids": null
+        }
+      ]
+    },
+    {
+      "id": "id-1774458929330",
+      "created": 1774458929,
+      "model": "@cf/moonshotai/kimi-k2.5",
+      "object": "chat.completion.chunk",
+      "choices": [
+        {
+          "index": 0,
+          "delta": {
+            "reasoning_content": null,
+            "tool_calls": [
+              {
+                "index": 1,
+                "function": {
+                  "arguments": "Users"
+                }
+              }
+            ]
+          },
+          "logprobs": null,
+          "finish_reason": null,
+          "token_ids": null
+        }
+      ]
+    },
+    {
+      "id": "id-1774458929330",
+      "created": 1774458929,
+      "model": "@cf/moonshotai/kimi-k2.5",
+      "object": "chat.completion.chunk",
+      "choices": [
+        {
+          "index": 0,
+          "delta": {
+            "reasoning_content": null,
+            "tool_calls": [
+              {
+                "index": 1,
+                "function": {
+                  "arguments": "/rust"
+                }
+              }
+            ]
+          },
+          "logprobs": null,
+          "finish_reason": null,
+          "token_ids": null
+        }
+      ]
+    },
+    {
+      "id": "id-1774458929330",
+      "created": 1774458929,
+      "model": "@cf/moonshotai/kimi-k2.5",
+      "object": "chat.completion.chunk",
+      "choices": [
+        {
+          "index": 0,
+          "delta": {
+            "reasoning_content": null,
+            "tool_calls": [
+              {
+                "index": 1,
+                "function": {
+                  "arguments": "am"
+                }
+              }
+            ]
+          },
+          "logprobs": null,
+          "finish_reason": null,
+          "token_ids": null
+        }
+      ]
+    },
+    {
+      "id": "id-1774458929330",
+      "created": 1774458929,
+      "model": "@cf/moonshotai/kimi-k2.5",
+      "object": "chat.completion.chunk",
+      "choices": [
+        {
+          "index": 0,
+          "delta": {
+            "reasoning_content": null,
+            "tool_calls": [
+              {
+                "index": 1,
+                "function": {
+                  "arguments": "/start"
+                }
+              }
+            ]
+          },
+          "logprobs": null,
+          "finish_reason": null,
+          "token_ids": null
+        }
+      ]
+    },
+    {
+      "id": "id-1774458929330",
+      "created": 1774458929,
+      "model": "@cf/moonshotai/kimi-k2.5",
+      "object": "chat.completion.chunk",
+      "choices": [
+        {
+          "index": 0,
+          "delta": {
+            "reasoning_content": null,
+            "tool_calls": [
+              {
+                "index": 1,
+                "function": {
+                  "arguments": "ups"
+                }
+              }
+            ]
+          },
+          "logprobs": null,
+          "finish_reason": null,
+          "token_ids": null
+        }
+      ]
+    },
+    {
+      "id": "id-1774458929330",
+      "created": 1774458929,
+      "model": "@cf/moonshotai/kimi-k2.5",
+      "object": "chat.completion.chunk",
+      "choices": [
+        {
+          "index": 0,
+          "delta": {
+            "reasoning_content": null,
+            "tool_calls": [
+              {
+                "index": 1,
+                "function": {
+                  "arguments": "/active"
+                }
+              }
+            ]
+          },
+          "logprobs": null,
+          "finish_reason": null,
+          "token_ids": null
+        }
+      ]
+    },
+    {
+      "id": "id-1774458929330",
+      "created": 1774458929,
+      "model": "@cf/moonshotai/kimi-k2.5",
+      "object": "chat.completion.chunk",
+      "choices": [
+        {
+          "index": 0,
+          "delta": {
+            "reasoning_content": null,
+            "tool_calls": [
+              {
+                "index": 1,
+                "function": {
+                  "arguments": "/open"
+                }
+              }
+            ]
+          },
+          "logprobs": null,
+          "finish_reason": null,
+          "token_ids": null
+        }
+      ]
+    },
+    {
+      "id": "id-1774458929330",
+      "created": 1774458929,
+      "model": "@cf/moonshotai/kimi-k2.5",
+      "object": "chat.completion.chunk",
+      "choices": [
+        {
+          "index": 0,
+          "delta": {
+            "reasoning_content": null,
+            "tool_calls": [
+              {
+                "index": 1,
+                "function": {
+                  "arguments": "ai"
+                }
+              }
+            ]
+          },
+          "logprobs": null,
+          "finish_reason": null,
+          "token_ids": null
+        }
+      ]
+    },
+    {
+      "id": "id-1774458929330",
+      "created": 1774458929,
+      "model": "@cf/moonshotai/kimi-k2.5",
+      "object": "chat.completion.chunk",
+      "choices": [
+        {
+          "index": 0,
+          "delta": {
+            "reasoning_content": null,
+            "tool_calls": [
+              {
+                "index": 1,
+                "function": {
+                  "arguments": "-r"
+                }
+              }
+            ]
+          },
+          "logprobs": null,
+          "finish_reason": null,
+          "token_ids": null
+        }
+      ]
+    },
+    {
+      "id": "id-1774458929330",
+      "created": 1774458929,
+      "model": "@cf/moonshotai/kimi-k2.5",
+      "object": "chat.completion.chunk",
+      "choices": [
+        {
+          "index": 0,
+          "delta": {
+            "reasoning_content": null,
+            "tool_calls": [
+              {
+                "index": 1,
+                "function": {
+                  "arguments": "ust"
+                }
+              }
+            ]
+          },
+          "logprobs": null,
+          "finish_reason": null,
+          "token_ids": null
+        }
+      ]
+    },
+    {
+      "id": "id-1774458929330",
+      "created": 1774458929,
+      "model": "@cf/moonshotai/kimi-k2.5",
+      "object": "chat.completion.chunk",
+      "choices": [
+        {
+          "index": 0,
+          "delta": {
+            "reasoning_content": null,
+            "tool_calls": [
+              {
+                "index": 1,
+                "function": {
+                  "arguments": "/src"
+                }
+              }
+            ]
+          },
+          "logprobs": null,
+          "finish_reason": null,
+          "token_ids": null
+        }
+      ]
+    },
+    {
+      "id": "id-1774458929330",
+      "created": 1774458929,
+      "model": "@cf/moonshotai/kimi-k2.5",
+      "object": "chat.completion.chunk",
+      "choices": [
+        {
+          "index": 0,
+          "delta": {
+            "reasoning_content": null,
+            "tool_calls": [
+              {
+                "index": 1,
+                "function": {
+                  "arguments": "/types"
+                }
+              }
+            ]
+          },
+          "logprobs": null,
+          "finish_reason": null,
+          "token_ids": null
+        }
+      ]
+    },
+    {
+      "id": "id-1774458929330",
+      "created": 1774458929,
+      "model": "@cf/moonshotai/kimi-k2.5",
+      "object": "chat.completion.chunk",
+      "choices": [
+        {
+          "index": 0,
+          "delta": {
+            "reasoning_content": null,
+            "tool_calls": [
+              {
+                "index": 1,
+                "function": {
+                  "arguments": "/chat"
+                }
+              }
+            ]
+          },
+          "logprobs": null,
+          "finish_reason": null,
+          "token_ids": null
+        }
+      ]
+    },
+    {
+      "id": "id-1774458929330",
+      "created": 1774458929,
+      "model": "@cf/moonshotai/kimi-k2.5",
+      "object": "chat.completion.chunk",
+      "choices": [
+        {
+          "index": 0,
+          "delta": {
+            "reasoning_content": null,
+            "tool_calls": [
+              {
+                "index": 1,
+                "function": {
+                  "arguments": ".rs"
+                }
+              }
+            ]
+          },
+          "logprobs": null,
+          "finish_reason": null,
+          "token_ids": null
+        }
+      ]
+    },
+    {
+      "id": "id-1774458929330",
+      "created": 1774458929,
+      "model": "@cf/moonshotai/kimi-k2.5",
+      "object": "chat.completion.chunk",
+      "choices": [
+        {
+          "index": 0,
+          "delta": {
+            "reasoning_content": null,
+            "tool_calls": [
+              {
+                "index": 1,
+                "function": {
+                  "arguments": "\","
+                }
+              }
+            ]
+          },
+          "logprobs": null,
+          "finish_reason": null,
+          "token_ids": null
+        }
+      ]
+    },
+    {
+      "id": "id-1774458929330",
+      "created": 1774458929,
+      "model": "@cf/moonshotai/kimi-k2.5",
+      "object": "chat.completion.chunk",
+      "choices": [
+        {
+          "index": 0,
+          "delta": {
+            "reasoning_content": null,
+            "tool_calls": [
+              {
+                "index": 1,
+                "function": {
+                  "arguments": " \""
+                }
+              }
+            ]
+          },
+          "logprobs": null,
+          "finish_reason": null,
+          "token_ids": null
+        }
+      ]
+    },
+    {
+      "id": "id-1774458929330",
+      "created": 1774458929,
+      "model": "@cf/moonshotai/kimi-k2.5",
+      "object": "chat.completion.chunk",
+      "choices": [
+        {
+          "index": 0,
+          "delta": {
+            "reasoning_content": null,
+            "tool_calls": [
+              {
+                "index": 1,
+                "function": {
+                  "arguments": "limit"
+                }
+              }
+            ]
+          },
+          "logprobs": null,
+          "finish_reason": null,
+          "token_ids": null
+        }
+      ]
+    },
+    {
+      "id": "id-1774458929330",
+      "created": 1774458929,
+      "model": "@cf/moonshotai/kimi-k2.5",
+      "object": "chat.completion.chunk",
+      "choices": [
+        {
+          "index": 0,
+          "delta": {
+            "reasoning_content": null,
+            "tool_calls": [
+              {
+                "index": 1,
+                "function": {
+                  "arguments": "\":"
+                }
+              }
+            ]
+          },
+          "logprobs": null,
+          "finish_reason": null,
+          "token_ids": null
+        }
+      ]
+    },
+    {
+      "id": "id-1774458929330",
+      "created": 1774458929,
+      "model": "@cf/moonshotai/kimi-k2.5",
+      "object": "chat.completion.chunk",
+      "choices": [
+        {
+          "index": 0,
+          "delta": {
+            "reasoning_content": null,
+            "tool_calls": [
+              {
+                "index": 1,
+                "function": {
+                  "arguments": " "
+                }
+              }
+            ]
+          },
+          "logprobs": null,
+          "finish_reason": null,
+          "token_ids": null
+        }
+      ]
+    },
+    {
+      "id": "id-1774458929330",
+      "created": 1774458929,
+      "model": "@cf/moonshotai/kimi-k2.5",
+      "object": "chat.completion.chunk",
+      "choices": [
+        {
+          "index": 0,
+          "delta": {
+            "reasoning_content": null,
+            "tool_calls": [
+              {
+                "index": 1,
+                "function": {
+                  "arguments": "100"
+                }
+              }
+            ]
+          },
+          "logprobs": null,
+          "finish_reason": null,
+          "token_ids": null
+        }
+      ]
+    },
+    {
+      "id": "id-1774458929330",
+      "created": 1774458929,
+      "model": "@cf/moonshotai/kimi-k2.5",
+      "object": "chat.completion.chunk",
+      "choices": [
+        {
+          "index": 0,
+          "delta": {
+            "reasoning_content": null,
+            "tool_calls": [
+              {
+                "index": 1,
+                "function": {
+                  "arguments": "}"
+                }
+              }
+            ]
+          },
+          "logprobs": null,
+          "finish_reason": null,
+          "token_ids": null
+        }
+      ]
+    },
+    {
+      "id": "id-1774458929330",
+      "created": 1774458929,
+      "model": "@cf/moonshotai/kimi-k2.5",
+      "object": "chat.completion.chunk",
+      "choices": [
+        {
+          "index": 0,
+          "delta": {
+            "reasoning_content": null,
+            "tool_calls": [
+              {
+                "id": "functions.read:186",
+                "type": "function",
+                "index": 2,
+                "function": {
+                  "name": "read"
+                }
+              }
+            ]
+          },
+          "logprobs": null,
+          "finish_reason": null,
+          "token_ids": null
+        }
+      ]
+    },
+    {
+      "id": "id-1774458929330",
+      "created": 1774458929,
+      "model": "@cf/moonshotai/kimi-k2.5",
+      "object": "chat.completion.chunk",
+      "choices": [
+        {
+          "index": 0,
+          "delta": {
+            "reasoning_content": null,
+            "tool_calls": [
+              {
+                "index": 2,
+                "function": {
+                  "arguments": "{\""
+                }
+              }
+            ]
+          },
+          "logprobs": null,
+          "finish_reason": null,
+          "token_ids": null
+        }
+      ]
+    },
+    {
+      "id": "id-1774458929330",
+      "created": 1774458929,
+      "model": "@cf/moonshotai/kimi-k2.5",
+      "object": "chat.completion.chunk",
+      "choices": [
+        {
+          "index": 0,
+          "delta": {
+            "reasoning_content": null,
+            "tool_calls": [
+              {
+                "index": 2,
+                "function": {
+                  "arguments": "file"
+                }
+              }
+            ]
+          },
+          "logprobs": null,
+          "finish_reason": null,
+          "token_ids": null
+        }
+      ]
+    },
+    {
+      "id": "id-1774458929330",
+      "created": 1774458929,
+      "model": "@cf/moonshotai/kimi-k2.5",
+      "object": "chat.completion.chunk",
+      "choices": [
+        {
+          "index": 0,
+          "delta": {
+            "reasoning_content": null,
+            "tool_calls": [
+              {
+                "index": 2,
+                "function": {
+                  "arguments": "Path"
+                }
+              }
+            ]
+          },
+          "logprobs": null,
+          "finish_reason": null,
+          "token_ids": null
+        }
+      ]
+    },
+    {
+      "id": "id-1774458929330",
+      "created": 1774458929,
+      "model": "@cf/moonshotai/kimi-k2.5",
+      "object": "chat.completion.chunk",
+      "choices": [
+        {
+          "index": 0,
+          "delta": {
+            "reasoning_content": null,
+            "tool_calls": [
+              {
+                "index": 2,
+                "function": {
+                  "arguments": "\":"
+                }
+              }
+            ]
+          },
+          "logprobs": null,
+          "finish_reason": null,
+          "token_ids": null
+        }
+      ]
+    },
+    {
+      "id": "id-1774458929330",
+      "created": 1774458929,
+      "model": "@cf/moonshotai/kimi-k2.5",
+      "object": "chat.completion.chunk",
+      "choices": [
+        {
+          "index": 0,
+          "delta": {
+            "reasoning_content": null,
+            "tool_calls": [
+              {
+                "index": 2,
+                "function": {
+                  "arguments": " \"/"
+                }
+              }
+            ]
+          },
+          "logprobs": null,
+          "finish_reason": null,
+          "token_ids": null
+        }
+      ]
+    },
+    {
+      "id": "id-1774458929330",
+      "created": 1774458929,
+      "model": "@cf/moonshotai/kimi-k2.5",
+      "object": "chat.completion.chunk",
+      "choices": [
+        {
+          "index": 0,
+          "delta": {
+            "reasoning_content": null,
+            "tool_calls": [
+              {
+                "index": 2,
+                "function": {
+                  "arguments": "Users"
+                }
+              }
+            ]
+          },
+          "logprobs": null,
+          "finish_reason": null,
+          "token_ids": null
+        }
+      ]
+    },
+    {
+      "id": "id-1774458929330",
+      "created": 1774458929,
+      "model": "@cf/moonshotai/kimi-k2.5",
+      "object": "chat.completion.chunk",
+      "choices": [
+        {
+          "index": 0,
+          "delta": {
+            "reasoning_content": null,
+            "tool_calls": [
+              {
+                "index": 2,
+                "function": {
+                  "arguments": "/rust"
+                }
+              }
+            ]
+          },
+          "logprobs": null,
+          "finish_reason": null,
+          "token_ids": null
+        }
+      ]
+    },
+    {
+      "id": "id-1774458929330",
+      "created": 1774458929,
+      "model": "@cf/moonshotai/kimi-k2.5",
+      "object": "chat.completion.chunk",
+      "choices": [
+        {
+          "index": 0,
+          "delta": {
+            "reasoning_content": null,
+            "tool_calls": [
+              {
+                "index": 2,
+                "function": {
+                  "arguments": "am"
+                }
+              }
+            ]
+          },
+          "logprobs": null,
+          "finish_reason": null,
+          "token_ids": null
+        }
+      ]
+    },
+    {
+      "id": "id-1774458929330",
+      "created": 1774458929,
+      "model": "@cf/moonshotai/kimi-k2.5",
+      "object": "chat.completion.chunk",
+      "choices": [
+        {
+          "index": 0,
+          "delta": {
+            "reasoning_content": null,
+            "tool_calls": [
+              {
+                "index": 2,
+                "function": {
+                  "arguments": "/start"
+                }
+              }
+            ]
+          },
+          "logprobs": null,
+          "finish_reason": null,
+          "token_ids": null
+        }
+      ]
+    },
+    {
+      "id": "id-1774458929330",
+      "created": 1774458929,
+      "model": "@cf/moonshotai/kimi-k2.5",
+      "object": "chat.completion.chunk",
+      "choices": [
+        {
+          "index": 0,
+          "delta": {
+            "reasoning_content": null,
+            "tool_calls": [
+              {
+                "index": 2,
+                "function": {
+                  "arguments": "ups"
+                }
+              }
+            ]
+          },
+          "logprobs": null,
+          "finish_reason": null,
+          "token_ids": null
+        }
+      ]
+    },
+    {
+      "id": "id-1774458929330",
+      "created": 1774458929,
+      "model": "@cf/moonshotai/kimi-k2.5",
+      "object": "chat.completion.chunk",
+      "choices": [
+        {
+          "index": 0,
+          "delta": {
+            "reasoning_content": null,
+            "tool_calls": [
+              {
+                "index": 2,
+                "function": {
+                  "arguments": "/active"
+                }
+              }
+            ]
+          },
+          "logprobs": null,
+          "finish_reason": null,
+          "token_ids": null
+        }
+      ]
+    },
+    {
+      "id": "id-1774458929330",
+      "created": 1774458929,
+      "model": "@cf/moonshotai/kimi-k2.5",
+      "object": "chat.completion.chunk",
+      "choices": [
+        {
+          "index": 0,
+          "delta": {
+            "reasoning_content": null,
+            "tool_calls": [
+              {
+                "index": 2,
+                "function": {
+                  "arguments": "/open"
+                }
+              }
+            ]
+          },
+          "logprobs": null,
+          "finish_reason": null,
+          "token_ids": null
+        }
+      ]
+    },
+    {
+      "id": "id-1774458929330",
+      "created": 1774458929,
+      "model": "@cf/moonshotai/kimi-k2.5",
+      "object": "chat.completion.chunk",
+      "choices": [
+        {
+          "index": 0,
+          "delta": {
+            "reasoning_content": null,
+            "tool_calls": [
+              {
+                "index": 2,
+                "function": {
+                  "arguments": "ai"
+                }
+              }
+            ]
+          },
+          "logprobs": null,
+          "finish_reason": null,
+          "token_ids": null
+        }
+      ]
+    },
+    {
+      "id": "id-1774458929330",
+      "created": 1774458929,
+      "model": "@cf/moonshotai/kimi-k2.5",
+      "object": "chat.completion.chunk",
+      "choices": [
+        {
+          "index": 0,
+          "delta": {
+            "reasoning_content": null,
+            "tool_calls": [
+              {
+                "index": 2,
+                "function": {
+                  "arguments": "-r"
+                }
+              }
+            ]
+          },
+          "logprobs": null,
+          "finish_reason": null,
+          "token_ids": null
+        }
+      ]
+    },
+    {
+      "id": "id-1774458929330",
+      "created": 1774458929,
+      "model": "@cf/moonshotai/kimi-k2.5",
+      "object": "chat.completion.chunk",
+      "choices": [
+        {
+          "index": 0,
+          "delta": {
+            "reasoning_content": null,
+            "tool_calls": [
+              {
+                "index": 2,
+                "function": {
+                  "arguments": "ust"
+                }
+              }
+            ]
+          },
+          "logprobs": null,
+          "finish_reason": null,
+          "token_ids": null
+        }
+      ]
+    },
+    {
+      "id": "id-1774458929330",
+      "created": 1774458929,
+      "model": "@cf/moonshotai/kimi-k2.5",
+      "object": "chat.completion.chunk",
+      "choices": [
+        {
+          "index": 0,
+          "delta": {
+            "reasoning_content": null,
+            "tool_calls": [
+              {
+                "index": 2,
+                "function": {
+                  "arguments": "/src"
+                }
+              }
+            ]
+          },
+          "logprobs": null,
+          "finish_reason": null,
+          "token_ids": null
+        }
+      ]
+    },
+    {
+      "id": "id-1774458929330",
+      "created": 1774458929,
+      "model": "@cf/moonshotai/kimi-k2.5",
+      "object": "chat.completion.chunk",
+      "choices": [
+        {
+          "index": 0,
+          "delta": {
+            "reasoning_content": null,
+            "tool_calls": [
+              {
+                "index": 2,
+                "function": {
+                  "arguments": "/types"
+                }
+              }
+            ]
+          },
+          "logprobs": null,
+          "finish_reason": null,
+          "token_ids": null
+        }
+      ]
+    },
+    {
+      "id": "id-1774458929330",
+      "created": 1774458929,
+      "model": "@cf/moonshotai/kimi-k2.5",
+      "object": "chat.completion.chunk",
+      "choices": [
+        {
+          "index": 0,
+          "delta": {
+            "reasoning_content": null,
+            "tool_calls": [
+              {
+                "index": 2,
+                "function": {
+                  "arguments": "/re"
+                }
+              }
+            ]
+          },
+          "logprobs": null,
+          "finish_reason": null,
+          "token_ids": null
+        }
+      ]
+    },
+    {
+      "id": "id-1774458929330",
+      "created": 1774458929,
+      "model": "@cf/moonshotai/kimi-k2.5",
+      "object": "chat.completion.chunk",
+      "choices": [
+        {
+          "index": 0,
+          "delta": {
+            "reasoning_content": null,
+            "tool_calls": [
+              {
+                "index": 2,
+                "function": {
+                  "arguments": "al"
+                }
+              }
+            ]
+          },
+          "logprobs": null,
+          "finish_reason": null,
+          "token_ids": null
+        }
+      ]
+    },
+    {
+      "id": "id-1774458929330",
+      "created": 1774458929,
+      "model": "@cf/moonshotai/kimi-k2.5",
+      "object": "chat.completion.chunk",
+      "choices": [
+        {
+          "index": 0,
+          "delta": {
+            "reasoning_content": null,
+            "tool_calls": [
+              {
+                "index": 2,
+                "function": {
+                  "arguments": "time"
+                }
+              }
+            ]
+          },
+          "logprobs": null,
+          "finish_reason": null,
+          "token_ids": null
+        }
+      ]
+    },
+    {
+      "id": "id-1774458929330",
+      "created": 1774458929,
+      "model": "@cf/moonshotai/kimi-k2.5",
+      "object": "chat.completion.chunk",
+      "choices": [
+        {
+          "index": 0,
+          "delta": {
+            "reasoning_content": null,
+            "tool_calls": [
+              {
+                "index": 2,
+                "function": {
+                  "arguments": ".rs"
+                }
+              }
+            ]
+          },
+          "logprobs": null,
+          "finish_reason": null,
+          "token_ids": null
+        }
+      ]
+    },
+    {
+      "id": "id-1774458929330",
+      "created": 1774458929,
+      "model": "@cf/moonshotai/kimi-k2.5",
+      "object": "chat.completion.chunk",
+      "choices": [
+        {
+          "index": 0,
+          "delta": {
+            "reasoning_content": null,
+            "tool_calls": [
+              {
+                "index": 2,
+                "function": {
+                  "arguments": "\","
+                }
+              }
+            ]
+          },
+          "logprobs": null,
+          "finish_reason": null,
+          "token_ids": null
+        }
+      ]
+    },
+    {
+      "id": "id-1774458929330",
+      "created": 1774458929,
+      "model": "@cf/moonshotai/kimi-k2.5",
+      "object": "chat.completion.chunk",
+      "choices": [
+        {
+          "index": 0,
+          "delta": {
+            "reasoning_content": null,
+            "tool_calls": [
+              {
+                "index": 2,
+                "function": {
+                  "arguments": " \""
+                }
+              }
+            ]
+          },
+          "logprobs": null,
+          "finish_reason": null,
+          "token_ids": null
+        }
+      ]
+    },
+    {
+      "id": "id-1774458929330",
+      "created": 1774458929,
+      "model": "@cf/moonshotai/kimi-k2.5",
+      "object": "chat.completion.chunk",
+      "choices": [
+        {
+          "index": 0,
+          "delta": {
+            "reasoning_content": null,
+            "tool_calls": [
+              {
+                "index": 2,
+                "function": {
+                  "arguments": "limit"
+                }
+              }
+            ]
+          },
+          "logprobs": null,
+          "finish_reason": null,
+          "token_ids": null
+        }
+      ]
+    },
+    {
+      "id": "id-1774458929330",
+      "created": 1774458929,
+      "model": "@cf/moonshotai/kimi-k2.5",
+      "object": "chat.completion.chunk",
+      "choices": [
+        {
+          "index": 0,
+          "delta": {
+            "reasoning_content": null,
+            "tool_calls": [
+              {
+                "index": 2,
+                "function": {
+                  "arguments": "\":"
+                }
+              }
+            ]
+          },
+          "logprobs": null,
+          "finish_reason": null,
+          "token_ids": null
+        }
+      ]
+    },
+    {
+      "id": "id-1774458929330",
+      "created": 1774458929,
+      "model": "@cf/moonshotai/kimi-k2.5",
+      "object": "chat.completion.chunk",
+      "choices": [
+        {
+          "index": 0,
+          "delta": {
+            "reasoning_content": null,
+            "tool_calls": [
+              {
+                "index": 2,
+                "function": {
+                  "arguments": " "
+                }
+              }
+            ]
+          },
+          "logprobs": null,
+          "finish_reason": null,
+          "token_ids": null
+        }
+      ]
+    },
+    {
+      "id": "id-1774458929330",
+      "created": 1774458929,
+      "model": "@cf/moonshotai/kimi-k2.5",
+      "object": "chat.completion.chunk",
+      "choices": [
+        {
+          "index": 0,
+          "delta": {
+            "reasoning_content": null,
+            "tool_calls": [
+              {
+                "index": 2,
+                "function": {
+                  "arguments": "100"
+                }
+              }
+            ]
+          },
+          "logprobs": null,
+          "finish_reason": null,
+          "token_ids": null
+        }
+      ]
+    },
+    {
+      "id": "id-1774458929330",
+      "created": 1774458929,
+      "model": "@cf/moonshotai/kimi-k2.5",
+      "object": "chat.completion.chunk",
+      "choices": [
+        {
+          "index": 0,
+          "delta": {
+            "reasoning_content": null,
+            "tool_calls": [
+              {
+                "index": 2,
+                "function": {
+                  "arguments": "}"
+                }
+              }
+            ]
+          },
+          "logprobs": null,
+          "finish_reason": null,
+          "token_ids": null
+        }
+      ]
+    },
+    {
+      "id": "id-1774458929330",
+      "created": 1774458929,
+      "model": "@cf/moonshotai/kimi-k2.5",
+      "object": "chat.completion.chunk",
+      "choices": [
+        {
+          "index": 0,
+          "delta": {
+            "content": "",
+            "reasoning_content": null
+          },
+          "logprobs": null,
+          "finish_reason": null,
+          "token_ids": null
+        }
+      ]
+    },
+    {
+      "id": "id-1774458929330",
+      "created": 1774458929,
+      "model": "@cf/moonshotai/kimi-k2.5",
+      "object": "chat.completion.chunk",
+      "choices": [
+        {
+          "index": 0,
+          "delta": {
+            "content": "",
+            "reasoning_content": null
+          },
+          "logprobs": null,
+          "finish_reason": "tool_calls",
+          "stop_reason": 163586,
+          "token_ids": null
+        }
+      ]
+    },
+    {
+      "id": "id-1774458929330",
+      "object": "chat.completion.chunk",
+      "created": 1774458929,
+      "model": "@cf/moonshotai/kimi-k2.5",
+      "choices": [
+        {
+          "index": 0,
+          "delta": {},
+          "finish_reason": "tool_calls"
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 152831,
+        "total_tokens": 152960,
+        "completion_tokens": 129,
+        "prompt_tokens_details": {
+          "cached_tokens": 148544
+        }
+      }
+    },
+    {
+      "id": "id-1774458929330",
+      "object": "chat.completion.chunk",
+      "created": 1774458929,
+      "model": "@cf/moonshotai/kimi-k2.5",
+      "choices": [
+        {
+          "index": 0,
+          "delta": {},
+          "finish_reason": "tool_calls"
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 152831,
+        "completion_tokens": 129,
+        "total_tokens": 152960,
+        "prompt_tokens_details": {
+          "cached_tokens": 148544
+        }
+      }
+    }
+  ]
+}

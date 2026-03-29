@@ -10,6 +10,7 @@ crate-type = ["cdylib"]
 futures-util = "0.3.32"
 napi = { version = "3.0.0-alpha", default-features = false, features = ["napi4", "async", "serde-json"] }
 napi-derive = "3.0.0-alpha"
+bytes = "1"
 openai-oxide = { path = "..", default-features = false, features = ["chat", "responses", "websocket"] }
 serde_json = "1.0.149"
 tokio = { version = "1", features = ["full"] }

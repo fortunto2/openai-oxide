@@ -127,6 +127,13 @@ impl OpenAI {
         }
     }
 
+    /// Returns a reference to `self` for direct access to low-level request methods.
+    ///
+    /// Useful for napi/FFI bindings that need `post_json_bytes` etc.
+    pub fn client(&self) -> &Self {
+        self
+    }
+
     /// Create a client using the `OPENAI_API_KEY` environment variable.
     pub fn from_env() -> Result<Self, OpenAIError> {
         Ok(Self::with_config(ClientConfig::from_env()?))
@@ -338,6 +345,40 @@ impl OpenAI {
         body: &B,
     ) -> Result<serde_json::Value, OpenAIError> {
         self.post(path, body).await
+    }
+
+    /// Send a POST request with a pre-serialized JSON body and return raw JSON.
+    ///
+    /// Skips `serde_json::to_vec` — the caller provides already-serialized bytes.
+    /// Used by napi bindings where JS already has the JSON string, avoiding
+    /// double serialization (napi copy + serde serialize).
+    pub async fn post_json_bytes(
+        &self,
+        path: &str,
+        json_bytes: bytes::Bytes,
+    ) -> Result<serde_json::Value, OpenAIError> {
+        let req = self
+            .request(reqwest::Method::POST, path)
+            .header(reqwest::header::CONTENT_TYPE, "application/json")
+            .body(json_bytes);
+        let response = req.send().await?;
+        Self::handle_response(response).await
+    }
+
+    /// Send a POST request with pre-serialized JSON body and return an SSE stream.
+    pub async fn post_stream_json_bytes(
+        &self,
+        path: &str,
+        json_bytes: bytes::Bytes,
+    ) -> Result<reqwest::Response, OpenAIError> {
+        let req = self
+            .request(reqwest::Method::POST, path)
+            .header(reqwest::header::CONTENT_TYPE, "application/json")
+            .header(reqwest::header::ACCEPT, "text/event-stream")
+            .header(reqwest::header::CACHE_CONTROL, "no-cache")
+            .body(json_bytes);
+        let response = req.send().await?;
+        Self::check_stream_response(response).await
     }
 
     /// Send a POST request with no body and deserialize the response.
