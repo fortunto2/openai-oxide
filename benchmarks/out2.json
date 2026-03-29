@@ -35,8 +35,8 @@
     {
       "index": 0,
       "delta": {
-        "reasoning": " should",
-        "reasoning_content": " should"
+        "reasoning": "30e 9s7",
+        "reasoning_content": "3b03o8 "
       },
       "logprobs": null,
       "finish_reason": null,
@@ -45,8 +45,8 @@
     {
       "index": 0,
       "delta": {
-        "reasoning": " read",
-        "reasoning_content": " read"
+        "reasoning": "25a4w",
+        "reasoning_content": "lqqe5"
       },
       "logprobs": null,
       "finish_reason": null,
@@ -55,8 +55,8 @@
     {
       "index": 0,
       "delta": {
-        "reasoning": " the",
-        "reasoning_content": " the"
+        "reasoning": "lopf",
+        "reasoning_content": "6uym"
       },
       "logprobs": null,
       "finish_reason": null,
@@ -65,8 +65,8 @@
     {
       "index": 0,
       "delta": {
-        "reasoning": " existing",
-        "reasoning_content": " existing"
+        "reasoning": "xgq0pn9lm",
+        "reasoning_content": "0jfm2giu5"
       },
       "logprobs": null,
       "finish_reason": null,
@@ -75,8 +75,8 @@
     {
       "index": 0,
       "delta": {
-        "reasoning": " files",
-        "reasoning_content": " files"
+        "reasoning": "30wmfh",
+        "reasoning_content": "cle4wg"
       },
       "logprobs": null,
       "finish_reason": null,
@@ -85,8 +85,8 @@
     {
       "index": 0,
       "delta": {
-        "reasoning": " first",
-        "reasoning_content": " first"
+        "reasoning": "par8m8",
+        "reasoning_content": "xysrgb"
       },
       "logprobs": null,
       "finish_reason": null,
@@ -105,8 +105,8 @@
     {
       "index": 0,
       "delta": {
-        "reasoning": " see",
-        "reasoning_content": " see"
+        "reasoning": " viv",
+        "reasoning_content": " cen"
       },
       "logprobs": null,
       "finish_reason": null,
@@ -115,8 +115,8 @@
     {
       "index": 0,
       "delta": {
-        "reasoning": " what",
-        "reasoning_content": " what"
+        "reasoning": "8lh45",
+        "reasoning_content": "2prj8"
       },
       "logprobs": null,
       "finish_reason": null,
@@ -125,8 +125,8 @@
     {
       "index": 0,
       "delta": {
-        "reasoning": " types",
-        "reasoning_content": " types"
+        "reasoning": "b7fh7z",
+        "reasoning_content": "tq8q8g"
       },
       "logprobs": null,
       "finish_reason": null,
@@ -135,8 +135,8 @@
     {
       "index": 0,
       "delta": {
-        "reasoning": " are",
-        "reasoning_content": " are"
+        "reasoning": "wwxw",
+        "reasoning_content": "bacp"
       },
       "logprobs": null,
       "finish_reason": null,
@@ -145,8 +145,8 @@
     {
       "index": 0,
       "delta": {
-        "reasoning": " being",
-        "reasoning_content": " being"
+        "reasoning": "leh4ga",
+        "reasoning_content": "146qe9"
       },
       "logprobs": null,
       "finish_reason": null,
@@ -155,8 +155,8 @@
     {
       "index": 0,
       "delta": {
-        "reasoning": " used",
-        "reasoning_content": " used"
+        "reasoning": "l8214",
+        "reasoning_content": " rc 6"
       },
       "logprobs": null,
       "finish_reason": null,
@@ -175,8 +175,8 @@
     {
       "index": 0,
       "delta": {
-        "reasoning": " can",
-        "reasoning_content": " can"
+        "reasoning": "z1 7",
+        "reasoning_content": "5kpl"
       },
       "logprobs": null,
       "finish_reason": null,
@@ -185,8 +185,8 @@
     {
       "index": 0,
       "delta": {
-        "reasoning": " properly",
-        "reasoning_content": " properly"
+        "reasoning": "vgvy7cuuw",
+        "reasoning_content": "n4dyh0taf"
       },
       "logprobs": null,
       "finish_reason": null,
@@ -195,8 +195,8 @@
     {
       "index": 0,
       "delta": {
-        "reasoning": " create",
-        "reasoning_content": " create"
+        "reasoning": "cbt3r8k",
+        "reasoning_content": "ram5g9w"
       },
       "logprobs": null,
       "finish_reason": null,
@@ -205,8 +205,8 @@
     {
       "index": 0,
       "delta": {
-        "reasoning": " aliases",
-        "reasoning_content": " aliases"
+        "reasoning": "nkvcv12a",
+        "reasoning_content": "gq5d3osk"
       },
       "logprobs": null,
       "finish_reason": null,
@@ -276,7 +276,7 @@
           {
             "index": 0,
             "function": {
-              "arguments": "file"
+              "arguments": "mauj"
             }
           }
         ]
@@ -293,7 +293,7 @@
           {
             "index": 0,
             "function": {
-              "arguments": "Path"
+              "arguments": "n7c1"
             }
           }
         ]
@@ -344,7 +344,7 @@
           {
             "index": 0,
             "function": {
-              "arguments": "Users"
+              "arguments": "w 41h"
             }
           }
         ]
@@ -361,7 +361,7 @@
           {
             "index": 0,
             "function": {
-              "arguments": "/rust"
+              "arguments": "nznyu"
             }
           }
         ]
@@ -395,7 +395,7 @@
           {
             "index": 0,
             "function": {
-              "arguments": "/start"
+              "arguments": "8lm8x4"
             }
           }
         ]
@@ -429,7 +429,7 @@
           {
             "index": 0,
             "function": {
-              "arguments": "/active"
+              "arguments": "c1jqn75"
             }
           }
         ]
@@ -446,7 +446,7 @@
           {
             "index": 0,
             "function": {
-              "arguments": "/open"
+              "arguments": "kf3ra"
             }
           }
         ]
@@ -514,7 +514,7 @@
           {
             "index": 0,
             "function": {
-              "arguments": "/src"
+              "arguments": "5tpu"
             }
           }
         ]
@@ -531,7 +531,7 @@
           {
             "index": 0,
             "function": {
-              "arguments": "/types"
+              "arguments": "z33d7l"
             }
           }
         ]
@@ -548,7 +548,7 @@
           {
             "index": 0,
             "function": {
-              "arguments": "/res"
+              "arguments": "6pmt"
             }
           }
         ]
@@ -565,7 +565,7 @@
           {
             "index": 0,
             "function": {
-              "arguments": "ponses"
+              "arguments": "k21jzj"
             }
           }
         ]
@@ -633,7 +633,7 @@
           {
             "index": 0,
             "function": {
-              "arguments": "limit"
+              "arguments": "7tl8m"
             }
           }
         ]
@@ -737,7 +737,7 @@
           {
             "index": 1,
             "function": {
-              "arguments": "file"
+              "arguments": "i59p"
             }
           }
         ]
@@ -754,7 +754,7 @@
           {
             "index": 1,
             "function": {
-              "arguments": "Path"
+              "arguments": "1aya"
             }
           }
         ]
@@ -805,7 +805,7 @@
           {
             "index": 1,
             "function": {
-              "arguments": "Users"
+              "arguments": "u37a6"
             }
           }
         ]
@@ -822,7 +822,7 @@
           {
             "index": 1,
             "function": {
-              "arguments": "/rust"
+              "arguments": "9rf1m"
             }
           }
         ]
@@ -856,7 +856,7 @@
           {
             "index": 1,
             "function": {
-              "arguments": "/start"
+              "arguments": "bc9wye"
             }
           }
         ]
@@ -890,7 +890,7 @@
           {
             "index": 1,
             "function": {
-              "arguments": "/active"
+              "arguments": "mrb1fll"
             }
           }
         ]
@@ -907,7 +907,7 @@
           {
             "index": 1,
             "function": {
-              "arguments": "/open"
+              "arguments": "h1xed"
             }
           }
         ]
@@ -975,7 +975,7 @@
           {
             "index": 1,
             "function": {
-              "arguments": "/src"
+              "arguments": "6bz8"
             }
           }
         ]
@@ -992,7 +992,7 @@
           {
             "index": 1,
             "function": {
-              "arguments": "/types"
+              "arguments": "jym3o1"
             }
           }
         ]
@@ -1009,7 +1009,7 @@
           {
             "index": 1,
             "function": {
-              "arguments": "/chat"
+              "arguments": "vb2xt"
             }
           }
         ]
@@ -1077,7 +1077,7 @@
           {
             "index": 1,
             "function": {
-              "arguments": "limit"
+              "arguments": "wqasg"
             }
           }
         ]
@@ -1181,7 +1181,7 @@
           {
             "index": 2,
             "function": {
-              "arguments": "file"
+              "arguments": "52jz"
             }
           }
         ]
@@ -1198,7 +1198,7 @@
           {
             "index": 2,
             "function": {
-              "arguments": "Path"
+              "arguments": "uhjy"
             }
           }
         ]
@@ -1249,7 +1249,7 @@
           {
             "index": 2,
             "function": {
-              "arguments": "Users"
+              "arguments": "8vffp"
             }
           }
         ]
@@ -1266,7 +1266,7 @@
           {
             "index": 2,
             "function": {
-              "arguments": "/rust"
+              "arguments": "dxdx7"
             }
           }
         ]
@@ -1300,7 +1300,7 @@
           {
             "index": 2,
             "function": {
-              "arguments": "/start"
+              "arguments": "6px8au"
             }
           }
         ]
@@ -1334,7 +1334,7 @@
           {
             "index": 2,
             "function": {
-              "arguments": "/active"
+              "arguments": "gmvzxu6"
             }
           }
         ]
@@ -1351,7 +1351,7 @@
           {
             "index": 2,
             "function": {
-              "arguments": "/open"
+              "arguments": "0lwd "
             }
           }
         ]
@@ -1419,7 +1419,7 @@
           {
             "index": 2,
             "function": {
-              "arguments": "/src"
+              "arguments": "jy06"
             }
           }
         ]
@@ -1436,7 +1436,7 @@
           {
             "index": 2,
             "function": {
-              "arguments": "/types"
+              "arguments": "17v35s"
             }
           }
         ]
@@ -1487,7 +1487,7 @@
           {
             "index": 2,
             "function": {
-              "arguments": "time"
+              "arguments": "rj7v"
             }
           }
         ]
@@ -1555,7 +1555,7 @@
           {
             "index": 2,
             "function": {
-              "arguments": "limit"
+              "arguments": "y5lrx"
             }
           }
         ]
@@ -1704,8 +1704,8 @@
         {
           "index": 0,
           "delta": {
-            "reasoning": " should",
-            "reasoning_content": " should"
+            "reasoning": "9rjr7vh",
+            "reasoning_content": "na4zety"
           },
           "logprobs": null,
           "finish_reason": null,
@@ -1722,8 +1722,8 @@
         {
           "index": 0,
           "delta": {
-            "reasoning": " read",
-            "reasoning_content": " read"
+            "reasoning": "mc9w6",
+            "reasoning_content": "qidyb"
           },
           "logprobs": null,
           "finish_reason": null,
@@ -1740,8 +1740,8 @@
         {
           "index": 0,
           "delta": {
-            "reasoning": " the",
-            "reasoning_content": " the"
+            "reasoning": "c35i",
+            "reasoning_content": "ggjl"
           },
           "logprobs": null,
           "finish_reason": null,
@@ -1758,8 +1758,8 @@
         {
           "index": 0,
           "delta": {
-            "reasoning": " existing",
-            "reasoning_content": " existing"
+            "reasoning": "3pqhpgdbm",
+            "reasoning_content": "d11vhxnpm"
           },
           "logprobs": null,
           "finish_reason": null,
@@ -1776,8 +1776,8 @@
         {
           "index": 0,
           "delta": {
-            "reasoning": " files",
-            "reasoning_content": " files"
+            "reasoning": "52z ro",
+            "reasoning_content": "sgume2"
           },
           "logprobs": null,
           "finish_reason": null,
@@ -1794,8 +1794,8 @@
         {
           "index": 0,
           "delta": {
-            "reasoning": " first",
-            "reasoning_content": " first"
+            "reasoning": "t4r9jl",
+            "reasoning_content": "05so39"
           },
           "logprobs": null,
           "finish_reason": null,
@@ -1830,8 +1830,8 @@
         {
           "index": 0,
           "delta": {
-            "reasoning": " see",
-            "reasoning_content": " see"
+            "reasoning": "y2b ",
+            "reasoning_content": "2lm6"
           },
           "logprobs": null,
           "finish_reason": null,
@@ -1848,8 +1848,8 @@
         {
           "index": 0,
           "delta": {
-            "reasoning": " what",
-            "reasoning_content": " what"
+            "reasoning": "cg8ch",
+            "reasoning_content": "3igwt"
           },
           "logprobs": null,
           "finish_reason": null,
@@ -1866,8 +1866,8 @@
         {
           "index": 0,
           "delta": {
-            "reasoning": " types",
-            "reasoning_content": " types"
+            "reasoning": "45 mfh",
+            "reasoning_content": "g2mj6o"
           },
           "logprobs": null,
           "finish_reason": null,
@@ -1884,8 +1884,8 @@
         {
           "index": 0,
           "delta": {
-            "reasoning": " are",
-            "reasoning_content": " are"
+            "reasoning": "6xfb",
+            "reasoning_content": "16sh"
           },
           "logprobs": null,
           "finish_reason": null,
@@ -1902,8 +1902,8 @@
         {
           "index": 0,
           "delta": {
-            "reasoning": " being",
-            "reasoning_content": " being"
+            "reasoning": "k73bou",
+            "reasoning_content": "2qsate"
           },
           "logprobs": null,
           "finish_reason": null,
@@ -1920,8 +1920,8 @@
         {
           "index": 0,
           "delta": {
-            "reasoning": " used",
-            "reasoning_content": " used"
+            "reasoning": "x0c8h",
+            "reasoning_content": "5g1bt"
           },
           "logprobs": null,
           "finish_reason": null,
@@ -1974,8 +1974,8 @@
         {
           "index": 0,
           "delta": {
-            "reasoning": " can",
-            "reasoning_content": " can"
+            "reasoning": "tzw3",
+            "reasoning_content": "7mz3"
           },
           "logprobs": null,
           "finish_reason": null,
@@ -1992,8 +1992,8 @@
         {
           "index": 0,
           "delta": {
-            "reasoning": " properly",
-            "reasoning_content": " properly"
+            "reasoning": "sxhb77rj6",
+            "reasoning_content": "0m2qj5pbm"
           },
           "logprobs": null,
           "finish_reason": null,
@@ -2010,8 +2010,8 @@
         {
           "index": 0,
           "delta": {
-            "reasoning": " create",
-            "reasoning_content": " create"
+            "reasoning": "4usb97q",
+            "reasoning_content": " pg623l"
           },
           "logprobs": null,
           "finish_reason": null,
@@ -2028,8 +2028,8 @@
         {
           "index": 0,
           "delta": {
-            "reasoning": " the",
-            "reasoning_content": " the"
+            "reasoning": "3yy4",
+            "reasoning_content": "16ak"
           },
           "logprobs": null,
           "finish_reason": null,
@@ -2046,8 +2046,8 @@
         {
           "index": 0,
           "delta": {
-            "reasoning": " aliases",
-            "reasoning_content": " aliases"
+            "reasoning": "fgvztqie",
+            "reasoning_content": "8wcbtbxp"
           },
           "logprobs": null,
           "finish_reason": null,
@@ -2175,7 +2175,7 @@
               {
                 "index": 0,
                 "function": {
-                  "arguments": "file"
+                  "arguments": "8tju"
                 }
               }
             ]
@@ -2200,7 +2200,7 @@
               {
                 "index": 0,
                 "function": {
-                  "arguments": "Path"
+                  "arguments": "wsbq"
                 }
               }
             ]
@@ -2275,7 +2275,7 @@
               {
                 "index": 0,
                 "function": {
-                  "arguments": "Users"
+                  "arguments": "wnfrx"
                 }
               }
             ]
@@ -2300,7 +2300,7 @@
               {
                 "index": 0,
                 "function": {
-                  "arguments": "/rust"
+                  "arguments": "87ama"
                 }
               }
             ]
@@ -2350,7 +2350,7 @@
               {
                 "index": 0,
                 "function": {
-                  "arguments": "/start"
+                  "arguments": "0so3ni"
                 }
               }
             ]
@@ -2400,7 +2400,7 @@
               {
                 "index": 0,
                 "function": {
-                  "arguments": "/active"
+                  "arguments": "dc12ktu"
                 }
               }
             ]
@@ -2425,7 +2425,7 @@
               {
                 "index": 0,
                 "function": {
-                  "arguments": "/open"
+                  "arguments": "wu3 6"
                 }
               }
             ]
@@ -2525,7 +2525,7 @@
               {
                 "index": 0,
                 "function": {
-                  "arguments": "/src"
+                  "arguments": "3i42"
                 }
               }
             ]
@@ -2550,7 +2550,7 @@
               {
                 "index": 0,
                 "function": {
-                  "arguments": "/types"
+                  "arguments": "c1gsoj"
                 }
               }
             ]
@@ -2575,7 +2575,7 @@
               {
                 "index": 0,
                 "function": {
-                  "arguments": "/res"
+                  "arguments": " 19j"
                 }
               }
             ]
@@ -2600,7 +2600,7 @@
               {
                 "index": 0,
                 "function": {
-                  "arguments": "ponses"
+                  "arguments": "1055tg"
                 }
               }
             ]
@@ -2700,7 +2700,7 @@
               {
                 "index": 0,
                 "function": {
-                  "arguments": "limit"
+                  "arguments": "uv1jd"
                 }
               }
             ]
@@ -2877,7 +2877,7 @@
               {
                 "index": 1,
                 "function": {
-                  "arguments": "file"
+                  "arguments": "y62w"
                 }
               }
             ]
@@ -2902,7 +2902,7 @@
               {
                 "index": 1,
                 "function": {
-                  "arguments": "Path"
+                  "arguments": "ihaw"
                 }
               }
             ]
@@ -2977,7 +2977,7 @@
               {
                 "index": 1,
                 "function": {
-                  "arguments": "Users"
+                  "arguments": "atw9y"
                 }
               }
             ]
@@ -3002,7 +3002,7 @@
               {
                 "index": 1,
                 "function": {
-                  "arguments": "/rust"
+                  "arguments": "b8wf0"
                 }
               }
             ]
@@ -3052,7 +3052,7 @@
               {
                 "index": 1,
                 "function": {
-                  "arguments": "/start"
+                  "arguments": "4gvgvq"
                 }
               }
             ]
@@ -3102,7 +3102,7 @@
               {
                 "index": 1,
                 "function": {
-                  "arguments": "/active"
+                  "arguments": "ag2 csj"
                 }
               }
             ]
@@ -3127,7 +3127,7 @@
               {
                 "index": 1,
                 "function": {
-                  "arguments": "/open"
+                  "arguments": "icbju"
                 }
               }
             ]
@@ -3227,7 +3227,7 @@
               {
                 "index": 1,
                 "function": {
-                  "arguments": "/src"
+                  "arguments": "aj4l"
                 }
               }
             ]
@@ -3252,7 +3252,7 @@
               {
                 "index": 1,
                 "function": {
-                  "arguments": "/types"
+                  "arguments": "zxg5cm"
                 }
               }
             ]
@@ -3277,7 +3277,7 @@
               {
                 "index": 1,
                 "function": {
-                  "arguments": "/chat"
+                  "arguments": "8g9eb"
                 }
               }
             ]
@@ -3377,7 +3377,7 @@
               {
                 "index": 1,
                 "function": {
-                  "arguments": "limit"
+                  "arguments": "kjjr5"
                 }
               }
             ]
@@ -3554,7 +3554,7 @@
               {
                 "index": 2,
                 "function": {
-                  "arguments": "file"
+                  "arguments": "cg3v"
                 }
               }
             ]
@@ -3579,7 +3579,7 @@
               {
                 "index": 2,
                 "function": {
-                  "arguments": "Path"
+                  "arguments": "s6 8"
                 }
               }
             ]
@@ -3654,7 +3654,7 @@
               {
                 "index": 2,
                 "function": {
-                  "arguments": "Users"
+                  "arguments": "hnbi3"
                 }
               }
             ]
@@ -3679,7 +3679,7 @@
               {
                 "index": 2,
                 "function": {
-                  "arguments": "/rust"
+                  "arguments": "l08i1"
                 }
               }
             ]
@@ -3729,7 +3729,7 @@
               {
                 "index": 2,
                 "function": {
-                  "arguments": "/start"
+                  "arguments": "o8uink"
                 }
               }
             ]
@@ -3779,7 +3779,7 @@
               {
                 "index": 2,
                 "function": {
-                  "arguments": "/active"
+                  "arguments": "z9ce27w"
                 }
               }
             ]
@@ -3804,7 +3804,7 @@
               {
                 "index": 2,
                 "function": {
-                  "arguments": "/open"
+                  "arguments": "i4tyq"
                 }
               }
             ]
@@ -3904,7 +3904,7 @@
               {
                 "index": 2,
                 "function": {
-                  "arguments": "/src"
+                  "arguments": "uxp7"
                 }
               }
             ]
@@ -3929,7 +3929,7 @@
               {
                 "index": 2,
                 "function": {
-                  "arguments": "/types"
+                  "arguments": "ddogto"
                 }
               }
             ]
@@ -4004,7 +4004,7 @@
               {
                 "index": 2,
                 "function": {
-                  "arguments": "time"
+                  "arguments": "u46t"
                 }
               }
             ]
@@ -4104,7 +4104,7 @@
               {
                 "index": 2,
                 "function": {
-                  "arguments": "limit"
+                  "arguments": "ghoxw"
                 }
               }
             ]
