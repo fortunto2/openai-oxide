@@ -2,10 +2,15 @@
   "name": "openai-oxide",
   "version": "0.9.8",
   "description": "Native Node.js bindings for openai-oxide powered by napi-rs.",
-  "main": "index.js",
+  "main": "wrapper.js",
   "types": "index.d.ts",
   "exports": {
     ".": {
+      "types": "./index.d.ts",
+      "require": "./wrapper.js",
+      "default": "./wrapper.js"
+    },
+    "./native": {
       "types": "./index.d.ts",
       "require": "./index.js",
       "default": "./index.js"
@@ -14,6 +19,7 @@
   "files": [
     "index.d.ts",
     "index.js",
+    "wrapper.js",
     "README.md"
   ],
   "repository": {
