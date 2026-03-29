@@ -3,3 +3,6 @@
 #[allow(clippy::all)]
 mod _gen;
 pub use _gen::*;
+
+pub mod pagination;
+pub use pagination::*;

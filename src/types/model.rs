@@ -1,14 +1,10 @@
-// Model types — re-exported from openai-types + pagination wrapper
+// Model types — re-exported from openai-types
 
 pub use openai_types::model::{Model, ModelDeleted};
-use serde::Deserialize;
+pub use openai_types::shared::ListResponse;
 
-/// Response from listing models (pagination wrapper, not in openai-types).
-#[derive(Debug, Clone, Deserialize)]
-pub struct ModelList {
-    pub object: String,
-    pub data: Vec<Model>,
-}
+/// Response from listing models.
+pub type ModelList = ListResponse<Model>;
 
 #[cfg(test)]
 mod tests {
