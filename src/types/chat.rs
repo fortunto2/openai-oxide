@@ -4,6 +4,24 @@ use serde::{Deserialize, Serialize};
 
 use super::common::{FinishReason, ReasoningEffort, Role, SearchContextSize, ServiceTier, Usage};
 
+// Re-export new types from openai-types (audio, deleted, service tiers, new params, etc.)
+pub use openai_types::chat::{
+    AnnotationURLCitation, ChatCompletion, ChatCompletionAudio, ChatCompletionChoiceFinishReason,
+    ChatCompletionChunkServiceTier, ChatCompletionContentPartImage, ChatCompletionContentPartText,
+    ChatCompletionDeleted, ChatCompletionFunctionTool, ChatCompletionMessageCustomToolCall,
+    ChatCompletionMessageFunctionToolCall, ChatCompletionMessageToolCall,
+    ChatCompletionMessageToolCallUnion, ChatCompletionModality, ChatCompletionRole,
+    ChatCompletionServiceTier, ChatCompletionStoreMessageContentPart, ChatCompletionTokenLogprob,
+    ChoiceDeltaFunctionCall, ChoiceDeltaRole, ChoiceDeltaToolCall, ChoiceDeltaToolCallFunction,
+    ChunkChoiceFinishReason, CompletionCreateFunction, CompletionCreateParams,
+    CompletionCreateParamsBase, CompletionCreateParamsBasePromptCacheRetention,
+    CompletionCreateParamsBaseServiceTier, CompletionCreateParamsBaseVerbosity,
+    CompletionListParams, CompletionListParamsOrder, CompletionUpdateParams, Custom, ImageURL,
+    ImageURLDetail, MessageFunctionFunction,
+    WebSearchOptionsSearchContextSize as GenWebSearchOptionsSearchContextSize,
+    WebSearchOptionsUserLocation, WebSearchOptionsUserLocationApproximate,
+};
+
 // ── Request types ──
 
 /// Request body for `POST /chat/completions`.

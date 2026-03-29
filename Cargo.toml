@@ -22,7 +22,7 @@ openai-oxide-macros = { version = "0.1.0", path = "openai-oxide-macros", optiona
 openai-types = { version = "0.1.0", path = "openai-types", default-features = false, features = [
     "audio", "chat", "responses", "realtime", "embedding", "image", "file", "model",
     "moderation", "batch", "uploads", "beta", "websocket", "shared",
-    "completion", "containers", "conversations", "evals", "graders",
+    "completion", "containers", "conversations", "evals", "fine-tuning", "graders",
     "skills", "vector-stores", "video", "webhooks",
 ] }
 serde = { version = "1", features = ["derive"] }

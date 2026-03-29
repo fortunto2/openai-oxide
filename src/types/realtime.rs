@@ -2,6 +2,27 @@
 
 use serde::{Deserialize, Serialize};
 
+// Re-export new types from openai-types (168 event types, session configs, call params)
+pub use openai_types::realtime::{
+    AllowedToolsMcpToolFilter, Audio, AudioInput, AudioInputNoiseReduction,
+    AudioInputTurnDetectionSemanticVad, AudioInputTurnDetectionSemanticVadEagerness,
+    AudioInputTurnDetectionServerVad, AudioOutput, AudioTranscription, CallAcceptParams,
+    CallCreateParams, CallReferParams, CallRejectParams, ClientSecretCreateParams,
+    ClientSecretCreateResponse, Conversation, ConversationCreatedEvent, ConversationItem,
+    ConversationItemAdded, ConversationItemCreateEvent, ConversationItemCreatedEvent,
+    ConversationItemDeleteEvent, ConversationItemDeletedEvent, ConversationItemDone,
+    ConversationItemError, ConversationItemInputAudioTranscriptionCompletedEvent,
+    ConversationItemInputAudioTranscriptionDeltaEvent,
+    ConversationItemInputAudioTranscriptionFailedEvent,
+    ConversationItemInputAudioTranscriptionSegment, ConversationItemRetrieveEvent,
+    ConversationItemTruncateEvent, ConversationItemTruncatedEvent, ExpiresAfter,
+    InputAudioBufferAppendEvent, InputAudioBufferClearEvent, InputAudioBufferClearedEvent,
+    InputAudioBufferCommitEvent, InputAudioBufferCommittedEvent,
+    InputAudioBufferSpeechStartedEvent, InputAudioBufferSpeechStoppedEvent, LogProbProperties,
+    NoiseReduction, OutputAudioBufferClearEvent, RateLimit, RateLimitName, RateLimitsUpdatedEvent,
+    RealtimeAudioConfig, Session,
+};
+
 /// Audio format for realtime API.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]

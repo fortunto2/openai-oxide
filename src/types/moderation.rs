@@ -2,6 +2,11 @@
 
 use serde::{Deserialize, Serialize};
 
+// Re-export new types from openai-types
+pub use openai_types::moderation::{
+    CategoryAppliedInputTypes, ModerationCreateParams, ModerationModel,
+};
+
 // ── Request types ──
 
 /// Input for moderations: a single string or array of strings.

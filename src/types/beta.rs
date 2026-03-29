@@ -3,7 +3,26 @@
 use serde::{Deserialize, Serialize};
 
 use super::common::{Role, SortOrder};
+
+// Re-export new types from openai-types (create/update params, tool types, streaming events)
 use crate::openai_enum;
+pub use openai_types::beta::{
+    AssistantCreateParams, AssistantListParamsOrder, AssistantResponseFormatOption,
+    AssistantStreamEvent, AssistantTool, AssistantToolChoice, AssistantToolChoiceFunction,
+    AssistantToolChoiceOption, AssistantToolChoiceType, AssistantUpdateParams, ChatKitWorkflow,
+    CodeInterpreterTool, ErrorEvent, FileSearch, FileSearchRankingOptionsRanker, FileSearchTool,
+    FunctionTool, ThreadCreated, ThreadMessageCompleted, ThreadMessageCreated, ThreadMessageDelta,
+    ThreadMessageInProgress, ThreadMessageIncomplete, ThreadRunCancelled, ThreadRunCancelling,
+    ThreadRunCompleted, ThreadRunCreated, ThreadRunExpired, ThreadRunFailed, ThreadRunInProgress,
+    ThreadRunIncomplete, ThreadRunQueued, ThreadRunRequiresAction, ThreadRunStepCancelled,
+    ThreadRunStepCompleted, ThreadRunStepCreated, ThreadRunStepDelta, ThreadRunStepExpired,
+    ThreadRunStepFailed, ThreadRunStepInProgress, ToolResources, ToolResourcesCodeInterpreter,
+    ToolResourcesFileSearch, ToolResourcesFileSearchVectorStore,
+    ToolResourcesFileSearchVectorStoreChunkingStrategy,
+    ToolResourcesFileSearchVectorStoreChunkingStrategyAuto,
+    ToolResourcesFileSearchVectorStoreChunkingStrategyStatic,
+    ToolResourcesFileSearchVectorStoreChunkingStrategyStaticStatic, Tracing,
+};
 
 openai_enum! {
     /// Status of a thread run.

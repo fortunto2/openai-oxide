@@ -3,6 +3,15 @@
 use crate::openai_enum;
 use serde::{Deserialize, Serialize};
 
+// Re-export new types from openai-types (methods, integrations, extended params)
+pub use openai_types::fine_tuning::{
+    DpoHyperparameters, DpoMethod, FineTuningJobEventLevel, FineTuningJobEventType,
+    FineTuningJobStatus, FineTuningJobWandbIntegration, FineTuningJobWandbIntegrationObject,
+    Integration, IntegrationWandb, JobCreateParams, JobError, JobListEventsParams, JobListParams,
+    Method, MethodType, ReinforcementHyperparameters, ReinforcementHyperparametersReasoningEffort,
+    ReinforcementMethod, SupervisedHyperparameters, SupervisedMethod,
+};
+
 openai_enum! {
     /// Status of a fine-tuning job.
     pub enum FineTuningStatus {

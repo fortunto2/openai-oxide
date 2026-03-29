@@ -2,6 +2,61 @@
 
 use serde::{Deserialize, Serialize};
 
+// Re-export all non-conflicting types from openai-types.
+// Types defined below in this file take precedence (they have builders/impls).
+mod _generated {
+    pub use openai_types::responses::*;
+}
+// Selective re-exports of types NOT defined in this file (281 new types).
+// Computer actions, streaming events, MCP, code interpreter, shell, image gen, etc.
+pub use _generated::{
+    AcknowledgedSafetyCheck, ActionClick, ActionClickButton, ActionDoubleClick, ActionDrag,
+    ActionDragPath, ActionFind, ActionKeypress, ActionMove, ActionOpenPage, ActionScreenshot,
+    ActionScroll, ActionSearch, ActionSearchSource, ActionType, ActionWait,
+    AnnotationContainerFileCitation, AnnotationFileCitation, AnnotationFilePath,
+    AnnotationURLCitation, ApplyPatchCall, ApplyPatchTool, Click, ClickButton, CodeInterpreter,
+    CompactedResponse, ComputerCallOutput, ComputerTool, ComputerUsePreviewTool,
+    ComputerUsePreviewToolEnvironment, ContainerAuto, ContainerAutoMemoryLimit,
+    ContainerNetworkPolicyAllowlist, ContainerNetworkPolicyDisabled,
+    ContainerNetworkPolicyDomainSecret, ContainerReference, ContextManagement, CustomTool,
+    DoubleClick, Drag, DragPath, EasyInputMessagePhase, EasyInputMessageRole, FileSearchResult,
+    FileSearchTool, FunctionShellTool, ImageGeneration, ImageGenerationCall,
+    IncompleteDetailsReason, InlineSkill, InlineSkillSource, InputAudio, InputAudioFormat,
+    InputItemListParams, InputItemListParamsOrder, InputTokenCountParams, InputTokenCountResponse,
+    Keypress, LocalEnvironment, LocalShell, LocalShellCall, LocalSkill, Logprob, Mcp, McpCall,
+    McpListTools, Message, MessageRole, Move, NamespaceTool, OperationCreateFile,
+    OperationDeleteFile, OperationUpdateFile, PendingSafetyCheck, RankingOptions,
+    RankingOptionsRanker, ResponseApplyPatchToolCall, ResponseApplyPatchToolCallOutput,
+    ResponseAudioDeltaEvent, ResponseAudioDoneEvent, ResponseAudioTranscriptDeltaEvent,
+    ResponseAudioTranscriptDoneEvent, ResponseCodeInterpreterCallCodeDeltaEvent,
+    ResponseCodeInterpreterCallCodeDoneEvent, ResponseCodeInterpreterCallCompletedEvent,
+    ResponseCodeInterpreterCallInProgressEvent, ResponseCodeInterpreterToolCall,
+    ResponseCompactParams, ResponseComputerToolCall, ResponseComputerToolCallOutputItem,
+    ResponseContentPartAddedEvent, ResponseContentPartDoneEvent, ResponseCreatedEvent,
+    ResponseCustomToolCall, ResponseCustomToolCallInputDeltaEvent,
+    ResponseCustomToolCallInputDoneEvent, ResponseCustomToolCallOutput,
+    ResponseFileSearchCallCompletedEvent, ResponseFileSearchCallInProgressEvent,
+    ResponseFileSearchToolCall, ResponseFunctionShellToolCall, ResponseFunctionToolCall,
+    ResponseFunctionToolCallOutputItem, ResponseFunctionWebSearch,
+    ResponseImageGenCallCompletedEvent, ResponseImageGenCallGeneratingEvent,
+    ResponseImageGenCallInProgressEvent, ResponseImageGenCallPartialImageEvent,
+    ResponseInProgressEvent, ResponseIncludable, ResponseInputAudio, ResponseInputFile,
+    ResponseInputImage, ResponseInputMessageItem, ResponseInputText, ResponseItemList,
+    ResponseMcpCallArgumentsDeltaEvent, ResponseMcpCallArgumentsDoneEvent,
+    ResponseMcpCallCompletedEvent, ResponseMcpCallFailedEvent, ResponseMcpCallInProgressEvent,
+    ResponseMcpListToolsCompletedEvent, ResponseOutputItemDoneEvent, ResponseOutputMessage,
+    ResponseOutputRefusal, ResponseOutputText, ResponseOutputTextAnnotationAddedEvent,
+    ResponsePrompt, ResponsePromptCacheRetention, ResponseQueuedEvent, ResponseReasoningItem,
+    ResponseReasoningSummaryPartAddedEvent, ResponseReasoningSummaryPartDoneEvent,
+    ResponseReasoningTextDoneEvent, ResponseRefusalDeltaEvent, ResponseRefusalDoneEvent,
+    ResponseServiceTier, ResponseStatus, ResponseTextDoneEvent, ResponseToolSearchCall,
+    ResponseToolSearchOutputItem, ResponseTruncation, ResponseWebSearchCallCompletedEvent,
+    ResponseWebSearchCallInProgressEvent, ResponseWebSearchCallSearchingEvent, Screenshot, Scroll,
+    ShellCall, SkillReference, Text, TextVerbosity, ToolChoiceAllowed, ToolChoiceApplyPatch,
+    ToolChoiceCustom, ToolChoiceMcp, ToolChoiceShell, ToolChoiceTypes, ToolFunction,
+    ToolSearchCall, ToolSearchTool, Wait, WebSearchPreviewTool, WebSearchTool,
+};
+
 // Re-export Role from common so `types::responses::Role` works (async-openai compat).
 pub use super::common::ReasoningEffort;
 pub use super::common::Role;

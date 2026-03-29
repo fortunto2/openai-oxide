@@ -3,6 +3,27 @@
 use crate::openai_enum;
 use serde::{Deserialize, Serialize};
 
+// Re-export new types from openai-types (streaming events, edit/generate params, model enum)
+pub use openai_types::image::{
+    ImageCreateVariationParams, ImageCreateVariationParamsResponseFormat,
+    ImageCreateVariationParamsSize, ImageEditCompletedEvent, ImageEditCompletedEventBackground,
+    ImageEditCompletedEventOutputFormat, ImageEditCompletedEventQuality,
+    ImageEditCompletedEventSize, ImageEditParamsBase, ImageEditParamsBaseBackground,
+    ImageEditParamsBaseInputFidelity, ImageEditParamsBaseOutputFormat, ImageEditParamsBaseQuality,
+    ImageEditParamsBaseResponseFormat, ImageEditParamsBaseSize, ImageEditPartialImageEvent,
+    ImageEditPartialImageEventBackground, ImageEditPartialImageEventOutputFormat,
+    ImageEditPartialImageEventQuality, ImageEditPartialImageEventSize, ImageEditStreamEvent,
+    ImageGenCompletedEvent, ImageGenCompletedEventBackground, ImageGenCompletedEventOutputFormat,
+    ImageGenCompletedEventQuality, ImageGenCompletedEventSize, ImageGenPartialImageEvent,
+    ImageGenPartialImageEventBackground, ImageGenPartialImageEventOutputFormat,
+    ImageGenPartialImageEventQuality, ImageGenPartialImageEventSize, ImageGenStreamEvent,
+    ImageGenerateParamsBase, ImageGenerateParamsBaseBackground, ImageGenerateParamsBaseModeration,
+    ImageGenerateParamsBaseOutputFormat, ImageGenerateParamsBaseQuality,
+    ImageGenerateParamsBaseResponseFormat, ImageGenerateParamsBaseSize,
+    ImageGenerateParamsBaseStyle, ImageModel, ImagesResponseBackground, ImagesResponseOutputFormat,
+    ImagesResponseQuality, ImagesResponseSize,
+};
+
 openai_enum! {
     /// Image quality level.
     pub enum ImageQuality {
