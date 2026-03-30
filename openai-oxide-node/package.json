@@ -3,10 +3,10 @@
   "version": "0.11.1",
   "description": "Native Node.js bindings for openai-oxide powered by napi-rs.",
   "main": "wrapper.js",
-  "types": "index.d.ts",
+  "types": "typed.d.ts",
   "exports": {
     ".": {
-      "types": "./index.d.ts",
+      "types": "./typed.d.ts",
       "require": "./wrapper.js",
       "default": "./wrapper.js"
     },
@@ -14,12 +14,17 @@
       "types": "./index.d.ts",
       "require": "./index.js",
       "default": "./index.js"
+    },
+    "./types": {
+      "types": "./types.d.ts"
     }
   },
   "files": [
     "index.d.ts",
     "index.js",
     "wrapper.js",
+    "typed.d.ts",
+    "types.d.ts",
     "README.md"
   ],
   "repository": {
@@ -68,6 +73,14 @@
     "prepublishOnly": "napi prepublish -t npm --npm-dir npm",
     "test": "node test.js",
     "version": "napi version --npm-dir npm"
+  },
+  "peerDependencies": {
+    "openai": ">=4.0.0"
+  },
+  "peerDependenciesMeta": {
+    "openai": {
+      "optional": true
+    }
   },
   "devDependencies": {
     "@napi-rs/cli": "^3.5.1",

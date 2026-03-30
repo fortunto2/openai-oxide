@@ -57,6 +57,15 @@ pub(crate) mod runtime;
 pub mod stream_helpers;
 pub mod streaming;
 pub mod types;
+
+/// Direct access to the standalone types crate (1100+ OpenAI API types).
+///
+/// Same types as `openai_oxide::types::*`, but also usable independently:
+/// ```toml
+/// [dependencies]
+/// openai-types = { version = "0.1", features = ["chat", "responses"] }
+/// ```
+pub use openai_types;
 #[cfg(feature = "websocket")]
 pub mod websocket;
 #[cfg(feature = "websocket")]
