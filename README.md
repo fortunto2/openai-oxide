@@ -35,27 +35,29 @@ What you get out of the box:
 
 ### WebSocket Mode for Agent Loops
 
-In multi-turn agent loops, WebSocket mode avoids per-request HTTP/2 framing and header overhead. Both HTTP and WebSocket reuse the same TCP+TLS connection (no per-request handshake), but WebSocket eliminates HTTP/2 frame negotiation.
+OpenAI offers a [WebSocket mode](https://platform.openai.com/docs/guides/websocket-mode) for the Responses API at `wss://api.openai.com/v1/responses`. The connection stays open across multiple turns, and the server uses connection-local caching to speed up continuations. Requests are sequential (one in-flight at a time per connection), but each turn benefits from the server keeping the previous response state in memory.
 
 ```text
-Standard Client (HTTP/2, warm connection — TLS reused via pool)
-Request 1 (ls)   : [HTTP/2 frames] -> [Wait TTFT] -> [Wait Done] -> [Parse] -> [Exec Tool]
-Request 2 (cat)  : [HTTP/2 frames] -> [Wait TTFT] -> [Wait Done] -> [Parse] -> [Exec Tool]
+HTTP (warm connection — TLS reused via pool)
+Request 1 (ls)   : [HTTP/2 req] -> [Server loads ctx] -> [Generate] -> [Parse] -> [Exec Tool]
+Request 2 (cat)  : [HTTP/2 req] -> [Server loads ctx] -> [Generate] -> [Parse] -> [Exec Tool]
 
-openai-oxide (WebSocket + Early Parse — TLS reused via persistent conn)
-Connection       : [WS Upgrade] (Done once)
-Request 1 (ls)   : [Send JSON] -> [Wait TTFT] -> [Exec Tool Early!]
-Request 2 (cat)  :             [Send JSON] -> [Wait TTFT] -> [Exec Tool Early!]
+WebSocket (persistent connection — server caches context)
+Connection       : [WS Upgrade] (once)
+Request 1 (ls)   : [Send JSON] -> [Generate] -> [Parse] -> [Exec Tool]
+Request 2 (cat)  : [Send JSON] -> [Ctx cached] -> [Generate] -> [Parse] -> [Exec Tool]
 ```
 
-Preliminary measurements on warm connections (gpt-5.4, median of medians, n=5):
+The speed improvement comes primarily from the **server side** (connection-local caching, reduced continuation overhead), not from saving a few bytes of HTTP/2 framing on the client. OpenAI reports [up to ~40% faster](https://platform.openai.com/docs/guides/websocket-mode) for chains with 20+ tool calls.
+
+Our preliminary measurements (gpt-5.4, warm connections, n=5):
 - **Plain text:** 710ms WS vs 1011ms HTTP (29% faster)
 - **Multi-turn (2 reqs):** 1425ms vs 2362ms (40% faster)
 - **Rapid-fire (5 calls):** 3227ms vs 5807ms (44% faster)
 
-This aligns with [OpenAI's own documentation](https://platform.openai.com/docs/guides/websocket-mode): *"For rollouts with 20+ tool calls, we have seen up to roughly 40% faster end-to-end execution."*
+*Preliminary at n=5 — direction matches OpenAI's published numbers.*
 
-*Our numbers are preliminary (n=5), but the direction matches OpenAI's published benchmarks.* The gap reflects both reduced framing overhead and different server-side routing for the WebSocket endpoint. Early parse (yielding tool calls before `[DONE]`) provides additional savings in streaming mode.
+Separately, **Stream FC Early Parse** (works on both HTTP and WebSocket) lets you start executing tool calls the moment arguments are complete, before the stream closes — saving additional time in function-calling loops.
 
 ---
 
