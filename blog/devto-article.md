@@ -5,7 +5,7 @@ tags: rust, openai, ai, webassembly
 canonical_url: https://github.com/fortunto2/openai-oxide
 ---
 
-I needed a fast OpenAI client for a realtime voice agent project. The official Python SDK is great, but I needed Rust for WebSocket audio streaming, edge deployment to Cloudflare Workers, and sub-second latency in agentic loops.
+I needed a fast OpenAI client for a realtime voice agent project. The official Python SDK is great, but I needed Rust for WebSocket audio streaming, edge deployment, and sub-second latency in agentic loops.
 
 So I ported it. 500+ commits, 5 days for the initial version, 100+ API methods. Day one (120 commits) was mostly Claude Code translating types from Python to Rust while I set up pre-commit hooks, WASM checks, and benchmarks. The rest was architecture decisions, performance tuning, Node/Python bindings, and a standalone types crate with 1100+ auto-synced types.
 
@@ -133,7 +133,7 @@ Or just get the final result: `stream.get_final_completion().await?`
 
 ## WASM Support
 
-The entire client compiles to `wasm32-unknown-unknown` and runs in Cloudflare Workers:
+The entire client compiles to `wasm32-unknown-unknown` and runs in any WASM environment (browsers, Cloudflare Workers, Deno, Dioxus, Leptos):
 
 ```toml
 [dependencies]
@@ -258,7 +258,7 @@ The biggest payoff from writing the core in Rust: it runs everywhere.
 | Rust | native | stable |
 | Node.js / TypeScript | napi-rs | stable |
 | Python | PyO3 + maturin | stable |
-| Browser / Cloudflare Workers | WASM | stable |
+| Browser / Edge / Dioxus / Leptos | WASM | stable |
 | iOS / macOS | UniFFI (Swift) | planned |
 | Android | UniFFI (Kotlin) | planned |
 

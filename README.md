@@ -43,7 +43,7 @@ The Rust crate is the single source of truth. Bindings for other platforms are t
 | **Rust** | native | stable |
 | **Node.js / TypeScript** | napi-rs | stable |
 | **Python** | PyO3 + maturin | stable |
-| **Browser / Cloudflare Workers** | WASM (`wasm32-unknown-unknown`) | stable |
+| **Browser / Edge / Dioxus / Leptos** | WASM (`wasm32-unknown-unknown`) | stable |
 | **iOS / macOS** | UniFFI (Swift) | planned |
 | **Android** | UniFFI (Kotlin) | planned |
 
