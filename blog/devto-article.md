@@ -95,7 +95,7 @@ println!("{}", result.parsed.unwrap().answer);
 
 One derive, both directions — the same `#[derive(JsonSchema)]` generates response schemas and tool parameter definitions. No manual JSON, no drift between types and schemas.
 
-## Zero-Copy SSE Streaming
+## SSE Streaming
 
 Time-to-first-token matters for UX. Our SSE parser avoids intermediate allocations and sets anti-buffering headers that prevent reverse proxies from holding back chunks:
 
@@ -243,7 +243,7 @@ The entire crate — 100+ API methods, typed streaming, structured outputs, WASM
 4. **Type sync**: built `py2rust.py` to auto-convert Python Pydantic models to Rust serde structs — 1100+ types across 24 domains, with a two-pass resolver for cross-file references
 5. **Quality gates**: every commit runs tests + clippy + WASM compilation check + doc coverage. Pre-commit catches regressions before they land
 
-The key insight: treat the Python SDK as a spec, not as code to port line-by-line. The agent handles mechanical translation (types, error mapping, serialization); you focus on Rust-specific wins (zero-copy, tagged enums, WASM cfg gates).
+The key insight: treat the Python SDK as a spec, not as code to port line-by-line. The agent handles mechanical translation (types, error mapping, serialization); you focus on Rust-specific wins (tagged enums, feature gates, WASM cfg).
 
 A harder lesson: **benchmarks are treacherous.** We went through multiple rounds of removing claims that looked impressive but weren't statistically significant at n=5 with live API calls. The honest answer is that SDK overhead is negligible compared to server latency for most use cases. The real wins are in features (WebSocket, structured outputs, WASM) and type safety (1100+ auto-synced types), not milliseconds on single requests.
 

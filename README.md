@@ -24,14 +24,14 @@ What you get out of the box:
 
 - **Structured Outputs — `parse::<T>()`:** Auto-generates JSON schema from Rust types via `schemars` and deserializes the response in one call — `parse::<MyStruct>()`. Works with Chat and Responses APIs.
 - **Stream Helpers:** High-level `ChatStreamEvent` with automatic text/tool-call accumulation, typed `ContentDelta`/`ToolCallDone` events, `get_final_completion()`, and `current_content()` snapshots. No manual chunk stitching.
-- **Streaming:** Zero-copy SSE parser with standard anti-buffering headers (`Accept: text/event-stream`, `Cache-Control: no-cache`).
+- **Streaming:** Incremental SSE parser with buffered line extraction and standard anti-buffering headers (`Accept: text/event-stream`, `Cache-Control: no-cache`).
 - **WebSocket Mode:** Persistent `wss://` connection for the [Responses API](https://platform.openai.com/docs/guides/websocket-mode). OpenAI reports [up to ~40% faster](https://platform.openai.com/docs/guides/websocket-mode) end-to-end for 20+ tool call chains — our preliminary measurements (29-44%, n=5) align with this. The only Rust client that implements this endpoint.
 - **Stream FC Early Parse:** Yields function calls the exact moment `arguments.done` is emitted, letting you start executing local tools before the overall response finishes.
 - **Hardware-Accelerated JSON (`simd`):** Opt-in AVX2/NEON vector instructions for faster JSON parsing of large payloads (agent histories, complex tool calls).
 - **Hedged Requests:** Send redundant requests and cancel the slower ones. Trades extra tokens for lower tail latency (technique from Google's "The Tail at Scale").
 - **Webhook Verification:** HMAC-SHA256 signature verification with timestamp tolerance check (rejects stale requests).
 - **HTTP Tuning:** gzip, TCP_NODELAY, HTTP/2 keep-alive with adaptive window, connection pooling — enabled by default.
-- **WASM First-Class:** Compiles to `wasm32-unknown-unknown` with full feature support — streaming, retries, early-parsing all work in Cloudflare Workers and browsers. Other Rust clients either don't support WASM or drop streaming/retry. [Live demo](https://cloudflare-worker-dioxus.nameless-sunset-8f24.workers.dev).
+- **WASM Support:** Compiles to `wasm32-unknown-unknown` — streaming, JSON request retries, and early-parsing work in Cloudflare Workers and browsers. Limitations: no multipart uploads, no gzip/HTTP/2 (browser handles these), streaming retries are not yet implemented. [Live demo](https://cloudflare-worker-dioxus.nameless-sunset-8f24.workers.dev).
 - **Node.js & Python bindings:** Native napi-rs (Node) and PyO3 (Python) bindings as separate packages. Structured outputs via Zod (Node) and Pydantic v2 (Python). On mock benchmarks, the Node bindings show 2-3x faster SDK overhead vs official `openai` npm (p<0.001).
 
 ### WebSocket Mode for Agent Loops
@@ -151,7 +151,7 @@ asyncio.run(main())
 - **Environment:** macOS (M-series), release mode.
 - **Model:** `gpt-5.4` via the official OpenAI API.
 - **Protocol:** TLS + HTTP/2 with connection pooling (warm connections).
-- **Methodology:** 5 iterations per test, median. At n=5, differences <15% are within API jitter. Date: 2026-03-29.
+- **Methodology:** n=5 per run, 3 runs, median of medians. At n=5, differences <15% are within API jitter. Date: 2026-03-24.
 
 ### Rust Ecosystem
 
@@ -159,14 +159,14 @@ asyncio.run(main())
 
 | Test | `openai-oxide` | `async-openai` | `genai` | Notes |
 | :--- | :--- | :--- | :--- | :--- |
-| **Plain text** | 1068ms | **995ms** | **845ms** | oxide slower |
-| **Structured output** | 1430ms | N/A | N/A | oxide-only |
-| **Function calling** | 1153ms | **1108ms** | N/A | within API noise |
-| **Multi-turn (2 reqs)** | 2266ms | **1866ms** | N/A | oxide slower |
-| **Streaming TTFT** | **584ms** | N/A | N/A | oxide-only |
-| **Parallel 3x (fan-out)** | **1057ms** | N/A | N/A | oxide-only |
+| **Plain text** | 1011ms | **960ms** | **835ms** | oxide slower |
+| **Structured output** | 1331ms | N/A | **1197ms** | within noise |
+| **Function calling** | **1192ms** | 1748ms | **1030ms** | genai fastest |
+| **Multi-turn (2 reqs)** | 2362ms | 3275ms | **1641ms** | genai fastest |
+| **Streaming TTFT** | **645ms** | 685ms | 670ms | within noise |
+| **Parallel 3x** | 1165ms | **1053ms** | **866ms** | oxide slower |
 
-**Honesty note:** On single HTTP requests, `async-openai` is faster than oxide in these measurements. However, at n=5 with live API calls, differences <15% are within API jitter and not statistically significant. genai is fastest on plain text because it skips full response deserialization (extracts text only). All three SDKs have negligible SDK overhead compared to server latency (800-1100ms).
+**Honesty note:** No single SDK consistently wins across all tests at n=5. genai is fastest on plain text and multi-turn (it skips full response deserialization — extracts text only). async-openai is faster on plain text and parallel fan-out. oxide wins function calling and streaming TTFT. At this sample size, differences <15% are within API jitter and not statistically significant. All three SDKs have negligible SDK overhead compared to server latency (800-1100ms).
 
 **Where oxide stands out** is features, not single-call speed:
 
@@ -176,7 +176,7 @@ asyncio.run(main())
 | Stream helpers (typed events) | **yes** | no | no |
 | [WebSocket mode](https://platform.openai.com/docs/guides/websocket-mode) for Responses API | **yes** | no | no |
 | Structured `parse::<T>()` with schema gen | **yes** | no | no |
-| WASM (full — streaming + retries) | **yes** | partial (no streaming) | no |
+| WASM (streaming, no multipart) | **yes** | partial (no streaming) | no |
 | Node.js / Python bindings | **yes** | no | no |
 | Hedged requests | **yes** | no | no |
 | Stream FC early parse | **yes** | no | no |
@@ -216,22 +216,22 @@ Reproduce: `cd openai-oxide-python && uv run python ../examples/bench_python.py`
 <!-- BENCH:node:START -->
 ### Node.js Ecosystem (`openai-oxide` vs `openai`)
 
-Live API results are **noisy** — single-call differences are within API variance (n=10). Neither SDK consistently wins on single requests. The real advantages show on streaming, parallel, and WebSocket workloads.
+Native napi-rs bindings vs official `openai` npm. n=5 per run, 3 runs — differences <15% are within API noise.
 
-| Test | `openai-oxide` | `openai` | Notes |
-| :--- | :--- | :--- | :--- |
-| **Plain text** | ~1050ms | ~1000ms | within noise |
-| **Structured output** | ~1400ms | ~1350ms | within noise |
-| **Function calling** | ~1220ms | ~1210ms | within noise |
-| **Multi-turn (2 reqs)** | ~2200ms | ~2500ms | oxide +12% (varies) |
-| **Rapid-fire (5 calls)** | ~4900ms | ~4800ms | within noise |
-| **Streaming TTFT** | **~600ms** | ~670ms | oxide consistently faster |
-| **Parallel 3x** | **~1000ms** | ~1060ms | oxide consistently faster |
-| **WebSocket hot pair** | **~2300ms** | N/A | preliminary, no official equivalent |
+| Test | `openai-oxide` | `openai` | Diff | Note |
+| :--- | :--- | :--- | :--- | :--- |
+| **Plain text** | 1075ms | 1311ms | -18% | |
+| **Structured output** | 1370ms | 1765ms | -22% | |
+| **Function calling** | 1725ms | 1832ms | -6% | within API noise |
+| **Multi-turn (2 reqs)** | 2283ms | 2859ms | -20% | |
+| **Rapid-fire (5 calls)** | 6246ms | 6936ms | -10% | within API noise |
+| **Streaming TTFT** | 534ms | 580ms | -8% | within API noise |
+| **Parallel 3x** | 1937ms | 1991ms | -3% | within API noise |
+| **WebSocket hot pair** | 2181ms | N/A | — | preliminary, needs reproducible script |
 
-*10 iterations, median. Model: gpt-5.4. Date: 2026-03-29. Results vary between runs.*
+*median of medians, 3×5 iterations. Model: gpt-5.4. Date: 2026-03-24. At n=5 with ~200ms API jitter, only >15% differences are meaningful.*
 
-Reproduce: `cd openai-oxide-node && BENCH_ITERATIONS=10 node examples/bench_node.js`
+Reproduce: `cd openai-oxide-node && BENCH_ITERATIONS=5 node examples/bench_node.js`
 <!-- BENCH:node:END -->
 
 ### SDK Overhead (synthetic, Node.js)
@@ -243,21 +243,19 @@ server (zero network, zero inference). Fixtures are captured from a real coding 
 
 | Test | `openai-oxide` | `openai` npm | oxide faster | sig |
 | :--- | :--- | :--- | :--- | :--- |
-| Tiny req → Tiny resp | 112µs | 431µs | **+74%** | *** |
-| Tiny req → Structured 5KB | 172µs | 393µs | **+56%** | *** |
-| Medium 150KB → Tool call | 839µs | 1.2ms | **+29%** | *** |
-| Heavy 657KB → Real agent resp | 2.3ms | 2.7ms | **+16%** | *** |
-| SSE stream (114 real chunks) | 312µs | 783µs | **+60%** | *** |
-| Agent 20x sequential (tiny) | 1.9ms | 4.6ms | **+58%** | *** |
-| Agent 10x sequential (heavy) | 22.7ms | 26.0ms | **+13%** | *** |
+| Tiny req → Tiny resp | 172µs | 443µs | **+61%** | *** |
+| Tiny req → Structured 5KB | 161µs | 499µs | **+68%** | *** |
+| Medium 150KB → Tool call | 1.1ms | 1.7ms | **+37%** | *** |
+| Heavy 657KB → Real agent resp | 4.9ms | 6.2ms | **+21%** | *** |
+| SSE stream (114 real chunks) | 283µs | 742µs | **+62%** | *** |
+| Agent 20x sequential (tiny) | 2.1ms | 5.4ms | **+61%** | *** |
+| Agent 10x sequential (heavy) | 51.7ms | 62.2ms | **+17%** | *** |
 
-*50 iterations, 20 warmup, `--expose-gc`, Welch's t-test — all p<0.001. Date: 2026-03-29.*
+*50 iterations, 20 warmup, `--expose-gc`, Welch's t-test — all p<0.001.*
 
-oxide wins all mock tests (was 10/12 before auto fast-path wrapper). Note: the mock server uses HTTP/1.1, so these results measure SDK serialization/parsing overhead, not HTTP/2 multiplexing benefits.
+Note: the mock server uses HTTP/1.1, so these results measure SDK serialization/parsing overhead, not HTTP/2 multiplexing benefits.
 
-The wrapper auto-detects large payloads (>8KB) and routes through `JSON.stringify` → Rust, bypassing the napi object→Value copy. This fixed the heavy-payload regression: 657KB went from -7% (slower) to **+16%** (faster).
-
-**Where oxide is faster:** everything on mock — 13-74% depending on payload size. SSE streaming 60% faster (zero-copy parser). Agent loops compound: 20 tiny calls save 2.7ms, 10 heavy calls save 3.3ms.
+**Where oxide is faster:** everything on mock — 17-68% depending on payload size. SSE streaming 62% faster. Agent loops compound: 20 tiny calls save 3.3ms, 10 heavy calls save 10.5ms.
 
 **Where it doesn't matter:** single API calls to OpenAI with 200ms-2s latency. SDK overhead (0.1-3ms) is <1% of wall time. Live benchmarks show no consistent winner on single requests — API variance dominates. Real advantages are streaming TTFT, parallel fan-out, and WebSocket mode.
 

@@ -11,7 +11,7 @@ openai-oxide and [async-openai](https://github.com/64bit/async-openai) are both 
 | Derive-macro builders | Manual builder methods (no proc macros) |
 | `backoff` crate for retries | Built-in configurable retry policy |
 | No WebSocket support | Native WebSocket sessions |
-| No WASM support | First-class WASM target |
+| Partial WASM (no streaming/retry) | WASM with streaming and JSON retries |
 | No hedged requests | Built-in hedged request support |
 
 ## Pattern: async-openai to openai-oxide
