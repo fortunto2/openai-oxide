@@ -2,7 +2,7 @@
   <img src="docs/logo.png" alt="openai-oxide" width="480">
   <br>
   <p align="center">
-    Feature-complete OpenAI client for <strong>Rust</strong>, <strong>Node.js</strong>, and <strong>Python</strong>.<br>Streaming, WebSockets, structured outputs, WASM — built for agentic workflows.
+    Feature-complete OpenAI client for <strong>Rust</strong>, <strong>Node.js</strong>, and <strong>Python</strong>.<br>Streaming, WebSockets, structured outputs, WASM. Built for agentic workflows.
   </p>
   <p align="center">
     <a href="https://crates.io/crates/openai-oxide"><img src="https://img.shields.io/crates/v/openai-oxide.svg" alt="crates.io"></a>
@@ -20,18 +20,18 @@
 
 ## Why openai-oxide?
 
-What you get out of the box:
+Included:
 
-- **Structured Outputs — `parse::<T>()`:** Auto-generates JSON schema from Rust types via `schemars` and deserializes the response in one call — `parse::<MyStruct>()`. Works with Chat and Responses APIs.
+- **Structured Outputs (`parse::<T>()`):** Auto-generates JSON schema from Rust types via `schemars` and deserializes the response in one call. `parse::<MyStruct>()`. Works with Chat and Responses APIs.
 - **Stream Helpers:** High-level `ChatStreamEvent` with automatic text/tool-call accumulation, typed `ContentDelta`/`ToolCallDone` events, `get_final_completion()`, and `current_content()` snapshots. No manual chunk stitching.
 - **Streaming:** Incremental SSE parser with buffered line extraction and standard anti-buffering headers (`Accept: text/event-stream`, `Cache-Control: no-cache`).
-- **WebSocket Mode:** Persistent `wss://` connection for the [Responses API](https://platform.openai.com/docs/guides/websocket-mode). OpenAI reports [up to ~40% faster](https://platform.openai.com/docs/guides/websocket-mode) end-to-end for 20+ tool call chains — our preliminary measurements (29-44%, n=5) align with this. The only Rust client that implements this endpoint.
+- **WebSocket Mode:** Persistent `wss://` connection for the [Responses API](https://platform.openai.com/docs/guides/websocket-mode). OpenAI reports [up to ~40% faster](https://platform.openai.com/docs/guides/websocket-mode) end-to-end for 20+ tool call chains. Our preliminary measurements (29-44%, n=5) align with this. The only Rust client that implements this endpoint.
 - **Stream FC Early Parse:** Yields function calls the exact moment `arguments.done` is emitted, letting you start executing local tools before the overall response finishes.
 - **Hardware-Accelerated JSON (`simd`):** Opt-in AVX2/NEON vector instructions for faster JSON parsing of large payloads (agent histories, complex tool calls).
 - **Hedged Requests:** Send redundant requests and cancel the slower ones. Trades extra tokens for lower tail latency (technique from Google's "The Tail at Scale").
 - **Webhook Verification:** HMAC-SHA256 signature verification with timestamp tolerance check (rejects stale requests).
-- **HTTP Tuning:** gzip, TCP_NODELAY, HTTP/2 keep-alive with adaptive window, connection pooling — enabled by default.
-- **WASM Support:** Compiles to `wasm32-unknown-unknown` — streaming, JSON request retries, and early-parsing work in Cloudflare Workers and browsers. Limitations: no multipart uploads, no gzip/HTTP/2 (browser handles these), streaming retries are not yet implemented. [Live demo](https://cloudflare-worker-dioxus.nameless-sunset-8f24.workers.dev).
+- **HTTP Tuning:** gzip, TCP_NODELAY, HTTP/2 keep-alive with adaptive window, connection pooling, all enabled by default.
+- **WASM Support:** Compiles to `wasm32-unknown-unknown`. Streaming, JSON request retries, and early-parsing work in Cloudflare Workers and browsers. Limitations: no multipart uploads, no gzip/HTTP/2 (browser handles these), streaming retries are not yet implemented. [Live demo](https://cloudflare-worker-dioxus.nameless-sunset-8f24.workers.dev).
 - **Node.js & Python bindings:** Native napi-rs (Node) and PyO3 (Python) bindings as separate packages. Structured outputs via Zod (Node) and Pydantic v2 (Python). On mock benchmarks, the Node bindings show 2-3x faster SDK overhead vs official `openai` npm (p<0.001).
 
 ### WebSocket Mode for Agent Loops
@@ -58,9 +58,9 @@ Our preliminary measurements (gpt-5.4, warm connections, n=5):
 
 *Preliminary at n=5 — direction matches OpenAI's published numbers.*
 
-WebSocket mode is compatible with Zero Data Retention (ZDR) and `store: false` — context is cached in-memory only for the lifetime of the connection, with no disk persistence.
+WebSocket mode is compatible with Zero Data Retention (ZDR) and `store: false`. Context is cached in-memory only for the lifetime of the connection, with no disk persistence.
 
-Separately, **Stream FC Early Parse** (works on both HTTP and WebSocket) lets you start executing tool calls the moment arguments are complete, before the stream closes — saving additional time in function-calling loops.
+Separately, **Stream FC Early Parse** (works on both HTTP and WebSocket) lets you start executing tool calls the moment arguments are complete, before the stream closes, saving additional time in function-calling loops.
 
 ---
 
@@ -155,7 +155,7 @@ asyncio.run(main())
 
 ### Rust Ecosystem
 
-`openai-oxide` vs [`async-openai`](https://crates.io/crates/async-openai) 0.34 vs [`genai`](https://crates.io/crates/genai) 0.6-beta. All via Responses API (genai uses Chat API — it's a multi-provider adapter).
+`openai-oxide` vs [`async-openai`](https://crates.io/crates/async-openai) 0.34 vs [`genai`](https://crates.io/crates/genai) 0.6-beta. All via Responses API (genai uses Chat API, it's a multi-provider adapter).
 
 | Test | `openai-oxide` | `async-openai` | `genai` | Notes |
 | :--- | :--- | :--- | :--- | :--- |
@@ -289,7 +289,7 @@ asyncio.run(main())
 ## Advanced Features Guide
 
 ### WebSocket Mode
-Persistent connections eliminate per-request HTTP/2 framing overhead. Both HTTP and WebSocket reuse TCP+TLS connections (reqwest uses connection pooling), but WebSocket avoids HTTP/2 frame negotiation entirely. Ideal for high-speed agent loops.
+The server caches context locally for WebSocket connections, speeding up continuations. Both HTTP and WebSocket reuse TCP+TLS via connection pooling. The speed gain is server-side, not from saving HTTP/2 framing bytes.
 
 ```rust
 let client = OpenAI::from_env()?;
@@ -361,7 +361,7 @@ let tool = get_weather_tool();
 ```
 
 ### Node.js / TypeScript Native Bindings
-Native NAPI-RS bindings — requests and stream events execute in Rust and cross into the V8 event loop with minimal overhead.
+Native NAPI-RS bindings. Requests and stream events execute in Rust and cross into the V8 event loop with minimal overhead.
 
 ```javascript
 const { Client } = require("openai-oxide");
@@ -446,7 +446,7 @@ Check out our **[Cloudflare Worker Examples](https://github.com/fortunto2/openai
 
 ## OpenAI Docs → openai-oxide
 
-Use OpenAI's official guides — the same concepts apply directly. Here's how each maps to `openai-oxide`:
+OpenAI's official guides apply directly. Here's how each maps to `openai-oxide`:
 
 | OpenAI Guide | Rust | Node.js | Python |
 |---|---|---|---|
@@ -490,7 +490,7 @@ let client = OpenAI::azure(AzureConfig::new()                   // Azure OpenAI
 
 ## Structured Outputs
 
-Get typed, validated responses directly from the model — no manual JSON parsing.
+Get typed, validated responses directly from the model. No manual JSON parsing.
 
 ### Rust (feature: `structured`)
 
@@ -593,7 +593,7 @@ let event: MyEvent = wh.unwrap(payload, signature_header, timestamp_header)?;
 
 ## Built With AI
 
-This crate was built in days, not months — using [Claude Code](https://claude.ai/claude-code) with a harness engineering approach: pre-commit quality gates, OpenAPI spec as ground truth, official Python SDK as reference. Planning and code intelligence via [solo-factory](https://github.com/fortunto2/solo-factory) skills and [solograph](https://github.com/fortunto2/solograph) MCP server.
+Built in days, not months, using [Claude Code](https://claude.ai/claude-code): pre-commit quality gates, OpenAPI spec as ground truth, official Python SDK as reference. Planning and code intelligence via [solo-factory](https://github.com/fortunto2/solo-factory) skills and [solograph](https://github.com/fortunto2/solograph) MCP server.
 
 ---
 
@@ -601,8 +601,8 @@ This crate was built in days, not months — using [Claude Code](https://claude.
 
 Full OpenAI API coverage from a single codebase — Rust core with native bindings for every major platform.
 
-- [x] **Rust Core**: Fully typed, high-performance client (Chat, Responses, Realtime, Assistants).
-- [x] **WASM Support**: First-class Cloudflare Workers & browser execution.
+- [x] **Rust Core**: Typed client covering Chat, Responses, Realtime, Assistants, and 20+ endpoints.
+- [x] **WASM Support**: Cloudflare Workers and browser execution (with limitations noted above).
 - [x] **Python Bindings**: Native PyO3 integration published on PyPI.
 - [ ] **Tauri Integrations**: Dedicated examples/guides for building AI desktop apps with Tauri + WebSockets.
 - [ ] **HTMX + Axum Examples**: Showcasing how to stream LLM responses directly to HTML with zero-JS frontends.
@@ -610,11 +610,11 @@ Full OpenAI API coverage from a single codebase — Rust core with native bindin
 - [ ] **Kotlin Bindings (UniFFI)**: Native Android integration via JNI.
 - [x] **Node.js/TypeScript Bindings (NAPI-RS)**: Native Node.js bindings for the TS ecosystem.
 
-Want to help us get there? PRs and discussions are highly welcome!
+PRs welcome.
 
 ## Keeping up with OpenAI
 
-OpenAI moves fast. To ensure `openai-oxide` never falls behind, we built an automated architecture synchronization pipeline.
+OpenAI changes their API often. We built an automated sync pipeline to keep up.
 
 Types are strictly validated against the [official OpenAPI spec](https://github.com/openai/openai-openapi) and cross-checked directly with the [official Python SDK](https://github.com/openai/openai-python)'s AST.
 
