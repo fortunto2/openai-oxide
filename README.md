@@ -22,9 +22,9 @@
 
 What you get out of the box:
 
-- **Structured Outputs — `parse::<T>()`:** Auto-generates JSON schema from Rust types via `schemars` and deserializes the response in one call — `parse::<MyStruct>()`. Works with Chat and Responses APIs. Node (Zod) and Python (Pydantic v2) bindings included.
+- **Structured Outputs — `parse::<T>()`:** Auto-generates JSON schema from Rust types via `schemars` and deserializes the response in one call — `parse::<MyStruct>()`. Works with Chat and Responses APIs.
 - **Stream Helpers:** High-level `ChatStreamEvent` with automatic text/tool-call accumulation, typed `ContentDelta`/`ToolCallDone` events, `get_final_completion()`, and `current_content()` snapshots. No manual chunk stitching.
-- **Streaming:** Zero-copy SSE parser. In Node.js benchmarks (napi-rs bindings vs official `openai` npm), 2.5x faster per-chunk processing (312µs vs 783µs for 114 chunks, p<0.001 on mock server).
+- **Streaming:** Zero-copy SSE parser with standard anti-buffering headers (`Accept: text/event-stream`, `Cache-Control: no-cache`).
 - **WebSocket Mode:** Persistent `wss://` connection for the [Responses API](https://platform.openai.com/docs/guides/websocket-mode). OpenAI reports [up to ~40% faster](https://platform.openai.com/docs/guides/websocket-mode) end-to-end for 20+ tool call chains — our preliminary measurements (29-44%, n=5) align with this. The only Rust client that implements this endpoint.
 - **Stream FC Early Parse:** Yields function calls the exact moment `arguments.done` is emitted, letting you start executing local tools before the overall response finishes.
 - **Hardware-Accelerated JSON (`simd`):** Opt-in AVX2/NEON vector instructions for faster JSON parsing of large payloads (agent histories, complex tool calls).
@@ -32,6 +32,7 @@ What you get out of the box:
 - **Webhook Verification:** HMAC-SHA256 signature verification with timestamp tolerance check (rejects stale requests).
 - **HTTP Tuning:** gzip, TCP_NODELAY, HTTP/2 keep-alive with adaptive window, connection pooling — enabled by default.
 - **WASM First-Class:** Compiles to `wasm32-unknown-unknown` with full feature support — streaming, retries, early-parsing all work in Cloudflare Workers and browsers. Other Rust clients either don't support WASM or drop streaming/retry. [Live demo](https://cloudflare-worker-dioxus.nameless-sunset-8f24.workers.dev).
+- **Node.js & Python bindings:** Native napi-rs (Node) and PyO3 (Python) bindings as separate packages. Structured outputs via Zod (Node) and Pydantic v2 (Python). On mock benchmarks, the Node bindings show 2-3x faster SDK overhead vs official `openai` npm (p<0.001).
 
 ### WebSocket Mode for Agent Loops
 
