@@ -5,29 +5,29 @@ tags: rust, openai, ai, webassembly
 canonical_url: https://github.com/fortunto2/openai-oxide
 ---
 
-I needed a fast OpenAI client for a realtime voice agent project. The official Python SDK is great, but I needed Rust — for WebSocket audio streaming, edge deployment to Cloudflare Workers, and sub-second latency in agentic loops with dozens of tool calls.
+I needed a fast OpenAI client for a realtime voice agent project. The official Python SDK is great, but I needed Rust for WebSocket audio streaming, edge deployment to Cloudflare Workers, and sub-second latency in agentic loops.
 
-So I ported it. 500+ commits, 5 days for the initial version, 100+ API methods. The first day — 120 commits — was mostly Claude Code translating types from Python to Rust while I set up pre-commit hooks, WASM checks, and benchmarks. The rest was architecture decisions, performance tuning, Node/Python bindings, and a standalone types crate with 1100+ auto-synced types.
+So I ported it. 500+ commits, 5 days for the initial version, 100+ API methods. Day one (120 commits) was mostly Claude Code translating types from Python to Rust while I set up pre-commit hooks, WASM checks, and benchmarks. The rest was architecture decisions, performance tuning, Node/Python bindings, and a standalone types crate with 1100+ auto-synced types.
 
-The result: [openai-oxide](https://github.com/fortunto2/openai-oxide) — a Rust client that matches the official Python SDK's API surface, with features like persistent WebSockets, structured outputs, and WASM deployment that aren't available in other Rust clients.
+The result: [openai-oxide](https://github.com/fortunto2/openai-oxide), a Rust client that matches the official Python SDK's API surface, with persistent WebSockets, structured outputs, and WASM deployment that aren't available in other Rust clients.
 
 ## Why Not Just Use What Exists?
 
-My goal was a Rust client with complete 1:1 parity with the official Python SDK — all endpoints, plus Rust-specific features like WASM deployment, persistent WebSockets for the Responses API, and structured outputs with auto-generated schemas.
+My goal was a Rust client with complete 1:1 parity with the official Python SDK. All endpoints, plus WASM deployment, persistent WebSockets for the Responses API, and structured outputs with auto-generated schemas.
 
-The types and HTTP layer were ported from the Python SDK. But OpenAI also has a [WebSocket mode](https://platform.openai.com/docs/guides/websocket-mode) for the Responses API — a server-side feature at `wss://api.openai.com/v1/responses` where you keep one persistent connection open for multi-turn agent loops. The endpoint exists and is documented, but the official Python and Node SDKs haven't added a convenience wrapper for it yet (their WebSocket support covers only the Realtime API for audio/multimodal). We implemented the client for this endpoint directly from the OpenAI docs.
+The types and HTTP layer were ported from the Python SDK. But OpenAI also has a [WebSocket mode](https://platform.openai.com/docs/guides/websocket-mode) for the Responses API, a server-side feature at `wss://api.openai.com/v1/responses` where you keep one persistent connection open for multi-turn agent loops. The endpoint exists and is documented, but the official Python and Node SDKs haven't added a convenience wrapper for it yet (their WebSocket support covers only the Realtime API for audio/multimodal). We implemented the client for this endpoint directly from the OpenAI docs.
 
-In the Rust ecosystem, [async-openai](https://crates.io/crates/async-openai) is the closest — good type coverage and active maintenance. I actually found it after I'd mostly finished the initial version. But at the time of building, no single Rust crate offered WebSocket sessions for the Responses API, structured outputs (`parse::<T>()` with auto-generated JSON schema), stream helpers with typed events, and WASM compilation — together in one package. That's the gap we filled.
+In the Rust ecosystem, [async-openai](https://crates.io/crates/async-openai) is the closest. Good type coverage and active maintenance. I actually found it after I'd mostly finished the initial version. But at the time of building, no single Rust crate offered WebSocket sessions for the Responses API, `parse::<T>()` with auto-generated JSON schema, and WASM compilation together. That's the gap we filled.
 
 ## 1100+ Types, Auto-Synced from Python SDK
 
-One of the biggest challenges was type coverage. OpenAI's API surface is enormous — 24 domains, hundreds of nested types that change regularly. We solved this by building [openai-types](https://crates.io/crates/openai-types), a standalone crate auto-generated from the Python SDK via a custom `py2rust.py` tool.
+Type coverage was the hardest part. OpenAI's API surface spans 24 domains with hundreds of nested types that change regularly. We solved this by building [openai-types](https://crates.io/crates/openai-types), a standalone crate auto-generated from the Python SDK via a custom `py2rust.py` tool.
 
 ```bash
 make sync-types  # re-generates from ~/openai-python/src/openai/types/
 ```
 
-The mechanism: `_gen.rs` files are machine-owned (overwritten on every sync), while manual `.rs` files contain hand-crafted overrides (enums, builders, Option fields) that are never touched. This gives us Python SDK parity on types without manual maintenance — when OpenAI adds a new field, `py2rust` picks it up automatically.
+The mechanism: `_gen.rs` files are machine-owned (overwritten on every sync), while manual `.rs` files contain hand-crafted overrides (enums, builders, Option fields) that are never touched. This gives us Python SDK parity on types without manual maintenance. When OpenAI adds a new field, `py2rust` picks it up automatically.
 
 ```rust
 use openai_types::chat::ChatCompletion;
@@ -35,11 +35,11 @@ use openai_types::responses::{Response, ResponseCreateRequest};
 use openai_types::shared::ReasoningEffort;
 ```
 
-The types crate has zero runtime dependencies beyond `serde` and can be used independently — useful if you're building your own HTTP layer or working with OpenAI's API through a different transport.
+The types crate has zero runtime dependencies beyond `serde` and can be used on its own if you're building your own HTTP layer.
 
 ## Persistent WebSockets
 
-Keep one `wss://` connection open for the entire agent cycle. Both HTTP and WebSocket reuse TCP+TLS connections (reqwest uses connection pooling), but the server uses connection-local caching for WebSocket — keeping the previous response state in memory for faster continuations.
+Keep one `wss://` connection open for the entire agent cycle. Both HTTP and WebSocket reuse TCP+TLS connections (reqwest pools them), but the server caches context locally for WebSocket connections, keeping the previous response state in memory for faster continuations.
 
 ```rust
 let mut session = client.ws_session().await?;
@@ -93,7 +93,7 @@ let result = client.chat().completions()
 println!("{}", result.parsed.unwrap().answer);
 ```
 
-One derive, both directions — the same `#[derive(JsonSchema)]` generates response schemas and tool parameter definitions. No manual JSON, no drift between types and schemas.
+One derive, both directions. The same `#[derive(JsonSchema)]` generates response schemas and tool parameter definitions. No manual JSON, no drift between types and schemas.
 
 ## SSE Streaming
 
@@ -106,11 +106,11 @@ Cache-Control: no-cache
 
 Without these, Cloudflare and nginx buffer streaming responses, adding 50-200ms to TTFT.
 
-On mock benchmarks (localhost, no network), SSE processing via our Node napi-rs bindings is 2.6x faster than the official JS SDK: 283µs vs 742µs for 114 real agent chunks (p<0.001). On live API calls, the difference is masked by 200ms+ network latency — but it compounds in agent loops with many streaming rounds.
+On mock benchmarks (localhost, no network), SSE processing via our Node napi-rs bindings is 2.6x faster than the official JS SDK: 283µs vs 742µs for 114 real agent chunks (p<0.001). On live API calls, the difference is masked by 200ms+ network latency, but it compounds in agent loops with many streaming rounds.
 
 ## Stream Helpers
 
-Raw SSE chunks require manual stitching — tracking content deltas, assembling tool call arguments by index, detecting completion. We provide typed events:
+Raw SSE chunks require manual stitching: tracking content deltas, assembling tool call arguments by index, detecting completion. We provide typed events:
 
 ```rust
 let mut stream = client.chat().completions()
@@ -145,7 +145,7 @@ Streaming, structured outputs, and JSON request retries work in WASM. Limitation
 
 ## HTTP Tuning Defaults
 
-These are standard reqwest builder options — enabled by default in openai-oxide:
+These are standard reqwest builder options, enabled by default in openai-oxide:
 
 | Optimization | What it does |
 |:---|:---|
@@ -155,11 +155,11 @@ These are standard reqwest builder options — enabled by default in openai-oxid
 | HTTP/2 adaptive window | Auto-tunes flow control |
 | Connection pool (4/host) | Better parallel throughput |
 
-Will these make your API calls faster? Probably not noticeably — server-side latency dominates. But they prevent edge cases (stale connections, buffering delays) that bite you in production. [Source](https://github.com/fortunto2/openai-oxide/blob/main/src/client.rs#L85).
+Will these make your API calls faster? Probably not. Server-side latency dominates. But they prevent edge cases (stale connections, buffering delays) that bite you in production. [Source](https://github.com/fortunto2/openai-oxide/blob/main/src/client.rs#L85).
 
 ## Benchmarks — What's Real and What's Noise
 
-We spent a lot of time on benchmarks and learned an important lesson: **on single API calls, SDK choice doesn't matter for speed.** Network latency (200ms-2s) is 100-1000x larger than SDK overhead (0.1-5ms). At n=5 with live API calls, differences under 15% are within API jitter and not statistically significant.
+After many rounds of benchmarking: **on single API calls, SDK choice doesn't matter for speed.** Network latency (200ms-2s) is 100-1000x larger than SDK overhead (0.1-5ms). At n=5 with live API calls, differences under 15% are within API jitter and not statistically significant.
 
 ### Live API (gpt-5.4) — honest results
 
@@ -193,7 +193,7 @@ On single HTTP requests, oxide is not faster than async-openai or genai. All thr
 
 ### SDK overhead — where oxide actually shines
 
-The interesting story is pure SDK overhead, isolated with a localhost mock server. No network, no model inference — just request building, JSON serialization, response parsing, SSE chunk processing. Fixtures from a real coding agent session (320 messages, 42 tools, 718KB request body).
+The interesting part is pure SDK overhead, isolated with a localhost mock server. No network, no model inference. Just request building, JSON serialization, response parsing, SSE chunk processing. Fixtures from a real coding agent session (320 messages, 42 tools, 718KB request body).
 
 | Test | openai-oxide | official JS SDK | oxide faster | sig |
 |:---|:---|:---|:---|:---|
@@ -204,13 +204,13 @@ The interesting story is pure SDK overhead, isolated with a localhost mock serve
 
 *50 iterations, 20 warmup, Welch's t-test — all p<0.001.*
 
-**What this means:** if your bottleneck is API latency (most use cases), SDK choice doesn't matter for speed. If you're building high-throughput pipelines, local proxies, or processing many requests with fast backends — oxide saves real time. The value proposition for most users is **API completeness** (WebSocket, structured outputs, WASM, stream helpers) and **type safety** (1100+ types), not raw speed.
+**What this means:** if your bottleneck is API latency (most use cases), SDK choice doesn't affect speed. If you're running high-throughput pipelines or local model proxies, oxide saves real time. But for most users the point is **API completeness** (WebSocket, structured outputs, WASM, stream helpers) and **type safety** (1100+ types), not raw speed.
 
 Full reproducible benchmarks: `node --expose-gc benchmarks/bench_science.js`
 
 ## Drop-in Replacement
 
-For existing codebases — change one import:
+For existing codebases, change one import:
 
 **Python:**
 ```python
@@ -233,14 +233,14 @@ const client = new OpenAI();
 
 ## How This Was Built
 
-This library started as a need for a fast OpenAI client for my realtime TTS voice agent project. The official Python SDK worked, but I needed Rust-level performance for WebSocket audio streaming and edge deployment.
+This started as a need for a fast OpenAI client for a realtime TTS voice agent project. The Python SDK worked, but I needed Rust for WebSocket audio streaming and edge deployment.
 
-The entire crate — 100+ API methods, typed streaming, structured outputs, WASM support, Node/Python bindings — was built in a few days using a harness engineering approach with [Claude Code](https://claude.ai/claude-code) and my own toolkit:
+The whole thing (100+ API methods, typed streaming, structured outputs, WASM, Node/Python bindings) was built in a few days using [Claude Code](https://claude.ai/claude-code) and my own toolkit:
 
 1. **Setup**: configured pre-commit hooks (tests, clippy, WASM check, secret scan), OpenAPI spec as ground truth, Python SDK source as reference
-2. **Planning**: used [solo-factory](https://github.com/fortunto2/solo-factory) skills (`/plan`, `/build`) with [solograph](https://github.com/fortunto2/solograph) for code intelligence — MCP server that indexes the codebase and provides semantic search across projects
-3. **Building**: initial scaffold via Ralph Loop (autonomous agent loop), then manual refinement — architecture decisions, API design, performance tuning
-4. **Type sync**: built `py2rust.py` to auto-convert Python Pydantic models to Rust serde structs — 1100+ types across 24 domains, with a two-pass resolver for cross-file references
+2. **Planning**: [solo-factory](https://github.com/fortunto2/solo-factory) skills (`/plan`, `/build`) with [solograph](https://github.com/fortunto2/solograph) for code intelligence (MCP server that indexes the codebase and provides semantic search)
+3. **Building**: initial scaffold via Ralph Loop (autonomous agent loop), then manual refinement. Architecture decisions, API design, performance tuning.
+4. **Type sync**: built `py2rust.py` to auto-convert Python Pydantic models to Rust serde structs. 1100+ types across 24 domains, two-pass resolver for cross-file references.
 5. **Quality gates**: every commit runs tests + clippy + WASM compilation check + doc coverage. Pre-commit catches regressions before they land
 
 The key insight: treat the Python SDK as a spec, not as code to port line-by-line. The agent handles mechanical translation (types, error mapping, serialization); you focus on Rust-specific wins (tagged enums, feature gates, WASM cfg).
