@@ -395,9 +395,15 @@ At the moment, the Node bindings expose Chat Completions, Responses, streaming h
 | **Fine-tuning** | `client.fine_tuning().jobs().create()` / `list()` / `cancel()` / `list_events()` |
 | **Moderations** | `client.moderations().create()` |
 | **Batches** | `client.batches().create()` / `list()` / `retrieve()` / `cancel()` |
-| **Uploads** | `client.uploads().create()` / `cancel()` / `complete()` |
+| **Uploads** | `client.uploads().create()` / `add_part()` / `cancel()` / `complete()` |
+| **Conversations** | `client.conversations()` CRUD + items CRUD |
+| **Videos (Sora)** | `client.videos()` create / list / retrieve / delete / content / edit / extend / remix |
 | **Pagination** | `list_page()` / `list_auto()` — cursor-based, async stream |
-| **Assistants** (beta)| Full CRUD + threads + runs + vector stores |
+| **Webhooks** | `Webhooks::new(secret).verify()` / `.unwrap()` (feature: `webhooks`) |
+| **Assistants** (beta) | Full CRUD + `list_page()` / `list_auto()` |
+| **Threads** (beta) | `client.beta().threads()` CRUD + messages `list_page()` / `list_auto()` |
+| **Runs** (beta) | `client.beta().runs(thread_id)` CRUD + steps + `submit_tool_outputs` |
+| **Vector Stores** (beta) | `client.beta().vector_stores()` CRUD + `search()` + `list_page()` / `list_auto()` |
 | **Realtime** (beta) | `client.beta().realtime().sessions().create()` |
 
 ---
@@ -427,9 +433,12 @@ openai-oxide = { version = "0.11", default-features = false, features = ["respon
 - `beta` — Assistants, Threads, Vector Stores, Realtime API
 
 ### Ecosystem Features:
+- `structured` — Enables `parse::<T>()` with auto-generated JSON schema via `schemars`
+- `webhooks` — Enables webhook signature verification (HMAC-SHA256)
+- `macros` — Enables `#[openai_tool]` proc macro for tool schema generation
 - `websocket` — Enables Realtime API over WebSockets (Native: `tokio-tungstenite`)
 - `websocket-wasm` — Enables Realtime API over WebSockets (WASM: `gloo-net` / `web-sys`)
-- `simd` — Enables `simd-json` for ultra-fast JSON deserialization (requires nightly Rust)
+- `simd` — Enables `simd-json` for hardware-accelerated JSON deserialization (AVX2/NEON, stable Rust)
 
 Check out our **[Cloudflare Worker Examples](https://github.com/fortunto2/openai-oxide/tree/main/examples/cloudflare-worker-dioxus)** showcasing a Full-Stack Rust app with a Dioxus frontend and a Cloudflare Worker Durable Object backend holding a WebSocket connection to OpenAI.
 
