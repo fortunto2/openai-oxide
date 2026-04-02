@@ -24,12 +24,12 @@ What you get out of the box:
 
 - **Structured Outputs — `parse::<T>()`:** Auto-generates JSON schema from Rust types via `schemars` and deserializes the response in one call — `parse::<MyStruct>()`. Works with Chat and Responses APIs. Node (Zod) and Python (Pydantic v2) bindings included.
 - **Stream Helpers:** High-level `ChatStreamEvent` with automatic text/tool-call accumulation, typed `ContentDelta`/`ToolCallDone` events, `get_final_completion()`, and `current_content()` snapshots. No manual chunk stitching.
-- **Streaming:** SSE parser with anti-buffering headers. On mock benchmarks, 2.5x faster per-chunk processing vs official JS SDK (312µs vs 783µs for 114 chunks, p<0.001).
+- **Streaming:** Zero-copy SSE parser. In Node.js benchmarks (napi-rs bindings vs official `openai` npm), 2.5x faster per-chunk processing (312µs vs 783µs for 114 chunks, p<0.001 on mock server).
 - **WebSocket Mode:** Persistent `wss://` connection for the [Responses API](https://platform.openai.com/docs/guides/websocket-mode). OpenAI reports [up to ~40% faster](https://platform.openai.com/docs/guides/websocket-mode) end-to-end for 20+ tool call chains — our preliminary measurements (29-44%, n=5) align with this. The only Rust client that implements this endpoint.
 - **Stream FC Early Parse:** Yields function calls the exact moment `arguments.done` is emitted, letting you start executing local tools before the overall response finishes.
 - **Hardware-Accelerated JSON (`simd`):** Opt-in AVX2/NEON vector instructions for faster JSON parsing of large payloads (agent histories, complex tool calls).
 - **Hedged Requests:** Send redundant requests and cancel the slower ones. Trades extra tokens for lower tail latency (technique from Google's "The Tail at Scale").
-- **Webhook Verification:** HMAC-SHA256 signature verification with timestamp replay protection — production-ready webhook handling out of the box.
+- **Webhook Verification:** HMAC-SHA256 signature verification with timestamp tolerance check (rejects stale requests).
 - **HTTP Tuning:** gzip, TCP_NODELAY, HTTP/2 keep-alive with adaptive window, connection pooling — enabled by default.
 - **WASM First-Class:** Compiles to `wasm32-unknown-unknown` with full feature support — streaming, retries, early-parsing all work in Cloudflare Workers and browsers. Other Rust clients either don't support WASM or drop streaming/retry. [Live demo](https://cloudflare-worker-dioxus.nameless-sunset-8f24.workers.dev).
 
@@ -56,6 +56,8 @@ Our preliminary measurements (gpt-5.4, warm connections, n=5):
 - **Rapid-fire (5 calls):** 3227ms vs 5807ms (44% faster)
 
 *Preliminary at n=5 — direction matches OpenAI's published numbers.*
+
+WebSocket mode is compatible with Zero Data Retention (ZDR) and `store: false` — context is cached in-memory only for the lifetime of the connection, with no disk persistence.
 
 Separately, **Stream FC Early Parse** (works on both HTTP and WebSocket) lets you start executing tool calls the moment arguments are complete, before the stream closes — saving additional time in function-calling loops.
 
