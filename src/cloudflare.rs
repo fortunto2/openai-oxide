@@ -16,6 +16,8 @@ use crate::client::OpenAI;
 use crate::config::ClientConfig;
 use crate::error::OpenAIError;
 
+const SESSION_AFFINITY_HEADER: &str = "x-session-affinity";
+
 /// Configuration builder for Cloudflare Workers AI.
 ///
 /// Cloudflare Workers AI provides an OpenAI-compatible API at
@@ -65,12 +67,6 @@ pub struct CloudflareConfig {
     /// Custom gateway ID for AI Gateway (optional).
     /// Changes base URL to use AI Gateway endpoint.
     pub gateway_id: Option<String>,
-
-    /// Timeout in seconds.
-    pub timeout_secs: Option<u64>,
-
-    /// Max retries.
-    pub max_retries: Option<u32>,
 }
 
 impl CloudflareConfig {
@@ -86,8 +82,6 @@ impl CloudflareConfig {
             api_token: api_token.into(),
             session_affinity: None,
             gateway_id: None,
-            timeout_secs: None,
-            max_retries: None,
         }
     }
 
@@ -114,20 +108,6 @@ impl CloudflareConfig {
         self
     }
 
-    /// Set timeout in seconds.
-    #[must_use]
-    pub fn timeout_secs(mut self, secs: u64) -> Self {
-        self.timeout_secs = Some(secs);
-        self
-    }
-
-    /// Set max retries.
-    #[must_use]
-    pub fn max_retries(mut self, retries: u32) -> Self {
-        self.max_retries = Some(retries);
-        self
-    }
-
     /// Build an `OpenAI` client from this Cloudflare configuration.
     pub fn build(self) -> Result<OpenAI, OpenAIError> {
         let base_url = match &self.gateway_id {
@@ -141,28 +121,17 @@ impl CloudflareConfig {
             ),
         };
 
-        let mut headers = HeaderMap::new();
+        let mut config = ClientConfig::new(&self.api_token).base_url(base_url);
+
         if let Some(ref session_key) = self.session_affinity {
+            let mut headers = HeaderMap::with_capacity(1);
             headers.insert(
-                "x-session-affinity",
+                SESSION_AFFINITY_HEADER,
                 HeaderValue::from_str(session_key).map_err(|e| {
                     OpenAIError::InvalidArgument(format!("invalid session affinity key: {e}"))
                 })?,
             );
-        }
-
-        let mut config = ClientConfig::new(&self.api_token).base_url(base_url);
-
-        if !headers.is_empty() {
             config = config.default_headers(headers);
-        }
-
-        if let Some(t) = self.timeout_secs {
-            config = config.timeout_secs(t);
-        }
-
-        if let Some(r) = self.max_retries {
-            config = config.max_retries(r);
         }
 
         Ok(OpenAI::with_config(config))
@@ -237,7 +206,7 @@ mod tests {
             .unwrap();
 
         let headers = client.config.default_headers().unwrap();
-        assert_eq!(headers.get("x-session-affinity").unwrap(), "ses_12345");
+        assert_eq!(headers.get(SESSION_AFFINITY_HEADER).unwrap(), "ses_12345");
     }
 
     #[test]
@@ -254,12 +223,25 @@ mod tests {
         assert_eq!(client.config.api_key(), "cf-token");
     }
 
+    /// E2E test: build through CloudflareConfig, verify headers reach the server.
+    ///
+    /// We build via CloudflareConfig to get the correct default_headers, then
+    /// reconstruct with the mock server URL (CloudflareConfig hardcodes the
+    /// Cloudflare domain, so we extract the headers it produced).
     #[tokio::test]
-    async fn test_cloudflare_sends_session_affinity() {
+    async fn test_cloudflare_e2e_session_affinity() {
+        // 1. Build through CloudflareConfig to get the real headers
+        let cf_client = CloudflareConfig::new("test-account", "cf-token")
+            .session_affinity("agent-42")
+            .build()
+            .unwrap();
+        let built_headers = cf_client.config.default_headers().unwrap().clone();
+
+        // 2. Set up mock server
         let mut server = mockito::Server::new_async().await;
         let mock = server
             .mock("POST", "/ai/v1/chat/completions")
-            .match_header("x-session-affinity", "agent-42")
+            .match_header(SESSION_AFFINITY_HEADER, "agent-42")
             .match_header("authorization", "Bearer cf-token")
             .with_status(200)
             .with_header("content-type", "application/json")
@@ -287,17 +269,10 @@ mod tests {
             .create_async()
             .await;
 
-        // Build client pointing at mock server
-        let headers = {
-            let mut h = HeaderMap::new();
-            h.insert("x-session-affinity", HeaderValue::from_static("agent-42"));
-            h
-        };
-
+        // 3. Rebuild with mock URL but same headers from CloudflareConfig
         let config = ClientConfig::new("cf-token")
             .base_url(format!("{}/ai/v1", server.url()))
-            .default_headers(headers);
-
+            .default_headers(built_headers);
         let client = OpenAI::with_config(config);
 
         use crate::types::chat::{ChatCompletionMessageParam, ChatCompletionRequest, UserContent};
