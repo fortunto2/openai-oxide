@@ -40,6 +40,7 @@ extern crate reqwest012 as reqwest;
 
 pub mod azure;
 pub mod client;
+pub mod cloudflare;
 pub mod config;
 pub mod error;
 #[cfg(feature = "responses")]
@@ -85,6 +86,7 @@ pub(crate) fn ensure_tls_provider() {
 
 pub use azure::AzureConfig;
 pub use client::OpenAI;
+pub use cloudflare::CloudflareConfig;
 pub use config::ClientConfig;
 pub use error::OpenAIError;
 #[cfg(feature = "responses")]

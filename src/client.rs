@@ -157,6 +157,21 @@ impl OpenAI {
         config.build()
     }
 
+    /// Create a client for Cloudflare Workers AI.
+    ///
+    /// Uses the OpenAI-compatible endpoint with optional session affinity
+    /// for prefix caching.
+    ///
+    /// ```ignore
+    /// let client = OpenAI::cloudflare(
+    ///     CloudflareConfig::new("account-id", "cf-api-token")
+    ///         .session_affinity("agent-session-123")
+    /// )?;
+    /// ```
+    pub fn cloudflare(config: crate::cloudflare::CloudflareConfig) -> Result<Self, OpenAIError> {
+        config.build()
+    }
+
     /// Access the Batches resource.
     #[cfg(feature = "batches")]
     pub fn batches(&self) -> Batches<'_> {
