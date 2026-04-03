@@ -47,6 +47,7 @@ pub mod error;
 pub mod hedged;
 #[cfg(not(target_arch = "wasm32"))]
 pub mod middleware;
+pub mod openrouter;
 pub mod pagination;
 #[cfg(feature = "structured")]
 pub mod parsing;
