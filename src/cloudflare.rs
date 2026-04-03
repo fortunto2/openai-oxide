@@ -104,7 +104,7 @@ pub fn gateway_config(
     api_token: &str,
     opts: &GatewayOptions,
 ) -> Result<ClientConfig, OpenAIError> {
-    let base_url = format!("https://gateway.ai.cloudflare.com/v1/{account_id}/{gateway_id}/openai");
+    let base_url = format!("https://gateway.ai.cloudflare.com/v1/{account_id}/{gateway_id}/compat");
 
     let mut headers = HeaderMap::new();
 
@@ -157,7 +157,7 @@ mod tests {
             gateway_config("abc123", "my-gw", "cf-token", &GatewayOptions::default()).unwrap();
         assert_eq!(
             cfg.base_url,
-            "https://gateway.ai.cloudflare.com/v1/abc123/my-gw/openai"
+            "https://gateway.ai.cloudflare.com/v1/abc123/my-gw/compat"
         );
     }
 
