@@ -135,9 +135,12 @@ pub struct ChatCompletionRequest {
     pub prompt_cache_key: Option<String>,
 
     /// OpenRouter/Anthropic prompt caching control.
-    /// Set to `{"type": "ephemeral"}` for 5-min cache, `{"type": "ephemeral", "ttl": "1h"}` for 1-hour.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub cache_control: Option<serde_json::Value>,
+
+    /// OpenRouter provider routing preferences.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub provider: Option<serde_json::Value>,
 
     /// DEPRECATED: Maximum number of tokens to generate. Use max_completion_tokens instead.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -187,6 +190,7 @@ impl ChatCompletionRequest {
             web_search_options: None,
             prompt_cache_key: None,
             cache_control: None,
+            provider: None,
             max_tokens: None,
             functions: None,
             function_call: None,
