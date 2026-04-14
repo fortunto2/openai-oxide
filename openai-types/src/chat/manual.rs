@@ -142,6 +142,10 @@ pub struct ChatCompletionRequest {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub provider: Option<serde_json::Value>,
 
+    /// OpenRouter session ID for sticky routing (cache affinity).
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub session_id: Option<String>,
+
     /// DEPRECATED: Maximum number of tokens to generate. Use max_completion_tokens instead.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub max_tokens: Option<i64>,
@@ -191,6 +195,7 @@ impl ChatCompletionRequest {
             prompt_cache_key: None,
             cache_control: None,
             provider: None,
+            session_id: None,
             max_tokens: None,
             functions: None,
             function_call: None,
@@ -662,6 +667,9 @@ pub struct ChatCompletionResponse {
     pub system_fingerprint: Option<String>,
     #[serde(default)]
     pub usage: Option<Usage>,
+    /// Session ID echoed back (OpenRouter sticky routing).
+    #[serde(default)]
+    pub session_id: Option<String>,
 }
 
 /// A single choice in a chat completion response.
@@ -759,6 +767,9 @@ pub struct ChatCompletionChunk {
     pub system_fingerprint: Option<String>,
     #[serde(default)]
     pub usage: Option<Usage>,
+    /// Session ID echoed back (OpenRouter sticky routing).
+    #[serde(default)]
+    pub session_id: Option<String>,
 }
 
 /// A choice within a streaming chunk.

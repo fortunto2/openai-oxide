@@ -294,6 +294,7 @@ impl StreamState {
             service_tier: self.service_tier,
             system_fingerprint: self.system_fingerprint,
             usage: self.usage,
+            session_id: None,
         }
     }
 }
@@ -432,6 +433,7 @@ mod tests {
             service_tier: None,
             system_fingerprint: None,
             usage: None,
+            session_id: None,
         }
     }
 
@@ -510,6 +512,7 @@ mod tests {
             service_tier: None,
             system_fingerprint: None,
             usage: None,
+            session_id: None,
         };
 
         let events = state.handle_chunk(&chunk1);
@@ -545,6 +548,7 @@ mod tests {
             service_tier: None,
             system_fingerprint: None,
             usage: None,
+            session_id: None,
         };
 
         state.handle_chunk(&chunk2);

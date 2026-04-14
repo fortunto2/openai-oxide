@@ -442,6 +442,7 @@ mod tests {
             service_tier: None,
             system_fingerprint: None,
             usage: None,
+            session_id: None,
         };
 
         let parsed: ParsedChatCompletion<MathResponse> = parse_completion(response).unwrap();
@@ -473,6 +474,7 @@ mod tests {
             service_tier: None,
             system_fingerprint: None,
             usage: None,
+            session_id: None,
         };
 
         let result = parse_completion::<MathResponse>(response);
@@ -502,6 +504,7 @@ mod tests {
             service_tier: None,
             system_fingerprint: None,
             usage: None,
+            session_id: None,
         };
 
         let parsed: ParsedChatCompletion<MathResponse> = parse_completion(response).unwrap();
