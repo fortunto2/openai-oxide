@@ -588,8 +588,7 @@ pub struct DataSourceCreateEvalResponsesRunDataSourceInputMessagesTemplateTempla
 /// A text output from the model.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
-pub struct DataSourceCreateEvalResponsesRunDataSourceInputMessagesTemplateTemplateEvalItemContentOutputText
-{
+pub struct DataSourceCreateEvalResponsesRunDataSourceInputMessagesTemplateTemplateEvalItemContentOutputText {
     /// The text output from the model.
     pub text: String,
     /// The type of the output text. Always `output_text`.
@@ -600,8 +599,7 @@ pub struct DataSourceCreateEvalResponsesRunDataSourceInputMessagesTemplateTempla
 /// An image input block used within EvalItem content arrays.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
-pub struct DataSourceCreateEvalResponsesRunDataSourceInputMessagesTemplateTemplateEvalItemContentInputImage
-{
+pub struct DataSourceCreateEvalResponsesRunDataSourceInputMessagesTemplateTemplateEvalItemContentInputImage {
     /// The URL of the image input.
     pub image_url: String,
     /// The type of the image input. Always `input_image`.
@@ -612,8 +610,7 @@ pub struct DataSourceCreateEvalResponsesRunDataSourceInputMessagesTemplateTempla
     pub detail: Option<String>,
 }
 
-pub type DataSourceCreateEvalResponsesRunDataSourceInputMessagesTemplateTemplateEvalItemContent =
-    serde_json::Value;
+pub type DataSourceCreateEvalResponsesRunDataSourceInputMessagesTemplateTemplateEvalItemContent = serde_json::Value;
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
@@ -634,8 +631,7 @@ pub enum DataSourceCreateEvalResponsesRunDataSourceInputMessagesTemplateTemplate
 #[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
 pub struct DataSourceCreateEvalResponsesRunDataSourceInputMessagesTemplateTemplateEvalItem {
     /// Inputs to the model - can contain template strings.
-    pub content:
-        DataSourceCreateEvalResponsesRunDataSourceInputMessagesTemplateTemplateEvalItemContent,
+    pub content: DataSourceCreateEvalResponsesRunDataSourceInputMessagesTemplateTemplateEvalItemContent,
     /// The role of the message input.
     pub role: DataSourceCreateEvalResponsesRunDataSourceInputMessagesTemplateTemplateEvalItemRole,
     /// The type of the message input. Always `message`.
@@ -643,8 +639,7 @@ pub struct DataSourceCreateEvalResponsesRunDataSourceInputMessagesTemplateTempla
     pub type_: Option<String>,
 }
 
-pub type DataSourceCreateEvalResponsesRunDataSourceInputMessagesTemplateTemplate =
-    serde_json::Value;
+pub type DataSourceCreateEvalResponsesRunDataSourceInputMessagesTemplateTemplate = serde_json::Value;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]

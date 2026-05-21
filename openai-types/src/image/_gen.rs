@@ -3,8 +3,8 @@
 // Domain: image
 #![allow(unused_imports)]
 
-use super::*;
 use serde::{Deserialize, Serialize};
+use super::*;
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]

@@ -7,6 +7,7 @@ pub mod beta;
 #[cfg(feature = "chat")]
 pub mod chat;
 pub mod conversations;
+pub mod realtime;
 #[cfg(feature = "embeddings")]
 pub mod embeddings;
 #[cfg(feature = "files")]

@@ -3,8 +3,8 @@
 // Domain: moderation
 #![allow(unused_imports)]
 
-use super::*;
 use serde::{Deserialize, Serialize};
+use super::*;
 
 /// A list of the categories along with the input type(s) that the score applies to.
 #[derive(Debug, Clone, Serialize, Deserialize)]

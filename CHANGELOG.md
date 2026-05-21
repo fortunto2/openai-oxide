@@ -6,6 +6,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [0.15.0]
+
+### Added
+- **GA Realtime resource** — `client.realtime().client_secrets().create(&params)` issues ephemeral tokens (`ek_…`) for Realtime / transcription sessions via `POST /v1/realtime/client_secrets`.
+- `ClientSecretCreateParams`, `ClientSecretCreateResponse`, `ExpiresAfter`, and 187 other realtime types re-synced from openai-python (incl. `RealtimeSessionCreateRequest` + `RealtimeTranscriptionSessionCreateRequest` with the new nested `session.audio.input.{format,transcription,noise_reduction,turn_detection}` shape).
+
+### Context
+OpenAI retired the Realtime Beta endpoints (`/v1/realtime/sessions`, `/v1/realtime/transcription_sessions`) on 2026-05-21 with `beta_api_shape_disabled`. Callers on `client.beta().realtime().*` must switch to `client.realtime().client_secrets()`; the beta path is kept compiling for compatibility but the server now returns 400.
+
+### Bumps
+- `openai-types` 0.1.2 → 0.1.3 (new realtime types, no breaking changes elsewhere).
+
+---
+
 ## [0.10.0]
 
 ### Added

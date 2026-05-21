@@ -239,6 +239,15 @@ impl OpenAI {
         crate::resources::videos::Videos::new(self)
     }
 
+    /// Access the GA Realtime endpoints (post-2026 client_secrets API).
+    ///
+    /// The legacy beta accessor (`client.beta().realtime()`) targets the
+    /// retired `/realtime/sessions` and `/realtime/transcription_sessions`
+    /// paths. Use this instead for new code.
+    pub fn realtime(&self) -> crate::resources::realtime::Realtime<'_> {
+        crate::resources::realtime::Realtime::new(self)
+    }
+
     /// Create a persistent WebSocket session to the Responses API.
     ///
     /// Opens a connection to `wss://api.openai.com/v1/responses` and returns

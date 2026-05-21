@@ -3,8 +3,8 @@
 // Domain: responses
 #![allow(unused_imports)]
 
-use super::*;
 use serde::{Deserialize, Serialize};
+use super::*;
 
 /// Allows the assistant to create, delete, or update files using unified diffs.
 #[derive(Debug, Clone, Serialize, Deserialize)]

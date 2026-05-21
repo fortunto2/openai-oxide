@@ -3,8 +3,8 @@
 // Domain: file
 #![allow(unused_imports)]
 
-use super::*;
 use serde::{Deserialize, Serialize};
+use super::*;
 
 pub type FileChunkingStrategy = serde_json::Value;
 
