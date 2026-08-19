@@ -1,6 +1,6 @@
 {
   "name": "openai-oxide",
-  "version": "0.11.2",
+  "version": "0.16.0",
   "description": "Native Node.js bindings for openai-oxide powered by napi-rs.",
   "main": "wrapper.js",
   "types": "typed.d.ts",
