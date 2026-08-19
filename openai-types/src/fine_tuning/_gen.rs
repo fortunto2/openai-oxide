@@ -3,8 +3,8 @@
 // Domain: fine_tuning
 #![allow(unused_imports)]
 
-use serde::{Deserialize, Serialize};
 use super::*;
+use serde::{Deserialize, Serialize};
 
 /// The hyperparameters used for the DPO fine-tuning job.
 #[derive(Debug, Clone, Serialize, Deserialize)]

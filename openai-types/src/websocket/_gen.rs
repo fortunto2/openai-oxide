@@ -29,3 +29,18 @@ pub struct WebSocketConnectionOptions {
 }
 
 pub type WebsocketConnectionOptions = WebSocketConnectionOptions;
+
+/// Optional overrides returned from the ``on_reconnecting`` handler
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct ReconnectingOverrides {
+    /// If provided, assigns the query parameters for the next connection.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub extra_query: Option<serde_json::Value>,
+    /// If provided, assigns the headers for the next connection.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub extra_headers: Option<serde_json::Value>,
+    /// If set to ``True``, will stop attempting to reconnect.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub abort: Option<bool>,
+}

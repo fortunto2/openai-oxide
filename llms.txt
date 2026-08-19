@@ -380,6 +380,7 @@ Resources are accessed via zero-cost borrows from the client:
 - `client.files()` — File CRUD
 - `client.fine_tuning().jobs()` — Fine-tuning jobs
 - `client.moderations()` — Content moderation
+- `client.content_provenance_checks()` — C2PA / SynthID provenance check for image & audio files
 - `client.batches()` — Batch processing
 - `client.uploads()` — Large file uploads
 - `client.beta().assistants()` — Assistants (beta)

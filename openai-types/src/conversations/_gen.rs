@@ -4,18 +4,12 @@
 
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+/// Marks the exact end of a reusable prompt prefix.
+#[derive(Debug, Clone, Serialize, Deserialize)]
 #[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
-#[non_exhaustive]
-pub enum ComputerScreenshotContentDetail {
-    #[serde(rename = "low")]
-    Low,
-    #[serde(rename = "high")]
-    High,
-    #[serde(rename = "auto")]
-    Auto,
-    #[serde(rename = "original")]
-    Original,
+pub struct PromptCacheBreakpoint {
+    /// The breakpoint mode. Always `explicit`.
+    pub mode: String,
 }
 
 /// A screenshot of a computer.
@@ -23,7 +17,7 @@ pub enum ComputerScreenshotContentDetail {
 #[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
 pub struct ComputerScreenshotContent {
     /// The detail level of the screenshot image to be sent to the model.
-    pub detail: ComputerScreenshotContentDetail,
+    pub detail: serde_json::Value,
     /// The identifier of an uploaded file that contains the screenshot.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub file_id: Option<String>,
@@ -33,6 +27,9 @@ pub struct ComputerScreenshotContent {
     /// Specifies the event type.
     #[serde(rename = "type")]
     pub type_: String,
+    /// Marks the exact end of a reusable prompt prefix.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub prompt_cache_breakpoint: Option<PromptCacheBreakpoint>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -93,6 +90,84 @@ pub struct ImageGenerationCall {
     /// The status of the image generation call.
     pub status: ImageGenerationCallStatus,
     /// The type of the image generation call. Always `image_generation_call`.
+    #[serde(rename = "type")]
+    pub type_: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+#[non_exhaustive]
+pub enum AdditionalToolsRole {
+    #[serde(rename = "unknown")]
+    Unknown,
+    #[serde(rename = "user")]
+    User,
+    #[serde(rename = "assistant")]
+    Assistant,
+    #[serde(rename = "system")]
+    System,
+    #[serde(rename = "critic")]
+    Critic,
+    #[serde(rename = "discriminator")]
+    Discriminator,
+    #[serde(rename = "developer")]
+    Developer,
+    #[serde(rename = "tool")]
+    Tool,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct AdditionalTools {
+    /// The unique ID of the additional tools item.
+    pub id: String,
+    /// The role that provided the additional tools.
+    pub role: AdditionalToolsRole,
+    /// The additional tool definitions made available at this item.
+    pub tools: Vec<serde_json::Value>,
+    /// The type of the item. Always `additional_tools`.
+    #[serde(rename = "type")]
+    pub type_: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct Program {
+    /// The unique ID of the program item.
+    pub id: String,
+    /// The stable call ID of the program item.
+    pub call_id: String,
+    /// The JavaScript source executed by programmatic tool calling.
+    pub code: String,
+    /// Opaque program replay fingerprint that must be round-tripped.
+    pub fingerprint: String,
+    /// The type of the item. Always `program`.
+    #[serde(rename = "type")]
+    pub type_: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+#[non_exhaustive]
+pub enum ProgramOutputStatus {
+    #[serde(rename = "completed")]
+    Completed,
+    #[serde(rename = "incomplete")]
+    Incomplete,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct ProgramOutput {
+    /// The unique ID of the program output item.
+    pub id: String,
+    /// The call ID of the program item.
+    pub call_id: String,
+    /// The result produced by the program item.
+    pub result: String,
+    /// The terminal status of the program output item.
+    pub status: ProgramOutputStatus,
+    /// The type of the item. Always `program_output`.
     #[serde(rename = "type")]
     pub type_: String,
 }
@@ -281,7 +356,7 @@ pub struct McpCall {
     pub approval_request_id: Option<String>,
     /// The error from the tool call, if any.
     #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub error: Option<String>,
+    pub error: Option<serde_json::Value>,
     /// The output from the tool call.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub output: Option<String>,
@@ -408,6 +483,16 @@ pub enum MessageStatus {
     Incomplete,
 }
 
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+#[non_exhaustive]
+pub enum MessagePhase {
+    #[serde(rename = "commentary")]
+    Commentary,
+    #[serde(rename = "final_answer")]
+    FinalAnswer,
+}
+
 /// A message to or from the model.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
@@ -423,6 +508,9 @@ pub struct Message {
     /// The type of the message. Always set to `message`.
     #[serde(rename = "type")]
     pub type_: String,
+    /// Labels an `assistant` message as intermediate commentary (`commentary`) or the
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub phase: Option<MessagePhase>,
 }
 
 /// A summary text from the model.

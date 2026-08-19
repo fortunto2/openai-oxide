@@ -294,6 +294,8 @@ impl StreamState {
             service_tier: self.service_tier,
             system_fingerprint: self.system_fingerprint,
             usage: self.usage,
+            metadata: None,
+            moderation: None,
             session_id: None,
         }
     }

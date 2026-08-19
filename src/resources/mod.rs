@@ -6,8 +6,8 @@ pub mod batches;
 pub mod beta;
 #[cfg(feature = "chat")]
 pub mod chat;
+pub mod content_provenance;
 pub mod conversations;
-pub mod realtime;
 #[cfg(feature = "embeddings")]
 pub mod embeddings;
 #[cfg(feature = "files")]
@@ -20,6 +20,7 @@ pub mod images;
 pub mod models;
 #[cfg(feature = "moderations")]
 pub mod moderations;
+pub mod realtime;
 #[cfg(feature = "responses")]
 pub mod responses;
 #[cfg(feature = "uploads")]

@@ -15,6 +15,7 @@
   - [Structured Output](./guides/structured-output.md)
   - [Hedged Requests](./guides/hedged-requests.md)
   - [Webhooks](./guides/webhooks.md)
+  - [Content Provenance](./guides/content-provenance.md)
   - [WASM / Cloudflare Workers](./guides/wasm.md)
   - [Types (openai-types)](./guides/types.md)
   - [Benchmarks](./guides/benchmarks.md)

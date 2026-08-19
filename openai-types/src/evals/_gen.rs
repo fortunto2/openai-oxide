@@ -144,7 +144,7 @@ pub struct SamplingParams {
     /// The maximum number of tokens in the generated output.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub max_completion_tokens: Option<i64>,
-    /// Constrains effort on reasoning for
+    /// Constrains effort on reasoning for reasoning models.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub reasoning_effort: Option<serde_json::Value>,
     /// An object specifying the format that the model must output.
@@ -254,7 +254,7 @@ pub struct DataSourceResponsesSourceResponses {
     /// The name of the model to find responses for.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub model: Option<String>,
-    /// Constrains effort on reasoning for
+    /// Constrains effort on reasoning for reasoning models.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub reasoning_effort: Option<serde_json::Value>,
     /// Sampling temperature. This is a query parameter used to select responses.
@@ -375,7 +375,7 @@ pub struct DataSourceResponsesSamplingParams {
     /// The maximum number of tokens in the generated output.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub max_completion_tokens: Option<i64>,
-    /// Constrains effort on reasoning for
+    /// Constrains effort on reasoning for reasoning models.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub reasoning_effort: Option<serde_json::Value>,
     /// A seed value to initialize the randomness, during sampling.
@@ -557,7 +557,7 @@ pub struct DataSourceCreateEvalResponsesRunDataSourceSourceResponses {
     /// The name of the model to find responses for.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub model: Option<String>,
-    /// Constrains effort on reasoning for
+    /// Constrains effort on reasoning for reasoning models.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub reasoning_effort: Option<serde_json::Value>,
     /// Sampling temperature. This is a query parameter used to select responses.
@@ -588,7 +588,8 @@ pub struct DataSourceCreateEvalResponsesRunDataSourceInputMessagesTemplateTempla
 /// A text output from the model.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
-pub struct DataSourceCreateEvalResponsesRunDataSourceInputMessagesTemplateTemplateEvalItemContentOutputText {
+pub struct DataSourceCreateEvalResponsesRunDataSourceInputMessagesTemplateTemplateEvalItemContentOutputText
+{
     /// The text output from the model.
     pub text: String,
     /// The type of the output text. Always `output_text`.
@@ -599,7 +600,8 @@ pub struct DataSourceCreateEvalResponsesRunDataSourceInputMessagesTemplateTempla
 /// An image input block used within EvalItem content arrays.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
-pub struct DataSourceCreateEvalResponsesRunDataSourceInputMessagesTemplateTemplateEvalItemContentInputImage {
+pub struct DataSourceCreateEvalResponsesRunDataSourceInputMessagesTemplateTemplateEvalItemContentInputImage
+{
     /// The URL of the image input.
     pub image_url: String,
     /// The type of the image input. Always `input_image`.
@@ -610,7 +612,8 @@ pub struct DataSourceCreateEvalResponsesRunDataSourceInputMessagesTemplateTempla
     pub detail: Option<String>,
 }
 
-pub type DataSourceCreateEvalResponsesRunDataSourceInputMessagesTemplateTemplateEvalItemContent = serde_json::Value;
+pub type DataSourceCreateEvalResponsesRunDataSourceInputMessagesTemplateTemplateEvalItemContent =
+    serde_json::Value;
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
@@ -631,7 +634,8 @@ pub enum DataSourceCreateEvalResponsesRunDataSourceInputMessagesTemplateTemplate
 #[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
 pub struct DataSourceCreateEvalResponsesRunDataSourceInputMessagesTemplateTemplateEvalItem {
     /// Inputs to the model - can contain template strings.
-    pub content: DataSourceCreateEvalResponsesRunDataSourceInputMessagesTemplateTemplateEvalItemContent,
+    pub content:
+        DataSourceCreateEvalResponsesRunDataSourceInputMessagesTemplateTemplateEvalItemContent,
     /// The role of the message input.
     pub role: DataSourceCreateEvalResponsesRunDataSourceInputMessagesTemplateTemplateEvalItemRole,
     /// The type of the message input. Always `message`.
@@ -639,7 +643,8 @@ pub struct DataSourceCreateEvalResponsesRunDataSourceInputMessagesTemplateTempla
     pub type_: Option<String>,
 }
 
-pub type DataSourceCreateEvalResponsesRunDataSourceInputMessagesTemplateTemplate = serde_json::Value;
+pub type DataSourceCreateEvalResponsesRunDataSourceInputMessagesTemplateTemplate =
+    serde_json::Value;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
@@ -678,7 +683,7 @@ pub struct DataSourceCreateEvalResponsesRunDataSourceSamplingParams {
     /// The maximum number of tokens in the generated output.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub max_completion_tokens: Option<i64>,
-    /// Constrains effort on reasoning for
+    /// Constrains effort on reasoning for reasoning models.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub reasoning_effort: Option<serde_json::Value>,
     /// A seed value to initialize the randomness, during sampling.

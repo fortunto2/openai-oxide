@@ -17,6 +17,9 @@ pub mod upload;
 pub mod completion {
     pub use openai_types::completion::*;
 }
+pub mod content_provenance {
+    pub use openai_types::content_provenance::*;
+}
 pub mod containers {
     pub use openai_types::containers::*;
 }

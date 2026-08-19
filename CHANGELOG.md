@@ -6,6 +6,26 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [0.16.0]
+
+### Added
+- **Content Provenance Checks resource** — `client.content_provenance_checks().create(params)` / `.from_path(path)` (`POST /content_provenance_checks`, multipart). Results come back as a typed `ContentProvenanceResult` enum (`C2pa` / `SynthId` / `Other` for forward compat) instead of raw JSON.
+- **Moderated chat completions** — `ChatCompletionRequest.moderation` (`ModerationConfig`: moderation model + score/block `ModerationPolicy`), and `ChatCompletionResponse.{metadata, moderation}` on the response side.
+- **Image streaming params** — `ImageGenerateRequest.{stream, partial_images}` with builder methods (gpt-image-1 streaming).
+- Types re-synced from **openai-python v3.3.0** (previous sync: v2.29.0) — 1575 generated types across 25 domains, including the new `content_provenance` domain (feature `content-provenance` in openai-types).
+- OpenAPI spec fixture refreshed to the current upstream; field coverage back to **100% (50/50)**.
+
+### Fixed
+- `py2rust.py` now treats `pub use` re-exports in manual files as claimed names, so a generated type can no longer shadow a re-exported one (this cycle: a second `ServiceTier` in `responses` causing an ambiguous glob re-export warning).
+
+### Bumps
+- `openai-types` 0.1.3 → 0.2.0 (large generated-type resync; new domain).
+
+### Known gaps
+- Organization Admin API (`types/admin/**`, new in Python SDK v3.x) is not synced yet — it is a nested domain (`admin/organization/projects/…`) and `py2rust.py` walks one level; needs generator support before the resource can land.
+
+---
+
 ## [0.15.0]
 
 ### Added

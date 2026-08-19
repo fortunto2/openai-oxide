@@ -3,8 +3,8 @@
 // Domain: audio
 #![allow(unused_imports)]
 
-use serde::{Deserialize, Serialize};
 use super::*;
+use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
@@ -165,6 +165,9 @@ pub struct TranscriptionCreateParamsBase {
     /// Additional information to include in the transcription response. `logprobs` will
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub include: Option<Vec<TranscriptionInclude>>,
+    /// Words or phrases to guide transcription of the input audio.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub keywords: Option<serde_json::Value>,
     /// Optional list of speaker names that correspond to the audio samples provided in
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub known_speaker_names: Option<serde_json::Value>,
@@ -174,6 +177,9 @@ pub struct TranscriptionCreateParamsBase {
     /// The language of the input audio.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub language: Option<String>,
+    /// Possible languages of the input audio, in
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub languages: Option<serde_json::Value>,
     /// An optional text to guide the model's style or continue a previous audio
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub prompt: Option<String>,
@@ -260,6 +266,14 @@ pub enum TranscriptionInclude {
     Logprobs,
 }
 
+/// A language detected in transcribed audio.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct TranscriptionLanguage {
+    /// The code of a language detected in the audio.
+    pub code: String,
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
 pub struct TranscriptionSegment {
@@ -325,6 +339,9 @@ pub struct TranscriptionTextDoneEvent {
     /// The type of the event. Always `transcript.text.done`.
     #[serde(rename = "type")]
     pub type_: String,
+    /// The languages detected in the audio.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub languages: Option<Vec<TranscriptionLanguage>>,
     /// The log probabilities of the individual tokens in the transcription.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub logprobs: Option<Vec<Logprob>>,
@@ -440,6 +457,8 @@ pub struct TranslationVerbose {
 pub enum AudioModel {
     #[serde(rename = "whisper-1")]
     Whisper1,
+    #[serde(rename = "gpt-transcribe")]
+    GptTranscribe,
     #[serde(rename = "gpt-4o-transcribe")]
     Gpt4oTranscribe,
     #[serde(rename = "gpt-4o-mini-transcribe")]

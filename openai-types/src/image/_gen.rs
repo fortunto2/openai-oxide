@@ -3,8 +3,8 @@
 // Domain: image
 #![allow(unused_imports)]
 
-use serde::{Deserialize, Serialize};
 use super::*;
+use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
@@ -209,24 +209,6 @@ pub enum ImageEditParamsBaseResponseFormat {
     B64Json,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
-#[non_exhaustive]
-pub enum ImageEditParamsBaseSize {
-    #[serde(rename = "256x256")]
-    V256x256,
-    #[serde(rename = "512x512")]
-    V512x512,
-    #[serde(rename = "1024x1024")]
-    V1024x1024,
-    #[serde(rename = "1536x1024")]
-    V1536x1024,
-    #[serde(rename = "1024x1536")]
-    V1024x1536,
-    #[serde(rename = "auto")]
-    Auto,
-}
-
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
 pub struct ImageEditParamsBase {
@@ -243,7 +225,7 @@ pub struct ImageEditParamsBase {
     /// An additional image whose fully transparent areas (e.g.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub mask: Option<serde_json::Value>,
-    /// The model to use for image generation. Defaults to `gpt-image-1.5`.
+    /// The model to use for image generation.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub model: Option<String>,
     /// The number of images to generate. Must be between 1 and 10.
@@ -266,7 +248,7 @@ pub struct ImageEditParamsBase {
     pub response_format: Option<ImageEditParamsBaseResponseFormat>,
     /// The size of the generated images.
     #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub size: Option<ImageEditParamsBaseSize>,
+    pub size: Option<String>,
     /// A unique identifier representing your end-user, which can help OpenAI to monitor
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub user: Option<String>,
@@ -566,28 +548,6 @@ pub enum ImageGenerateParamsBaseResponseFormat {
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
 #[non_exhaustive]
-pub enum ImageGenerateParamsBaseSize {
-    #[serde(rename = "auto")]
-    Auto,
-    #[serde(rename = "1024x1024")]
-    V1024x1024,
-    #[serde(rename = "1536x1024")]
-    V1536x1024,
-    #[serde(rename = "1024x1536")]
-    V1024x1536,
-    #[serde(rename = "256x256")]
-    V256x256,
-    #[serde(rename = "512x512")]
-    V512x512,
-    #[serde(rename = "1792x1024")]
-    V1792x1024,
-    #[serde(rename = "1024x1792")]
-    V1024x1792,
-}
-
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
-#[non_exhaustive]
 pub enum ImageGenerateParamsBaseStyle {
     #[serde(rename = "vivid")]
     Vivid,
@@ -629,7 +589,7 @@ pub struct ImageGenerateParamsBase {
     pub response_format: Option<ImageGenerateParamsBaseResponseFormat>,
     /// The size of the generated images.
     #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub size: Option<ImageGenerateParamsBaseSize>,
+    pub size: Option<String>,
     /// The style of the generated images.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub style: Option<ImageGenerateParamsBaseStyle>,
@@ -644,16 +604,22 @@ pub type ImageGenerateParams = serde_json::Value;
 #[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
 #[non_exhaustive]
 pub enum ImageModel {
-    #[serde(rename = "gpt-image-1.5")]
-    GptImage15,
-    #[serde(rename = "dall-e-2")]
-    DallE2,
-    #[serde(rename = "dall-e-3")]
-    DallE3,
     #[serde(rename = "gpt-image-1")]
     GptImage1,
     #[serde(rename = "gpt-image-1-mini")]
     GptImage1Mini,
+    #[serde(rename = "gpt-image-2")]
+    GptImage2,
+    #[serde(rename = "gpt-image-2-2026-04-21")]
+    GptImage220260421,
+    #[serde(rename = "gpt-image-1.5")]
+    GptImage15,
+    #[serde(rename = "chatgpt-image-latest")]
+    ChatgptImageLatest,
+    #[serde(rename = "dall-e-2")]
+    DallE2,
+    #[serde(rename = "dall-e-3")]
+    DallE3,
 }
 
 /// The output token details for the image generation.

@@ -155,6 +155,14 @@ pub struct ImageGenerateRequest {
     /// Moderation level (low, auto).
     #[serde(skip_serializing_if = "Option::is_none")]
     pub moderation: Option<ImageModeration>,
+
+    /// Number of partial images to stream (0-3) -- gpt-image-1 streaming only.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub partial_images: Option<i64>,
+
+    /// Stream the image generation as server-sent events -- gpt-image-1 only.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub stream: Option<bool>,
 }
 
 impl ImageGenerateRequest {
@@ -172,6 +180,8 @@ impl ImageGenerateRequest {
             output_compression: None,
             background: None,
             moderation: None,
+            partial_images: None,
+            stream: None,
         }
     }
 
@@ -227,6 +237,16 @@ impl ImageGenerateRequest {
 
     pub fn moderation(mut self, moderation: ImageModeration) -> Self {
         self.moderation = Some(moderation);
+        self
+    }
+
+    pub fn partial_images(mut self, partial_images: i64) -> Self {
+        self.partial_images = Some(partial_images);
+        self
+    }
+
+    pub fn stream(mut self, stream: bool) -> Self {
+        self.stream = Some(stream);
         self
     }
 }

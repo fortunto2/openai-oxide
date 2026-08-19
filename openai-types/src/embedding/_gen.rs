@@ -3,8 +3,8 @@
 // Domain: embedding
 #![allow(unused_imports)]
 
-use serde::{Deserialize, Serialize};
 use super::*;
+use serde::{Deserialize, Serialize};
 
 /// The usage information for the request.
 #[derive(Debug, Clone, Serialize, Deserialize)]

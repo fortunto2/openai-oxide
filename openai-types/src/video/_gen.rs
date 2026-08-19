@@ -149,7 +149,7 @@ pub struct VideoEditParams {
     pub video: Video,
 }
 
-/// Reference to the completed video.
+/// Reference to the completed video to edit.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
 pub struct VideoVideoReferenceInputParam {

@@ -3,8 +3,8 @@
 // Domain: beta
 #![allow(unused_imports)]
 
-use serde::{Deserialize, Serialize};
 use super::*;
+use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
@@ -49,7 +49,7 @@ pub struct AssistantCreateParams {
     /// The name of the assistant. The maximum length is 256 characters.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub name: Option<String>,
-    /// Constrains effort on reasoning for
+    /// Constrains effort on reasoning for reasoning models.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub reasoning_effort: Option<serde_json::Value>,
     /// Specifies the format that the model must output.
@@ -409,7 +409,7 @@ pub struct AssistantUpdateParams {
     /// The name of the assistant. The maximum length is 256 characters.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub name: Option<String>,
-    /// Constrains effort on reasoning for
+    /// Constrains effort on reasoning for reasoning models.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub reasoning_effort: Option<serde_json::Value>,
     /// Specifies the format that the model must output.
@@ -427,6 +427,6050 @@ pub struct AssistantUpdateParams {
     /// An alternative to sampling with temperature, called nucleus sampling, where the
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub top_p: Option<f64>,
+}
+
+/// Allows the assistant to create, delete, or update files using unified diffs.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct BetaApplyPatchTool {
+    /// The type of the tool. Always `apply_patch`.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// The tool invocation context(s).
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub allowed_callers: Option<Vec<serde_json::Value>>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct BetaCompactedResponse {
+    /// The unique identifier for the compacted response.
+    pub id: String,
+    /// Unix timestamp (in seconds) when the compacted conversation was created.
+    pub created_at: i64,
+    /// The object type. Always `response.compaction`.
+    pub object: String,
+    /// The compacted list of output items.
+    pub output: Vec<BetaResponseOutputItem>,
+    /// Token accounting for the compaction pass, including cached, reasoning, and total
+    pub usage: BetaResponseUsage,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+#[non_exhaustive]
+pub enum ClickButton {
+    #[serde(rename = "left")]
+    Left,
+    #[serde(rename = "right")]
+    Right,
+    #[serde(rename = "wheel")]
+    Wheel,
+    #[serde(rename = "back")]
+    Back,
+    #[serde(rename = "forward")]
+    Forward,
+}
+
+/// A click action.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct Click {
+    /// Indicates which mouse button was pressed during the click.
+    pub button: ClickButton,
+    /// Specifies the event type. For a click action, this property is always `click`.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// The x-coordinate where the click occurred.
+    pub x: i64,
+    /// The y-coordinate where the click occurred.
+    pub y: i64,
+    /// The keys being held while clicking.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub keys: Option<Vec<String>>,
+}
+
+/// A double click action.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct DoubleClick {
+    /// The keys being held while double-clicking.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub keys: Option<Vec<String>>,
+    /// Specifies the event type.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// The x-coordinate where the double click occurred.
+    pub x: i64,
+    /// The y-coordinate where the double click occurred.
+    pub y: i64,
+}
+
+/// An x/y coordinate pair, e.g. `{ x: 100, y: 200 }`.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct DragPath {
+    /// The x-coordinate.
+    pub x: i64,
+    /// The y-coordinate.
+    pub y: i64,
+}
+
+/// A drag action.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct Drag {
+    /// An array of coordinates representing the path of the drag action.
+    pub path: Vec<DragPath>,
+    /// Specifies the event type.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// The keys being held while dragging the mouse.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub keys: Option<Vec<String>>,
+}
+
+/// A collection of keypresses the model would like to perform.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct Keypress {
+    /// The combination of keys the model is requesting to be pressed.
+    pub keys: Vec<String>,
+    /// Specifies the event type.
+    #[serde(rename = "type")]
+    pub type_: String,
+}
+
+/// A mouse move action.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct Move {
+    /// Specifies the event type.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// The x-coordinate to move to.
+    pub x: i64,
+    /// The y-coordinate to move to.
+    pub y: i64,
+    /// The keys being held while moving the mouse.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub keys: Option<Vec<String>>,
+}
+
+/// A screenshot action.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct Screenshot {
+    /// Specifies the event type.
+    #[serde(rename = "type")]
+    pub type_: String,
+}
+
+/// A scroll action.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct Scroll {
+    /// The horizontal scroll distance.
+    pub scroll_x: i64,
+    /// The vertical scroll distance.
+    pub scroll_y: i64,
+    /// Specifies the event type.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// The x-coordinate where the scroll occurred.
+    pub x: i64,
+    /// The y-coordinate where the scroll occurred.
+    pub y: i64,
+    /// The keys being held while scrolling.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub keys: Option<Vec<String>>,
+}
+
+/// An action to type in text.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct Type {
+    /// The text to type.
+    pub text: String,
+    /// Specifies the event type.
+    #[serde(rename = "type")]
+    pub type_: String,
+}
+
+/// A wait action.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct Wait {
+    /// Specifies the event type.
+    #[serde(rename = "type")]
+    pub type_: String,
+}
+
+pub type BetaComputerAction = serde_json::Value;
+
+pub type BetaComputerActionList = Vec<BetaComputerAction>;
+
+/// A tool that controls a virtual computer.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct BetaComputerTool {
+    /// The type of the computer tool. Always `computer`.
+    #[serde(rename = "type")]
+    pub type_: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+#[non_exhaustive]
+pub enum BetaComputerUsePreviewToolEnvironment {
+    #[serde(rename = "windows")]
+    Windows,
+    #[serde(rename = "mac")]
+    Mac,
+    #[serde(rename = "linux")]
+    Linux,
+    #[serde(rename = "ubuntu")]
+    Ubuntu,
+    #[serde(rename = "browser")]
+    Browser,
+}
+
+/// A tool that controls a virtual computer.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct BetaComputerUsePreviewTool {
+    /// The height of the computer display.
+    pub display_height: i64,
+    /// The width of the computer display.
+    pub display_width: i64,
+    /// The type of computer environment to control.
+    pub environment: BetaComputerUsePreviewToolEnvironment,
+    /// The type of the computer use tool. Always `computer_use_preview`.
+    #[serde(rename = "type")]
+    pub type_: String,
+}
+
+pub type NetworkPolicy = serde_json::Value;
+
+pub type Skill = serde_json::Value;
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+#[non_exhaustive]
+pub enum BetaContainerAutoMemoryLimit {
+    #[serde(rename = "1g")]
+    V1g,
+    #[serde(rename = "4g")]
+    V4g,
+    #[serde(rename = "16g")]
+    V16g,
+    #[serde(rename = "64g")]
+    V64g,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct BetaContainerAuto {
+    /// Automatically creates a container for this request
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// An optional list of uploaded files to make available to your code.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub file_ids: Option<Vec<String>>,
+    /// The memory limit for the container.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub memory_limit: Option<BetaContainerAutoMemoryLimit>,
+    /// Network access policy for the container.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub network_policy: Option<NetworkPolicy>,
+    /// An optional list of skills referenced by id or inline data.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub skills: Option<Vec<Skill>>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct BetaContainerNetworkPolicyAllowlist {
+    /// A list of allowed domains when type is `allowlist`.
+    pub allowed_domains: Vec<String>,
+    /// Allow outbound network access only to specified domains. Always `allowlist`.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// Optional domain-scoped secrets for allowlisted domains.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub domain_secrets: Option<Vec<BetaContainerNetworkPolicyDomainSecret>>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct BetaContainerNetworkPolicyDisabled {
+    /// Disable outbound network access. Always `disabled`.
+    #[serde(rename = "type")]
+    pub type_: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct BetaContainerNetworkPolicyDomainSecret {
+    /// The domain associated with the secret.
+    pub domain: String,
+    /// The name of the secret to inject for the domain.
+    pub name: String,
+    /// The secret value to inject for the domain.
+    pub value: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct BetaContainerReference {
+    /// The ID of the referenced container.
+    pub container_id: String,
+    /// References a container created with the /v1/containers endpoint
+    #[serde(rename = "type")]
+    pub type_: String,
+}
+
+/// Unconstrained free-form text.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct FormatText {
+    /// Unconstrained text format. Always `text`.
+    #[serde(rename = "type")]
+    pub type_: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+#[non_exhaustive]
+pub enum FormatGrammarSyntax {
+    #[serde(rename = "lark")]
+    Lark,
+    #[serde(rename = "regex")]
+    Regex,
+}
+
+/// A grammar defined by the user.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct FormatGrammar {
+    /// The grammar definition.
+    pub definition: String,
+    /// The syntax of the grammar definition. One of `lark` or `regex`.
+    pub syntax: FormatGrammarSyntax,
+    /// Grammar format. Always `grammar`.
+    #[serde(rename = "type")]
+    pub type_: String,
+}
+
+pub type Format = serde_json::Value;
+
+/// A custom tool that processes input using a specified format.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct BetaCustomTool {
+    /// The name of the custom tool, used to identify it in tool calls.
+    pub name: String,
+    /// The type of the custom tool. Always `custom`.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// The tool invocation context(s).
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub allowed_callers: Option<Vec<serde_json::Value>>,
+    /// Whether this tool should be deferred and discovered via tool search.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub defer_loading: Option<bool>,
+    /// Optional description of the custom tool, used to provide more context.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub description: Option<String>,
+    /// The input format for the custom tool. Default is unconstrained text.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub format: Option<Format>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+#[non_exhaustive]
+pub enum BetaEasyInputMessageRole {
+    #[serde(rename = "user")]
+    User,
+    #[serde(rename = "assistant")]
+    Assistant,
+    #[serde(rename = "system")]
+    System,
+    #[serde(rename = "developer")]
+    Developer,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+#[non_exhaustive]
+pub enum BetaEasyInputMessagePhase {
+    #[serde(rename = "commentary")]
+    Commentary,
+    #[serde(rename = "final_answer")]
+    FinalAnswer,
+}
+
+/// A message input to the model with a role indicating instruction following
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct BetaEasyInputMessage {
+    /// Text, image, or audio input to the model, used to generate a response. Can also
+    pub content: String,
+    /// The role of the message input.
+    pub role: BetaEasyInputMessageRole,
+    /// Labels an `assistant` message as intermediate commentary (`commentary`) or the
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub phase: Option<BetaEasyInputMessagePhase>,
+    /// The type of the message input. Always `message`.
+    #[serde(rename = "type", skip_serializing_if = "Option::is_none", default)]
+    pub type_: Option<String>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+#[non_exhaustive]
+pub enum FiltersComparisonFilterType {
+    #[serde(rename = "eq")]
+    Eq,
+    #[serde(rename = "ne")]
+    Ne,
+    #[serde(rename = "gt")]
+    Gt,
+    #[serde(rename = "gte")]
+    Gte,
+    #[serde(rename = "lt")]
+    Lt,
+    #[serde(rename = "lte")]
+    Lte,
+    #[serde(rename = "in")]
+    In,
+    #[serde(rename = "nin")]
+    Nin,
+}
+
+/// A filter used to compare a specified attribute key to a given value using a defined comparison operation.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct FiltersComparisonFilter {
+    /// The key to compare against the value.
+    pub key: String,
+    /// Specifies the comparison operator: `eq`, `ne`, `gt`, `gte`, `lt`, `lte`, `in`,
+    #[serde(rename = "type")]
+    pub type_: FiltersComparisonFilterType,
+    /// The value to compare against the attribute key; supports string, number, or
+    pub value: serde_json::Value,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+#[non_exhaustive]
+pub enum FiltersCompoundFilterFilterComparisonFilterType {
+    #[serde(rename = "eq")]
+    Eq,
+    #[serde(rename = "ne")]
+    Ne,
+    #[serde(rename = "gt")]
+    Gt,
+    #[serde(rename = "gte")]
+    Gte,
+    #[serde(rename = "lt")]
+    Lt,
+    #[serde(rename = "lte")]
+    Lte,
+    #[serde(rename = "in")]
+    In,
+    #[serde(rename = "nin")]
+    Nin,
+}
+
+/// A filter used to compare a specified attribute key to a given value using a defined comparison operation.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct FiltersCompoundFilterFilterComparisonFilter {
+    /// The key to compare against the value.
+    pub key: String,
+    /// Specifies the comparison operator: `eq`, `ne`, `gt`, `gte`, `lt`, `lte`, `in`,
+    #[serde(rename = "type")]
+    pub type_: FiltersCompoundFilterFilterComparisonFilterType,
+    /// The value to compare against the attribute key; supports string, number, or
+    pub value: serde_json::Value,
+}
+
+pub type FiltersCompoundFilterFilter = serde_json::Value;
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+#[non_exhaustive]
+pub enum FiltersCompoundFilterType {
+    #[serde(rename = "and")]
+    And,
+    #[serde(rename = "or")]
+    Or,
+}
+
+/// Combine multiple filters using `and` or `or`.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct FiltersCompoundFilter {
+    /// Array of filters to combine.
+    pub filters: Vec<FiltersCompoundFilterFilter>,
+    /// Type of operation: `and` or `or`.
+    #[serde(rename = "type")]
+    pub type_: FiltersCompoundFilterType,
+}
+
+pub type Filters = serde_json::Value;
+
+/// Weights that control how reciprocal rank fusion balances semantic embedding matches versus sparse keyword matches when hybrid search is enabled.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct RankingOptionsHybridSearch {
+    /// The weight of the embedding in the reciprocal ranking fusion.
+    pub embedding_weight: f64,
+    /// The weight of the text in the reciprocal ranking fusion.
+    pub text_weight: f64,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+#[non_exhaustive]
+pub enum RankingOptionsRanker {
+    #[serde(rename = "auto")]
+    Auto,
+    #[serde(rename = "default-2024-11-15")]
+    Default20241115,
+}
+
+/// Ranking options for search.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct RankingOptions {
+    /// Weights that control how reciprocal rank fusion balances semantic embedding
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub hybrid_search: Option<RankingOptionsHybridSearch>,
+    /// The ranker to use for the file search.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub ranker: Option<RankingOptionsRanker>,
+    /// The score threshold for the file search, a number between 0 and 1.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub score_threshold: Option<f64>,
+}
+
+/// A tool that searches for relevant content from uploaded files.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct BetaFileSearchTool {
+    /// The type of the file search tool. Always `file_search`.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// The IDs of the vector stores to search.
+    pub vector_store_ids: Vec<String>,
+    /// A filter to apply.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub filters: Option<Filters>,
+    /// The maximum number of results to return.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub max_num_results: Option<i64>,
+    /// Ranking options for search.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub ranking_options: Option<RankingOptions>,
+}
+
+pub type Environment = serde_json::Value;
+
+/// A tool that allows the model to execute shell commands.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct BetaFunctionShellTool {
+    /// The type of the shell tool. Always `shell`.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// The tool invocation context(s).
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub allowed_callers: Option<Vec<serde_json::Value>>,
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub environment: Option<Environment>,
+}
+
+/// Defines a function in your own code the model can choose to call.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct BetaFunctionTool {
+    /// The name of the function to call.
+    pub name: String,
+    /// A JSON schema object describing the parameters of the function.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub parameters: Option<std::collections::HashMap<String, serde_json::Value>>,
+    /// Whether strict parameter validation is enforced for this function tool.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub strict: Option<bool>,
+    /// The type of the function tool. Always `function`.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// The tool invocation context(s).
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub allowed_callers: Option<Vec<serde_json::Value>>,
+    /// Whether this function is deferred and loaded via tool search.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub defer_loading: Option<bool>,
+    /// A description of the function.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub description: Option<String>,
+    /// A JSON schema object describing the JSON value encoded in string outputs for
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub output_schema: Option<std::collections::HashMap<String, serde_json::Value>>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+#[non_exhaustive]
+pub enum BetaImageDetail {
+    #[serde(rename = "low")]
+    Low,
+    #[serde(rename = "high")]
+    High,
+    #[serde(rename = "auto")]
+    Auto,
+    #[serde(rename = "original")]
+    Original,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct BetaInlineSkill {
+    /// The description of the skill.
+    pub description: String,
+    /// The name of the skill.
+    pub name: String,
+    /// Inline skill payload
+    pub source: BetaInlineSkillSource,
+    /// Defines an inline skill for this request.
+    #[serde(rename = "type")]
+    pub type_: String,
+}
+
+/// Inline skill payload
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct BetaInlineSkillSource {
+    /// Base64-encoded skill zip bundle.
+    pub data: String,
+    /// The media type of the inline skill payload. Must be `application/zip`.
+    pub media_type: String,
+    /// The type of the inline skill source. Must be `base64`.
+    #[serde(rename = "type")]
+    pub type_: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct BetaLocalEnvironment {
+    /// Use a local computer environment.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// An optional list of skills.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub skills: Option<Vec<BetaLocalSkill>>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct BetaLocalSkill {
+    /// The description of the skill.
+    pub description: String,
+    /// The name of the skill.
+    pub name: String,
+    /// The path to the directory containing the skill.
+    pub path: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct McpProtocolError {
+    pub code: i64,
+    pub message: String,
+    #[serde(rename = "type")]
+    pub type_: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct McpToolExecutionError {
+    pub content: serde_json::Value,
+    #[serde(rename = "type")]
+    pub type_: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct HTTPError {
+    pub code: i64,
+    pub message: String,
+    #[serde(rename = "type")]
+    pub type_: String,
+}
+
+pub type BetaMcpToolCallError = serde_json::Value;
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct ToolFunction {
+    pub name: String,
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// The tool invocation context(s).
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub allowed_callers: Option<Vec<serde_json::Value>>,
+    /// Whether this function should be deferred and discovered via tool search.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub defer_loading: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub description: Option<String>,
+    /// A JSON Schema describing the JSON value encoded in string outputs for this
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub output_schema: Option<std::collections::HashMap<String, serde_json::Value>>,
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub parameters: Option<serde_json::Value>,
+    /// Whether to enforce strict parameter validation.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub strict: Option<bool>,
+}
+
+pub type Tool = serde_json::Value;
+
+/// Groups function/custom tools under a shared namespace.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct BetaNamespaceTool {
+    /// A description of the namespace shown to the model.
+    pub description: String,
+    /// The namespace name used in tool calls (for example, `crm`).
+    pub name: String,
+    /// The function/custom tools available inside this namespace.
+    pub tools: Vec<Tool>,
+    /// The type of the tool. Always `namespace`.
+    #[serde(rename = "type")]
+    pub type_: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+#[non_exhaustive]
+pub enum IncompleteDetailsReason {
+    #[serde(rename = "max_output_tokens")]
+    MaxOutputTokens,
+    #[serde(rename = "content_filter")]
+    ContentFilter,
+}
+
+/// Details about why the response is incomplete.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct IncompleteDetails {
+    /// The reason why the response is incomplete.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub reason: Option<IncompleteDetailsReason>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct ToolChoiceBetaSpecificProgrammaticToolCallingParam {
+    /// The tool to call. Always `programmatic_tool_calling`.
+    #[serde(rename = "type")]
+    pub type_: String,
+}
+
+pub type ToolChoice = serde_json::Value;
+
+/// The conversation that this response belonged to.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct Conversation {
+    /// The unique ID of the conversation that this response was associated with.
+    pub id: String,
+}
+
+/// A moderation result produced for the response input or output.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct ModerationInputModerationResult {
+    /// A dictionary of moderation categories to booleans, True if the input is flagged
+    pub categories: std::collections::HashMap<String, bool>,
+    /// Which modalities of input are reflected by the score for each category.
+    pub category_applied_input_types: std::collections::HashMap<String, Vec<serde_json::Value>>,
+    /// A dictionary of moderation categories to scores.
+    pub category_scores: std::collections::HashMap<String, f64>,
+    /// A boolean indicating whether the content was flagged by any category.
+    pub flagged: bool,
+    /// The moderation model that produced this result.
+    pub model: String,
+    /// The object type, which was always `moderation_result` for successful moderation
+    #[serde(rename = "type")]
+    pub type_: String,
+}
+
+/// An error produced while attempting moderation for the response input or output.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct ModerationInputError {
+    /// The error code.
+    pub code: String,
+    /// The error message.
+    pub message: String,
+    /// The object type, which was always `error` for moderation failures.
+    #[serde(rename = "type")]
+    pub type_: String,
+}
+
+pub type ModerationInput = serde_json::Value;
+
+/// A moderation result produced for the response input or output.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct ModerationOutputModerationResult {
+    /// A dictionary of moderation categories to booleans, True if the input is flagged
+    pub categories: std::collections::HashMap<String, bool>,
+    /// Which modalities of input are reflected by the score for each category.
+    pub category_applied_input_types: std::collections::HashMap<String, Vec<serde_json::Value>>,
+    /// A dictionary of moderation categories to scores.
+    pub category_scores: std::collections::HashMap<String, f64>,
+    /// A boolean indicating whether the content was flagged by any category.
+    pub flagged: bool,
+    /// The moderation model that produced this result.
+    pub model: String,
+    /// The object type, which was always `moderation_result` for successful moderation
+    #[serde(rename = "type")]
+    pub type_: String,
+}
+
+/// An error produced while attempting moderation for the response input or output.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct ModerationOutputError {
+    /// The error code.
+    pub code: String,
+    /// The error message.
+    pub message: String,
+    /// The object type, which was always `error` for moderation failures.
+    #[serde(rename = "type")]
+    pub type_: String,
+}
+
+pub type ModerationOutput = serde_json::Value;
+
+/// Moderation results for the response input and output, if moderated completions were requested.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct Moderation {
+    /// Moderation for the response input.
+    pub input: ModerationInput,
+    /// Moderation for the response output.
+    pub output: ModerationOutput,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+#[non_exhaustive]
+pub enum PromptCacheOptionsMode {
+    #[serde(rename = "implicit")]
+    Implicit,
+    #[serde(rename = "explicit")]
+    Explicit,
+}
+
+/// The prompt-caching options that were applied to the response.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct PromptCacheOptions {
+    /// Whether implicit prompt-cache breakpoints were enabled.
+    pub mode: PromptCacheOptionsMode,
+    /// The minimum lifetime applied to each cache breakpoint.
+    pub ttl: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+#[non_exhaustive]
+pub enum ReasoningContext {
+    #[serde(rename = "auto")]
+    Auto,
+    #[serde(rename = "current_turn")]
+    CurrentTurn,
+    #[serde(rename = "all_turns")]
+    AllTurns,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+#[non_exhaustive]
+pub enum ReasoningEffort {
+    #[serde(rename = "none")]
+    None,
+    #[serde(rename = "minimal")]
+    Minimal,
+    #[serde(rename = "low")]
+    Low,
+    #[serde(rename = "medium")]
+    Medium,
+    #[serde(rename = "high")]
+    High,
+    #[serde(rename = "xhigh")]
+    Xhigh,
+    #[serde(rename = "max")]
+    Max,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+#[non_exhaustive]
+pub enum ReasoningGenerateSummary {
+    #[serde(rename = "auto")]
+    Auto,
+    #[serde(rename = "concise")]
+    Concise,
+    #[serde(rename = "detailed")]
+    Detailed,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+#[non_exhaustive]
+pub enum ReasoningSummary {
+    #[serde(rename = "auto")]
+    Auto,
+    #[serde(rename = "concise")]
+    Concise,
+    #[serde(rename = "detailed")]
+    Detailed,
+}
+
+/// **gpt-5 and o-series models only**
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct Reasoning {
+    /// Controls which reasoning items are rendered back to the model on later turns. If
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub context: Option<ReasoningContext>,
+    /// Constrains effort on reasoning for reasoning models.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub effort: Option<ReasoningEffort>,
+    /// **Deprecated:** use `summary` instead.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub generate_summary: Option<ReasoningGenerateSummary>,
+    /// Controls the reasoning execution mode for the request.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub mode: Option<String>,
+    /// A summary of the reasoning performed by the model.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub summary: Option<ReasoningSummary>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+#[non_exhaustive]
+pub enum BetaResponsePromptCacheRetention {
+    #[serde(rename = "in_memory")]
+    InMemory,
+    #[serde(rename = "24h")]
+    V24h,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+#[non_exhaustive]
+pub enum BetaResponseTruncation {
+    #[serde(rename = "auto")]
+    Auto,
+    #[serde(rename = "disabled")]
+    Disabled,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct BetaResponse {
+    /// Unique identifier for this Response.
+    pub id: String,
+    /// Unix timestamp (in seconds) of when this Response was created.
+    pub created_at: f64,
+    /// An error object returned when the model fails to generate a Response.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub error: Option<BetaResponseError>,
+    /// Details about why the response is incomplete.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub incomplete_details: Option<IncompleteDetails>,
+    /// A system (or developer) message inserted into the model's context.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub instructions: Option<String>,
+    /// Set of 16 key-value pairs that can be attached to an object.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub metadata: Option<std::collections::HashMap<String, String>>,
+    /// Model ID used to generate the response, like `gpt-4o` or `o3`.
+    pub model: Option<String>,
+    /// The object type of this resource - always set to `response`.
+    pub object: String,
+    /// An array of content items generated by the model.
+    pub output: Vec<BetaResponseOutputItem>,
+    /// Whether to allow the model to run tool calls in parallel.
+    pub parallel_tool_calls: bool,
+    /// What sampling temperature to use, between 0 and 2.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub temperature: Option<f64>,
+    /// How the model should select which tool (or tools) to use when generating a
+    pub tool_choice: ToolChoice,
+    /// An array of tools the model may call while generating a response.
+    pub tools: Vec<BetaTool>,
+    /// An alternative to sampling with temperature, called nucleus sampling, where the
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub top_p: Option<f64>,
+    /// Whether to run the model response in the background.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub background: Option<bool>,
+    /// Unix timestamp (in seconds) of when this Response was completed. Only present
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub completed_at: Option<f64>,
+    /// The conversation that this response belonged to.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub conversation: Option<Conversation>,
+    /// An upper bound for the number of tokens that can be generated for a response,
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub max_output_tokens: Option<i64>,
+    /// The maximum number of total calls to built-in tools that can be processed in a
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub max_tool_calls: Option<i64>,
+    /// Moderation results for the response input and output, if moderated completions
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub moderation: Option<Moderation>,
+    /// The unique ID of the previous response to the model.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub previous_response_id: Option<String>,
+    /// Reference to a prompt template and its variables.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub prompt: Option<BetaResponsePrompt>,
+    /// Used by OpenAI to cache responses for similar requests to optimize your cache
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub prompt_cache_key: Option<String>,
+    /// The prompt-caching options that were applied to the response.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub prompt_cache_options: Option<PromptCacheOptions>,
+    /// Deprecated. Use `prompt_cache_options.ttl` instead.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub prompt_cache_retention: Option<BetaResponsePromptCacheRetention>,
+    /// **gpt-5 and o-series models only**
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub reasoning: Option<Reasoning>,
+    /// A stable identifier used to help detect users of your application that may be
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub safety_identifier: Option<String>,
+    /// Specifies the processing type used for serving the request.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub service_tier: Option<BetaServiceTier>,
+    /// The status of the response generation.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub status: Option<BetaResponseStatus>,
+    /// Configuration options for a text response from the model.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub text: Option<BetaResponseTextConfig>,
+    /// An integer between 0 and 20 specifying the maximum number of most likely tokens
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub top_logprobs: Option<i64>,
+    /// The truncation strategy to use for the model response.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub truncation: Option<BetaResponseTruncation>,
+    /// Represents token usage details including input tokens, output tokens, a
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub usage: Option<BetaResponseUsage>,
+    /// This field is being replaced by `safety_identifier` and `prompt_cache_key`.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub user: Option<String>,
+}
+
+/// Instruction describing how to create a file via the apply_patch tool.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct OperationCreateFile {
+    /// Diff to apply.
+    pub diff: String,
+    /// Path of the file to create.
+    pub path: String,
+    /// Create a new file with the provided diff.
+    #[serde(rename = "type")]
+    pub type_: String,
+}
+
+/// Instruction describing how to delete a file via the apply_patch tool.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct OperationDeleteFile {
+    /// Path of the file to delete.
+    pub path: String,
+    /// Delete the specified file.
+    #[serde(rename = "type")]
+    pub type_: String,
+}
+
+/// Instruction describing how to update a file via the apply_patch tool.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct OperationUpdateFile {
+    /// Diff to apply.
+    pub diff: String,
+    /// Path of the file to update.
+    pub path: String,
+    /// Update an existing file with the provided diff.
+    #[serde(rename = "type")]
+    pub type_: String,
+}
+
+pub type Operation = serde_json::Value;
+
+/// The agent that produced this item.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct Agent {
+    /// The canonical name of the agent that produced this item.
+    pub agent_name: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct CallerDirect {
+    #[serde(rename = "type")]
+    pub type_: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct CallerProgram {
+    /// The call ID of the program item that produced this tool call.
+    pub caller_id: String,
+    #[serde(rename = "type")]
+    pub type_: String,
+}
+
+pub type Caller = serde_json::Value;
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+#[non_exhaustive]
+pub enum BetaResponseApplyPatchToolCallStatus {
+    #[serde(rename = "in_progress")]
+    InProgress,
+    #[serde(rename = "completed")]
+    Completed,
+}
+
+/// A tool call that applies file diffs by creating, deleting, or updating files.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct BetaResponseApplyPatchToolCall {
+    /// The unique ID of the apply patch tool call.
+    pub id: String,
+    /// The unique ID of the apply patch tool call generated by the model.
+    pub call_id: String,
+    /// One of the create_file, delete_file, or update_file operations applied via
+    pub operation: Operation,
+    /// The status of the apply patch tool call. One of `in_progress` or `completed`.
+    pub status: BetaResponseApplyPatchToolCallStatus,
+    /// The type of the item. Always `apply_patch_call`.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// The agent that produced this item.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub agent: Option<Agent>,
+    /// The execution context that produced this tool call.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub caller: Option<Caller>,
+    /// The ID of the entity that created this tool call.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub created_by: Option<String>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+#[non_exhaustive]
+pub enum BetaResponseApplyPatchToolCallOutputStatus {
+    #[serde(rename = "completed")]
+    Completed,
+    #[serde(rename = "failed")]
+    Failed,
+}
+
+/// The output emitted by an apply patch tool call.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct BetaResponseApplyPatchToolCallOutput {
+    /// The unique ID of the apply patch tool call output.
+    pub id: String,
+    /// The unique ID of the apply patch tool call generated by the model.
+    pub call_id: String,
+    /// The status of the apply patch tool call output. One of `completed` or `failed`.
+    pub status: BetaResponseApplyPatchToolCallOutputStatus,
+    /// The type of the item. Always `apply_patch_call_output`.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// The agent that produced this item.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub agent: Option<Agent>,
+    /// The execution context that produced this tool call.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub caller: Option<Caller>,
+    /// The ID of the entity that created this tool call output.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub created_by: Option<String>,
+    /// Optional textual output returned by the apply patch tool.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub output: Option<String>,
+}
+
+/// Emitted when there is a partial audio response.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct BetaResponseAudioDeltaEvent {
+    /// A chunk of Base64 encoded response audio bytes.
+    pub delta: String,
+    /// A sequence number for this chunk of the stream response.
+    pub sequence_number: i64,
+    /// The type of the event. Always `response.audio.delta`.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// The agent that owns this multi-agent streaming event.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub agent: Option<Agent>,
+}
+
+/// Emitted when the audio response is complete.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct BetaResponseAudioDoneEvent {
+    /// The sequence number of the delta.
+    pub sequence_number: i64,
+    /// The type of the event. Always `response.audio.done`.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// The agent that owns this multi-agent streaming event.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub agent: Option<Agent>,
+}
+
+/// Emitted when there is a partial transcript of audio.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct BetaResponseAudioTranscriptDeltaEvent {
+    /// The partial transcript of the audio response.
+    pub delta: String,
+    /// The sequence number of this event.
+    pub sequence_number: i64,
+    /// The type of the event. Always `response.audio.transcript.delta`.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// The agent that owns this multi-agent streaming event.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub agent: Option<Agent>,
+}
+
+/// Emitted when the full audio transcript is completed.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct BetaResponseAudioTranscriptDoneEvent {
+    /// The sequence number of this event.
+    pub sequence_number: i64,
+    /// The type of the event. Always `response.audio.transcript.done`.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// The agent that owns this multi-agent streaming event.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub agent: Option<Agent>,
+}
+
+/// Emitted when a partial code snippet is streamed by the code interpreter.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct BetaResponseCodeInterpreterCallCodeDeltaEvent {
+    /// The partial code snippet being streamed by the code interpreter.
+    pub delta: String,
+    /// The unique identifier of the code interpreter tool call item.
+    pub item_id: String,
+    /// The index of the output item in the response for which the code is being
+    pub output_index: i64,
+    /// The sequence number of this event, used to order streaming events.
+    pub sequence_number: i64,
+    /// The type of the event. Always `response.code_interpreter_call_code.delta`.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// The agent that owns this multi-agent streaming event.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub agent: Option<Agent>,
+}
+
+/// Emitted when the code snippet is finalized by the code interpreter.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct BetaResponseCodeInterpreterCallCodeDoneEvent {
+    /// The final code snippet output by the code interpreter.
+    pub code: String,
+    /// The unique identifier of the code interpreter tool call item.
+    pub item_id: String,
+    /// The index of the output item in the response for which the code is finalized.
+    pub output_index: i64,
+    /// The sequence number of this event, used to order streaming events.
+    pub sequence_number: i64,
+    /// The type of the event. Always `response.code_interpreter_call_code.done`.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// The agent that owns this multi-agent streaming event.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub agent: Option<Agent>,
+}
+
+/// Emitted when the code interpreter call is completed.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct BetaResponseCodeInterpreterCallCompletedEvent {
+    /// The unique identifier of the code interpreter tool call item.
+    pub item_id: String,
+    /// The index of the output item in the response for which the code interpreter call
+    pub output_index: i64,
+    /// The sequence number of this event, used to order streaming events.
+    pub sequence_number: i64,
+    /// The type of the event. Always `response.code_interpreter_call.completed`.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// The agent that owns this multi-agent streaming event.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub agent: Option<Agent>,
+}
+
+/// Emitted when a code interpreter call is in progress.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct BetaResponseCodeInterpreterCallInProgressEvent {
+    /// The unique identifier of the code interpreter tool call item.
+    pub item_id: String,
+    /// The index of the output item in the response for which the code interpreter call
+    pub output_index: i64,
+    /// The sequence number of this event, used to order streaming events.
+    pub sequence_number: i64,
+    /// The type of the event. Always `response.code_interpreter_call.in_progress`.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// The agent that owns this multi-agent streaming event.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub agent: Option<Agent>,
+}
+
+/// Emitted when the code interpreter is actively interpreting the code snippet.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct BetaResponseCodeInterpreterCallInterpretingEvent {
+    /// The unique identifier of the code interpreter tool call item.
+    pub item_id: String,
+    /// The index of the output item in the response for which the code interpreter is
+    pub output_index: i64,
+    /// The sequence number of this event, used to order streaming events.
+    pub sequence_number: i64,
+    /// The type of the event. Always `response.code_interpreter_call.interpreting`.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// The agent that owns this multi-agent streaming event.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub agent: Option<Agent>,
+}
+
+/// The logs output from the code interpreter.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct OutputLogs {
+    /// The logs output from the code interpreter.
+    pub logs: String,
+    /// The type of the output. Always `logs`.
+    #[serde(rename = "type")]
+    pub type_: String,
+}
+
+/// The image output from the code interpreter.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct OutputImage {
+    /// The type of the output. Always `image`.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// The URL of the image output from the code interpreter.
+    pub url: String,
+}
+
+pub type Output = serde_json::Value;
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+#[non_exhaustive]
+pub enum BetaResponseCodeInterpreterToolCallStatus {
+    #[serde(rename = "in_progress")]
+    InProgress,
+    #[serde(rename = "completed")]
+    Completed,
+    #[serde(rename = "incomplete")]
+    Incomplete,
+    #[serde(rename = "interpreting")]
+    Interpreting,
+    #[serde(rename = "failed")]
+    Failed,
+}
+
+/// A tool call to run code.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct BetaResponseCodeInterpreterToolCall {
+    /// The unique ID of the code interpreter tool call.
+    pub id: String,
+    /// The code to run, or null if not available.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub code: Option<String>,
+    /// The ID of the container used to run the code.
+    pub container_id: String,
+    /// The outputs generated by the code interpreter, such as logs or images. Can be
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub outputs: Option<Vec<BetaResponseOutput>>,
+    /// The status of the code interpreter tool call.
+    pub status: BetaResponseCodeInterpreterToolCallStatus,
+    /// The type of the code interpreter tool call. Always `code_interpreter_call`.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// The agent that produced this item.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub agent: Option<Agent>,
+}
+
+/// A compaction item generated by the [`v1/responses/compact` API](https://platform.openai.com/docs/api-reference/responses/compact).
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct BetaResponseCompactionItem {
+    /// The unique ID of the compaction item.
+    pub id: String,
+    /// The encrypted content that was produced by compaction.
+    pub encrypted_content: String,
+    /// The type of the item. Always `compaction`.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// The agent that produced this item.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub agent: Option<Agent>,
+    /// The identifier of the actor that created the item.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub created_by: Option<String>,
+}
+
+/// Emitted when the model response is complete.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct BetaResponseCompletedEvent {
+    /// Properties of the completed response.
+    pub response: BetaResponse,
+    /// The sequence number for this event.
+    pub sequence_number: i64,
+    /// The type of the event. Always `response.completed`.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// The agent that owns this multi-agent streaming event.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub agent: Option<Agent>,
+}
+
+/// A pending safety check for the computer call.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct PendingSafetyCheck {
+    /// The ID of the pending safety check.
+    pub id: String,
+    /// The type of the pending safety check.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub code: Option<String>,
+    /// Details about the pending safety check.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub message: Option<String>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+#[non_exhaustive]
+pub enum BetaResponseComputerToolCallStatus {
+    #[serde(rename = "in_progress")]
+    InProgress,
+    #[serde(rename = "completed")]
+    Completed,
+    #[serde(rename = "incomplete")]
+    Incomplete,
+}
+
+/// A tool call to a computer use tool.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct BetaResponseComputerToolCall {
+    /// The unique ID of the computer call.
+    pub id: String,
+    /// An identifier used when responding to the tool call with output.
+    pub call_id: String,
+    /// The pending safety checks for the computer call.
+    pub pending_safety_checks: Vec<PendingSafetyCheck>,
+    /// The status of the item.
+    pub status: BetaResponseComputerToolCallStatus,
+    /// The type of the computer call. Always `computer_call`.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// A click action.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub action: Option<BetaComputerAction>,
+    /// Flattened batched actions for `computer_use`.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub actions: Option<BetaComputerActionList>,
+    /// The agent that produced this item.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub agent: Option<Agent>,
+}
+
+/// A pending safety check for the computer call.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct AcknowledgedSafetyCheck {
+    /// The ID of the pending safety check.
+    pub id: String,
+    /// The type of the pending safety check.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub code: Option<String>,
+    /// Details about the pending safety check.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub message: Option<String>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+#[non_exhaustive]
+pub enum BetaResponseComputerToolCallOutputItemStatus {
+    #[serde(rename = "completed")]
+    Completed,
+    #[serde(rename = "incomplete")]
+    Incomplete,
+    #[serde(rename = "failed")]
+    Failed,
+    #[serde(rename = "in_progress")]
+    InProgress,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct BetaResponseComputerToolCallOutputItem {
+    /// The unique ID of the computer call tool output.
+    pub id: String,
+    /// The ID of the computer tool call that produced the output.
+    pub call_id: String,
+    /// A computer screenshot image used with the computer use tool.
+    pub output: BetaResponseComputerToolCallOutputScreenshot,
+    /// The status of the message input.
+    pub status: BetaResponseComputerToolCallOutputItemStatus,
+    /// The type of the computer tool call output. Always `computer_call_output`.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// The safety checks reported by the API that have been acknowledged by the
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub acknowledged_safety_checks: Option<Vec<AcknowledgedSafetyCheck>>,
+    /// The agent that produced this item.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub agent: Option<Agent>,
+    /// The identifier of the actor that created the item.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub created_by: Option<String>,
+}
+
+/// A computer screenshot image used with the computer use tool.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct BetaResponseComputerToolCallOutputScreenshot {
+    /// Specifies the event type.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// The identifier of an uploaded file that contains the screenshot.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub file_id: Option<String>,
+    /// The URL of the screenshot image.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub image_url: Option<String>,
+}
+
+/// Represents a container created with /v1/containers.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct BetaResponseContainerReference {
+    pub container_id: String,
+    /// The environment type. Always `container_reference`.
+    #[serde(rename = "type")]
+    pub type_: String,
+}
+
+/// Reasoning text from the model.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct PartReasoningText {
+    /// The reasoning text from the model.
+    pub text: String,
+    /// The type of the reasoning text. Always `reasoning_text`.
+    #[serde(rename = "type")]
+    pub type_: String,
+}
+
+pub type Part = serde_json::Value;
+
+/// Emitted when a new content part is added.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct BetaResponseContentPartAddedEvent {
+    /// The index of the content part that was added.
+    pub content_index: i64,
+    /// The ID of the output item that the content part was added to.
+    pub item_id: String,
+    /// The index of the output item that the content part was added to.
+    pub output_index: i64,
+    /// The content part that was added.
+    pub part: BetaResponsePart,
+    /// The sequence number of this event.
+    pub sequence_number: i64,
+    /// The type of the event. Always `response.content_part.added`.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// The agent that owns this multi-agent streaming event.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub agent: Option<Agent>,
+}
+
+/// Emitted when a content part is done.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct BetaResponseContentPartDoneEvent {
+    /// The index of the content part that is done.
+    pub content_index: i64,
+    /// The ID of the output item that the content part was added to.
+    pub item_id: String,
+    /// The index of the output item that the content part was added to.
+    pub output_index: i64,
+    /// The content part that is done.
+    pub part: BetaResponsePart,
+    /// The sequence number of this event.
+    pub sequence_number: i64,
+    /// The type of the event. Always `response.content_part.done`.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// The agent that owns this multi-agent streaming event.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub agent: Option<Agent>,
+}
+
+/// An event that is emitted when a response is created.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct BetaResponseCreatedEvent {
+    /// The response that was created.
+    pub response: BetaResponse,
+    /// The sequence number for this event.
+    pub sequence_number: i64,
+    /// The type of the event. Always `response.created`.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// The agent that owns this multi-agent streaming event.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub agent: Option<Agent>,
+}
+
+/// A call to a custom tool created by the model.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct BetaResponseCustomToolCall {
+    /// An identifier used to map this custom tool call to a tool call output.
+    pub call_id: String,
+    /// The input for the custom tool call generated by the model.
+    pub input: String,
+    /// The name of the custom tool being called.
+    pub name: String,
+    /// The type of the custom tool call. Always `custom_tool_call`.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// The unique ID of the custom tool call in the OpenAI platform.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub id: Option<String>,
+    /// The agent that produced this item.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub agent: Option<Agent>,
+    /// The execution context that produced this tool call.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub caller: Option<Caller>,
+    /// The namespace of the custom tool being called.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub namespace: Option<String>,
+}
+
+/// Event representing a delta (partial update) to the input of a custom tool call.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct BetaResponseCustomToolCallInputDeltaEvent {
+    /// The incremental input data (delta) for the custom tool call.
+    pub delta: String,
+    /// Unique identifier for the API item associated with this event.
+    pub item_id: String,
+    /// The index of the output this delta applies to.
+    pub output_index: i64,
+    /// The sequence number of this event.
+    pub sequence_number: i64,
+    /// The event type identifier.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// The agent that owns this multi-agent streaming event.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub agent: Option<Agent>,
+}
+
+/// Event indicating that input for a custom tool call is complete.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct BetaResponseCustomToolCallInputDoneEvent {
+    /// The complete input data for the custom tool call.
+    pub input: String,
+    /// Unique identifier for the API item associated with this event.
+    pub item_id: String,
+    /// The index of the output this event applies to.
+    pub output_index: i64,
+    /// The sequence number of this event.
+    pub sequence_number: i64,
+    /// The event type identifier.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// The agent that owns this multi-agent streaming event.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub agent: Option<Agent>,
+}
+
+pub type OutputOutputContentList = serde_json::Value;
+
+/// The output of a custom tool call from your code, being sent back to the model.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct BetaResponseCustomToolCallOutput {
+    /// The call ID, used to map this custom tool call output to a custom tool call.
+    pub call_id: String,
+    /// The output from the custom tool call generated by your code. Can be a string or
+    pub output: String,
+    /// The type of the custom tool call output. Always `custom_tool_call_output`.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// The unique ID of the custom tool call output in the OpenAI platform.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub id: Option<String>,
+    /// The agent that produced this item.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub agent: Option<Agent>,
+    /// The execution context that produced this tool call.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub caller: Option<Caller>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+#[non_exhaustive]
+pub enum BetaResponseErrorCode {
+    #[serde(rename = "server_error")]
+    ServerError,
+    #[serde(rename = "rate_limit_exceeded")]
+    RateLimitExceeded,
+    #[serde(rename = "invalid_prompt")]
+    InvalidPrompt,
+    #[serde(rename = "data_residency_mismatch")]
+    DataResidencyMismatch,
+    #[serde(rename = "bio_policy")]
+    BioPolicy,
+    #[serde(rename = "vector_store_timeout")]
+    VectorStoreTimeout,
+    #[serde(rename = "invalid_image")]
+    InvalidImage,
+    #[serde(rename = "invalid_image_format")]
+    InvalidImageFormat,
+    #[serde(rename = "invalid_base64_image")]
+    InvalidBase64Image,
+    #[serde(rename = "invalid_image_url")]
+    InvalidImageUrl,
+    #[serde(rename = "image_too_large")]
+    ImageTooLarge,
+    #[serde(rename = "image_too_small")]
+    ImageTooSmall,
+    #[serde(rename = "image_parse_error")]
+    ImageParseError,
+    #[serde(rename = "image_content_policy_violation")]
+    ImageContentPolicyViolation,
+    #[serde(rename = "invalid_image_mode")]
+    InvalidImageMode,
+    #[serde(rename = "image_file_too_large")]
+    ImageFileTooLarge,
+    #[serde(rename = "unsupported_image_media_type")]
+    UnsupportedImageMediaType,
+    #[serde(rename = "empty_image_file")]
+    EmptyImageFile,
+    #[serde(rename = "failed_to_download_image")]
+    FailedToDownloadImage,
+    #[serde(rename = "image_file_not_found")]
+    ImageFileNotFound,
+}
+
+/// An error object returned when the model fails to generate a Response.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct BetaResponseError {
+    /// The error code for the response.
+    pub code: BetaResponseErrorCode,
+    /// A human-readable description of the error.
+    pub message: String,
+}
+
+/// Emitted when an error occurs.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct BetaResponseErrorEvent {
+    /// The error code.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub code: Option<String>,
+    /// The error message.
+    pub message: String,
+    /// The error parameter.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub param: Option<String>,
+    /// The sequence number of this event.
+    pub sequence_number: i64,
+    /// The type of the event. Always `error`.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// The agent that owns this multi-agent streaming event.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub agent: Option<Agent>,
+}
+
+/// An event that is emitted when a response fails.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct BetaResponseFailedEvent {
+    /// The response that failed.
+    pub response: BetaResponse,
+    /// The sequence number of this event.
+    pub sequence_number: i64,
+    /// The type of the event. Always `response.failed`.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// The agent that owns this multi-agent streaming event.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub agent: Option<Agent>,
+}
+
+/// Emitted when a file search call is completed (results found).
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct BetaResponseFileSearchCallCompletedEvent {
+    /// The ID of the output item that the file search call is initiated.
+    pub item_id: String,
+    /// The index of the output item that the file search call is initiated.
+    pub output_index: i64,
+    /// The sequence number of this event.
+    pub sequence_number: i64,
+    /// The type of the event. Always `response.file_search_call.completed`.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// The agent that owns this multi-agent streaming event.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub agent: Option<Agent>,
+}
+
+/// Emitted when a file search call is initiated.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct BetaResponseFileSearchCallInProgressEvent {
+    /// The ID of the output item that the file search call is initiated.
+    pub item_id: String,
+    /// The index of the output item that the file search call is initiated.
+    pub output_index: i64,
+    /// The sequence number of this event.
+    pub sequence_number: i64,
+    /// The type of the event. Always `response.file_search_call.in_progress`.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// The agent that owns this multi-agent streaming event.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub agent: Option<Agent>,
+}
+
+/// Emitted when a file search is currently searching.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct BetaResponseFileSearchCallSearchingEvent {
+    /// The ID of the output item that the file search call is initiated.
+    pub item_id: String,
+    /// The index of the output item that the file search call is searching.
+    pub output_index: i64,
+    /// The sequence number of this event.
+    pub sequence_number: i64,
+    /// The type of the event. Always `response.file_search_call.searching`.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// The agent that owns this multi-agent streaming event.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub agent: Option<Agent>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct BetaResponseResult {
+    /// Set of 16 key-value pairs that can be attached to an object.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub attributes: Option<std::collections::HashMap<String, serde_json::Value>>,
+    /// The unique ID of the file.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub file_id: Option<String>,
+    /// The name of the file.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub filename: Option<String>,
+    /// The relevance score of the file - a value between 0 and 1.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub score: Option<f64>,
+    /// The text that was retrieved from the file.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub text: Option<String>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+#[non_exhaustive]
+pub enum BetaResponseFileSearchToolCallStatus {
+    #[serde(rename = "in_progress")]
+    InProgress,
+    #[serde(rename = "searching")]
+    Searching,
+    #[serde(rename = "completed")]
+    Completed,
+    #[serde(rename = "incomplete")]
+    Incomplete,
+    #[serde(rename = "failed")]
+    Failed,
+}
+
+/// The results of a file search tool call.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct BetaResponseFileSearchToolCall {
+    /// The unique ID of the file search tool call.
+    pub id: String,
+    /// The queries used to search for files.
+    pub queries: Vec<String>,
+    /// The status of the file search tool call.
+    pub status: BetaResponseFileSearchToolCallStatus,
+    /// The type of the file search tool call. Always `file_search_call`.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// The agent that produced this item.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub agent: Option<Agent>,
+    /// The results of the file search tool call.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub results: Option<Vec<BetaResponseResult>>,
+}
+
+/// Default response format. Used to generate text responses.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct Text {
+    /// The type of response format being defined. Always `text`.
+    #[serde(rename = "type")]
+    pub type_: String,
+}
+
+/// JSON object response format.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct JSONObject {
+    /// The type of response format being defined. Always `json_object`.
+    #[serde(rename = "type")]
+    pub type_: String,
+}
+
+pub type BetaResponseFormatTextConfig = serde_json::Value;
+
+/// JSON Schema response format.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct BetaResponseFormatTextJSONSchemaConfig {
+    /// The name of the response format.
+    pub name: String,
+    /// The schema for the response format, described as a JSON Schema object. Learn how
+    #[serde(rename = "schema")]
+    pub schema_: std::collections::HashMap<String, serde_json::Value>,
+    /// The type of response format being defined. Always `json_schema`.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// A description of what the response format is for, used by the model to determine
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub description: Option<String>,
+    /// Whether to enable strict schema adherence when generating the output. If set to
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub strict: Option<bool>,
+}
+
+/// Emitted when there is a partial function-call arguments delta.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct BetaResponseFunctionCallArgumentsDeltaEvent {
+    /// The function-call arguments delta that is added.
+    pub delta: String,
+    /// The ID of the output item that the function-call arguments delta is added to.
+    pub item_id: String,
+    /// The index of the output item that the function-call arguments delta is added to.
+    pub output_index: i64,
+    /// The sequence number of this event.
+    pub sequence_number: i64,
+    /// The type of the event. Always `response.function_call_arguments.delta`.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// The agent that owns this multi-agent streaming event.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub agent: Option<Agent>,
+}
+
+/// Emitted when function-call arguments are finalized.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct BetaResponseFunctionCallArgumentsDoneEvent {
+    /// The function-call arguments.
+    pub arguments: String,
+    /// The ID of the item.
+    pub item_id: String,
+    /// The name of the function that was called.
+    pub name: String,
+    /// The index of the output item.
+    pub output_index: i64,
+    /// The sequence number of this event.
+    pub sequence_number: i64,
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// The agent that owns this multi-agent streaming event.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub agent: Option<Agent>,
+}
+
+pub type BetaResponseFunctionCallOutputItem = serde_json::Value;
+
+pub type BetaResponseFunctionCallOutputItemList = Vec<BetaResponseFunctionCallOutputItem>;
+
+/// Indicates that the shell call exceeded its configured time limit.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct OutcomeTimeout {
+    /// The outcome type. Always `timeout`.
+    #[serde(rename = "type")]
+    pub type_: String,
+}
+
+/// Indicates that the shell commands finished and returned an exit code.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct OutcomeExit {
+    /// The exit code returned by the shell process.
+    pub exit_code: i64,
+    /// The outcome type. Always `exit`.
+    #[serde(rename = "type")]
+    pub type_: String,
+}
+
+pub type Outcome = serde_json::Value;
+
+/// Captured stdout and stderr for a portion of a shell tool call output.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct BetaResponseFunctionShellCallOutputContent {
+    /// The exit or timeout outcome associated with this shell call.
+    pub outcome: Outcome,
+    /// Captured stderr output for the shell call.
+    pub stderr: String,
+    /// Captured stdout output for the shell call.
+    pub stdout: String,
+}
+
+/// The shell commands and limits that describe how to run the tool call.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct BetaResponseAction {
+    pub commands: Vec<String>,
+    /// Optional maximum number of characters to return from each command.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub max_output_length: Option<i64>,
+    /// Optional timeout in milliseconds for the commands.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub timeout_ms: Option<i64>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+#[non_exhaustive]
+pub enum BetaResponseFunctionShellToolCallStatus {
+    #[serde(rename = "in_progress")]
+    InProgress,
+    #[serde(rename = "completed")]
+    Completed,
+    #[serde(rename = "incomplete")]
+    Incomplete,
+}
+
+/// A tool call that executes one or more shell commands in a managed environment.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct BetaResponseFunctionShellToolCall {
+    /// The unique ID of the shell tool call.
+    pub id: String,
+    /// The shell commands and limits that describe how to run the tool call.
+    pub action: BetaResponseAction,
+    /// The unique ID of the shell tool call generated by the model.
+    pub call_id: String,
+    /// Represents the use of a local environment to perform shell actions.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub environment: Option<Environment>,
+    /// The status of the shell call.
+    pub status: BetaResponseFunctionShellToolCallStatus,
+    /// The type of the item. Always `shell_call`.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// The agent that produced this item.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub agent: Option<Agent>,
+    /// The execution context that produced this tool call.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub caller: Option<Caller>,
+    /// The ID of the entity that created this tool call.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub created_by: Option<String>,
+}
+
+/// Indicates that the shell call exceeded its configured time limit.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct OutputOutcomeTimeout {
+    /// The outcome type. Always `timeout`.
+    #[serde(rename = "type")]
+    pub type_: String,
+}
+
+/// Indicates that the shell commands finished and returned an exit code.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct OutputOutcomeExit {
+    /// Exit code from the shell process.
+    pub exit_code: i64,
+    /// The outcome type. Always `exit`.
+    #[serde(rename = "type")]
+    pub type_: String,
+}
+
+pub type OutputOutcome = serde_json::Value;
+
+/// The content of a shell tool call output that was emitted.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct BetaResponseOutput {
+    /// Represents either an exit outcome (with an exit code) or a timeout outcome for a
+    pub outcome: OutputOutcome,
+    /// The standard error output that was captured.
+    pub stderr: String,
+    /// The standard output that was captured.
+    pub stdout: String,
+    /// The identifier of the actor that created the item.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub created_by: Option<String>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+#[non_exhaustive]
+pub enum BetaResponseFunctionShellToolCallOutputStatus {
+    #[serde(rename = "in_progress")]
+    InProgress,
+    #[serde(rename = "completed")]
+    Completed,
+    #[serde(rename = "incomplete")]
+    Incomplete,
+}
+
+/// The output of a shell tool call that was emitted.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct BetaResponseFunctionShellToolCallOutput {
+    /// The unique ID of the shell call output.
+    pub id: String,
+    /// The unique ID of the shell tool call generated by the model.
+    pub call_id: String,
+    /// The maximum length of the shell command output.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub max_output_length: Option<i64>,
+    /// An array of shell call output contents
+    pub output: Vec<BetaResponseOutput>,
+    /// The status of the shell call output.
+    pub status: BetaResponseFunctionShellToolCallOutputStatus,
+    /// The type of the shell call output. Always `shell_call_output`.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// The agent that produced this item.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub agent: Option<Agent>,
+    /// The execution context that produced this tool call.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub caller: Option<Caller>,
+    /// The identifier of the actor that created the item.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub created_by: Option<String>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+#[non_exhaustive]
+pub enum BetaResponseFunctionToolCallStatus {
+    #[serde(rename = "in_progress")]
+    InProgress,
+    #[serde(rename = "completed")]
+    Completed,
+    #[serde(rename = "incomplete")]
+    Incomplete,
+}
+
+/// A tool call to run a function.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct BetaResponseFunctionToolCall {
+    /// A JSON string of the arguments to pass to the function.
+    pub arguments: String,
+    /// The unique ID of the function tool call generated by the model.
+    pub call_id: String,
+    /// The name of the function to run.
+    pub name: String,
+    /// The type of the function tool call. Always `function_call`.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// The unique ID of the function tool call.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub id: Option<String>,
+    /// The agent that produced this item.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub agent: Option<Agent>,
+    /// The execution context that produced this tool call.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub caller: Option<Caller>,
+    /// The namespace of the function to run.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub namespace: Option<String>,
+    /// The status of the item.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub status: Option<BetaResponseFunctionToolCallStatus>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+#[non_exhaustive]
+pub enum BetaResponseFunctionToolCallOutputItemStatus {
+    #[serde(rename = "in_progress")]
+    InProgress,
+    #[serde(rename = "completed")]
+    Completed,
+    #[serde(rename = "incomplete")]
+    Incomplete,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct BetaResponseFunctionToolCallOutputItem {
+    /// The unique ID of the function call tool output.
+    pub id: String,
+    /// The unique ID of the function tool call generated by the model.
+    pub call_id: String,
+    /// The output from the function call generated by your code. Can be a string or an
+    pub output: String,
+    /// The status of the item.
+    pub status: BetaResponseFunctionToolCallOutputItemStatus,
+    /// The type of the function tool call output. Always `function_call_output`.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// The agent that produced this item.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub agent: Option<Agent>,
+    /// The execution context that produced this tool call.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub caller: Option<Caller>,
+    /// The identifier of the actor that created the item.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub created_by: Option<String>,
+    /// The name of the tool that produced the output.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub name: Option<String>,
+    /// The namespace of the tool that produced the output.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub namespace: Option<String>,
+}
+
+/// A source used in the search.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct ActionSearchSource {
+    /// The type of source. Always `url`.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// The URL of the source.
+    pub url: String,
+}
+
+/// Action type "search" - Performs a web search query.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct ActionSearch {
+    /// The action type.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// The search queries.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub queries: Option<Vec<String>>,
+    /// The search query.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub query: Option<String>,
+    /// The sources used in the search.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub sources: Option<Vec<ActionSearchSource>>,
+}
+
+/// Action type "open_page" - Opens a specific URL from search results.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct ActionOpenPage {
+    /// The action type.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// The URL opened by the model.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub url: Option<String>,
+}
+
+/// Action type "find_in_page": Searches for a pattern within a loaded page.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct ActionFindInPage {
+    /// The pattern or text to search for within the page.
+    pub pattern: String,
+    /// The action type.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// The URL of the page searched for the pattern.
+    pub url: String,
+}
+
+pub type Action = serde_json::Value;
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+#[non_exhaustive]
+pub enum BetaResponseFunctionWebSearchStatus {
+    #[serde(rename = "in_progress")]
+    InProgress,
+    #[serde(rename = "searching")]
+    Searching,
+    #[serde(rename = "completed")]
+    Completed,
+    #[serde(rename = "failed")]
+    Failed,
+}
+
+/// The results of a web search tool call.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct BetaResponseFunctionWebSearch {
+    /// The unique ID of the web search tool call.
+    pub id: String,
+    /// An object describing the specific action taken in this web search call. Includes
+    pub action: BetaResponseAction,
+    /// The status of the web search tool call.
+    pub status: BetaResponseFunctionWebSearchStatus,
+    /// The type of the web search tool call. Always `web_search_call`.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// The agent that produced this item.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub agent: Option<Agent>,
+}
+
+/// Emitted when an image generation tool call has completed and the final image is available.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct BetaResponseImageGenCallCompletedEvent {
+    /// The unique identifier of the image generation item being processed.
+    pub item_id: String,
+    /// The index of the output item in the response's output array.
+    pub output_index: i64,
+    /// The sequence number of this event.
+    pub sequence_number: i64,
+    /// The type of the event. Always 'response.image_generation_call.completed'.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// The agent that owns this multi-agent streaming event.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub agent: Option<Agent>,
+}
+
+/// Emitted when an image generation tool call is actively generating an image (intermediate state).
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct BetaResponseImageGenCallGeneratingEvent {
+    /// The unique identifier of the image generation item being processed.
+    pub item_id: String,
+    /// The index of the output item in the response's output array.
+    pub output_index: i64,
+    /// The sequence number of the image generation item being processed.
+    pub sequence_number: i64,
+    /// The type of the event. Always 'response.image_generation_call.generating'.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// The agent that owns this multi-agent streaming event.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub agent: Option<Agent>,
+}
+
+/// Emitted when an image generation tool call is in progress.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct BetaResponseImageGenCallInProgressEvent {
+    /// The unique identifier of the image generation item being processed.
+    pub item_id: String,
+    /// The index of the output item in the response's output array.
+    pub output_index: i64,
+    /// The sequence number of the image generation item being processed.
+    pub sequence_number: i64,
+    /// The type of the event. Always 'response.image_generation_call.in_progress'.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// The agent that owns this multi-agent streaming event.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub agent: Option<Agent>,
+}
+
+/// Emitted when a partial image is available during image generation streaming.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct BetaResponseImageGenCallPartialImageEvent {
+    /// The unique identifier of the image generation item being processed.
+    pub item_id: String,
+    /// The index of the output item in the response's output array.
+    pub output_index: i64,
+    /// Base64-encoded partial image data, suitable for rendering as an image.
+    pub partial_image_b64: String,
+    /// 0-based index for the partial image (backend is 1-based, but this is 0-based for
+    pub partial_image_index: i64,
+    /// The sequence number of the image generation item being processed.
+    pub sequence_number: i64,
+    /// The type of the event. Always 'response.image_generation_call.partial_image'.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// The agent that owns this multi-agent streaming event.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub agent: Option<Agent>,
+    /// The background setting that was used.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub background: Option<String>,
+    /// The output format that was used.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub output_format: Option<String>,
+    /// The image quality that was used.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub quality: Option<String>,
+    /// The image size that was used.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub size: Option<String>,
+}
+
+/// Emitted when the response is in progress.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct BetaResponseInProgressEvent {
+    /// The response that is in progress.
+    pub response: BetaResponse,
+    /// The sequence number of this event.
+    pub sequence_number: i64,
+    /// The type of the event. Always `response.in_progress`.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// The agent that owns this multi-agent streaming event.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub agent: Option<Agent>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+#[non_exhaustive]
+pub enum BetaResponseIncludable {
+    #[serde(rename = "file_search_call.results")]
+    FileSearchCallResults,
+    #[serde(rename = "web_search_call.results")]
+    WebSearchCallResults,
+    #[serde(rename = "web_search_call.action.sources")]
+    WebSearchCallActionSources,
+    #[serde(rename = "message.input_image.image_url")]
+    MessageInputImageImageUrl,
+    #[serde(rename = "computer_call_output.output.image_url")]
+    ComputerCallOutputOutputImageUrl,
+    #[serde(rename = "code_interpreter_call.outputs")]
+    CodeInterpreterCallOutputs,
+    #[serde(rename = "reasoning.encrypted_content")]
+    ReasoningEncryptedContent,
+    #[serde(rename = "message.output_text.logprobs")]
+    MessageOutputTextLogprobs,
+}
+
+/// An event that is emitted when a response finishes as incomplete.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct BetaResponseIncompleteEvent {
+    /// The response that was incomplete.
+    pub response: BetaResponse,
+    /// The sequence number of this event.
+    pub sequence_number: i64,
+    /// The type of the event. Always `response.incomplete`.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// The agent that owns this multi-agent streaming event.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub agent: Option<Agent>,
+}
+
+/// Emitted when all injected input items were validated and committed to the
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct BetaResponseInjectCreatedEvent {
+    /// The ID of the response that accepted the input.
+    pub response_id: String,
+    /// The sequence number for this event.
+    pub sequence_number: i64,
+    /// The event discriminator. Always `response.inject.created`.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// The multiplexed WebSocket stream that emitted the event.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub stream_id: Option<String>,
+}
+
+/// Injects input items into an active response over a WebSocket connection.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct BetaResponseInjectEvent {
+    /// Input items to inject into the active response.
+    pub input: Vec<BetaResponseInputItem>,
+    /// The ID of the active response that should receive the input.
+    pub response_id: String,
+    /// The event discriminator. Always `response.inject`.
+    #[serde(rename = "type")]
+    pub type_: String,
+}
+
+/// Emitted when injected input could not be committed to a response.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct BetaResponseInjectFailedEvent {
+    /// Information about why the input was not committed.
+    pub error: BetaResponseError,
+    /// The raw input items that were not committed.
+    pub input: Vec<BetaResponseInputItem>,
+    /// The ID of the response that rejected the input.
+    pub response_id: String,
+    /// The sequence number for this event.
+    pub sequence_number: i64,
+    /// The event discriminator. Always `response.inject.failed`.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// The multiplexed WebSocket stream that emitted the event.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub stream_id: Option<String>,
+}
+
+pub type BetaResponseInput = Vec<BetaResponseInputItem>;
+
+pub type BetaResponseInputContent = serde_json::Value;
+
+/// Marks the exact end of a reusable prompt prefix.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct PromptCacheBreakpoint {
+    /// The breakpoint mode. Always `explicit`.
+    pub mode: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+#[non_exhaustive]
+pub enum BetaResponseInputFileDetail {
+    #[serde(rename = "auto")]
+    Auto,
+    #[serde(rename = "low")]
+    Low,
+    #[serde(rename = "high")]
+    High,
+}
+
+/// A file input to the model.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct BetaResponseInputFile {
+    /// The type of the input item. Always `input_file`.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// The detail level of the file to be sent to the model.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub detail: Option<BetaResponseInputFileDetail>,
+    /// The content of the file to be sent to the model.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub file_data: Option<String>,
+    /// The ID of the file to be sent to the model.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub file_id: Option<String>,
+    /// The URL of the file to be sent to the model.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub file_url: Option<String>,
+    /// The name of the file to be sent to the model.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub filename: Option<String>,
+    /// Marks the exact end of a reusable prompt prefix.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub prompt_cache_breakpoint: Option<PromptCacheBreakpoint>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+#[non_exhaustive]
+pub enum BetaResponseInputFileContentDetail {
+    #[serde(rename = "auto")]
+    Auto,
+    #[serde(rename = "low")]
+    Low,
+    #[serde(rename = "high")]
+    High,
+}
+
+/// A file input to the model.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct BetaResponseInputFileContent {
+    /// The type of the input item. Always `input_file`.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// The detail level of the file to be sent to the model.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub detail: Option<BetaResponseInputFileContentDetail>,
+    /// The base64-encoded data of the file to be sent to the model.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub file_data: Option<String>,
+    /// The ID of the file to be sent to the model.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub file_id: Option<String>,
+    /// The URL of the file to be sent to the model.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub file_url: Option<String>,
+    /// The name of the file to be sent to the model.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub filename: Option<String>,
+    /// Marks the exact end of a reusable prompt prefix.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub prompt_cache_breakpoint: Option<PromptCacheBreakpoint>,
+}
+
+/// An image input to the model.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct BetaResponseInputImage {
+    /// The detail level of the image to be sent to the model.
+    pub detail: BetaImageDetail,
+    /// The type of the input item. Always `input_image`.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// The ID of the file to be sent to the model.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub file_id: Option<String>,
+    /// The URL of the image to be sent to the model.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub image_url: Option<String>,
+    /// Marks the exact end of a reusable prompt prefix.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub prompt_cache_breakpoint: Option<PromptCacheBreakpoint>,
+}
+
+/// An image input to the model.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct BetaResponseInputImageContent {
+    /// The type of the input item. Always `input_image`.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// The detail level of the image to be sent to the model.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub detail: Option<BetaImageDetail>,
+    /// The ID of the file to be sent to the model.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub file_id: Option<String>,
+    /// The URL of the image to be sent to the model.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub image_url: Option<String>,
+    /// Marks the exact end of a reusable prompt prefix.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub prompt_cache_breakpoint: Option<PromptCacheBreakpoint>,
+}
+
+/// The agent that produced this item.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct MessageAgent {
+    /// The canonical name of the agent that produced this item.
+    pub agent_name: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+#[non_exhaustive]
+pub enum MessageRole {
+    #[serde(rename = "user")]
+    User,
+    #[serde(rename = "system")]
+    System,
+    #[serde(rename = "developer")]
+    Developer,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+#[non_exhaustive]
+pub enum MessageStatus {
+    #[serde(rename = "in_progress")]
+    InProgress,
+    #[serde(rename = "completed")]
+    Completed,
+    #[serde(rename = "incomplete")]
+    Incomplete,
+}
+
+/// A pending safety check for the computer call.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct ComputerCallOutputAcknowledgedSafetyCheck {
+    /// The ID of the pending safety check.
+    pub id: String,
+    /// The type of the pending safety check.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub code: Option<String>,
+    /// Details about the pending safety check.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub message: Option<String>,
+}
+
+/// The agent that produced this item.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct ComputerCallOutputAgent {
+    /// The canonical name of the agent that produced this item.
+    pub agent_name: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+#[non_exhaustive]
+pub enum ComputerCallOutputStatus {
+    #[serde(rename = "in_progress")]
+    InProgress,
+    #[serde(rename = "completed")]
+    Completed,
+    #[serde(rename = "incomplete")]
+    Incomplete,
+}
+
+/// The output of a computer tool call.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct ComputerCallOutput {
+    /// The ID of the computer tool call that produced the output.
+    pub call_id: String,
+    /// A computer screenshot image used with the computer use tool.
+    pub output: BetaResponseComputerToolCallOutputScreenshot,
+    /// The type of the computer tool call output. Always `computer_call_output`.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// The ID of the computer tool call output.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub id: Option<String>,
+    /// The safety checks reported by the API that have been acknowledged by the
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub acknowledged_safety_checks: Option<Vec<ComputerCallOutputAcknowledgedSafetyCheck>>,
+    /// The agent that produced this item.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub agent: Option<ComputerCallOutputAgent>,
+    /// The status of the message input.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub status: Option<ComputerCallOutputStatus>,
+}
+
+/// The agent that produced this item.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct FunctionCallOutputAgent {
+    /// The canonical name of the agent that produced this item.
+    pub agent_name: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct FunctionCallOutputCallerDirect {
+    /// The caller type. Always `direct`.
+    #[serde(rename = "type")]
+    pub type_: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct FunctionCallOutputCallerProgram {
+    /// The call ID of the program item that produced this tool call.
+    pub caller_id: String,
+    /// The caller type. Always `program`.
+    #[serde(rename = "type")]
+    pub type_: String,
+}
+
+pub type FunctionCallOutputCaller = serde_json::Value;
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+#[non_exhaustive]
+pub enum FunctionCallOutputStatus {
+    #[serde(rename = "in_progress")]
+    InProgress,
+    #[serde(rename = "completed")]
+    Completed,
+    #[serde(rename = "incomplete")]
+    Incomplete,
+}
+
+/// The output of a function tool call.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct FunctionCallOutput {
+    /// The unique ID of the function tool call generated by the model.
+    pub call_id: String,
+    /// Text, image, or file output of the function tool call.
+    pub output: String,
+    /// The type of the function tool call output. Always `function_call_output`.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// The unique ID of the function tool call output.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub id: Option<String>,
+    /// The agent that produced this item.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub agent: Option<FunctionCallOutputAgent>,
+    /// The execution context that produced this tool call.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub caller: Option<FunctionCallOutputCaller>,
+    /// The name of the tool that produced the output.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub name: Option<String>,
+    /// The namespace of the tool that produced the output.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub namespace: Option<String>,
+    /// The status of the item.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub status: Option<FunctionCallOutputStatus>,
+}
+
+/// Opaque encrypted content that Responses API decrypts inside trusted model execution.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct AgentMessageContentEncryptedContent {
+    /// Opaque encrypted content.
+    pub encrypted_content: String,
+    /// The type of the input item. Always `encrypted_content`.
+    #[serde(rename = "type")]
+    pub type_: String,
+}
+
+pub type AgentMessageContent = serde_json::Value;
+
+/// The agent that produced this item.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct AgentMessageAgent {
+    /// The canonical name of the agent that produced this item.
+    pub agent_name: String,
+}
+
+/// A message routed between agents.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct AgentMessage {
+    /// The sending agent identity.
+    pub author: String,
+    /// Plaintext, image, or encrypted content sent between agents.
+    pub content: Vec<AgentMessageContent>,
+    /// The destination agent identity.
+    pub recipient: String,
+    /// The item type. Always `agent_message`.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// The unique ID of this agent message item.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub id: Option<String>,
+    /// The agent that produced this item.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub agent: Option<AgentMessageAgent>,
+}
+
+/// The agent that produced this item.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct MultiAgentCallAgent {
+    /// The canonical name of the agent that produced this item.
+    pub agent_name: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+#[non_exhaustive]
+pub enum MultiAgentCallAction {
+    #[serde(rename = "spawn_agent")]
+    SpawnAgent,
+    #[serde(rename = "interrupt_agent")]
+    InterruptAgent,
+    #[serde(rename = "list_agents")]
+    ListAgents,
+    #[serde(rename = "send_message")]
+    SendMessage,
+    #[serde(rename = "followup_task")]
+    FollowupTask,
+    #[serde(rename = "wait_agent")]
+    WaitAgent,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct MultiAgentCall {
+    /// The multi-agent action that was executed.
+    pub action: MultiAgentCallAction,
+    /// The action arguments as a JSON string.
+    pub arguments: String,
+    /// The unique ID linking this call to its output.
+    pub call_id: String,
+    /// The item type. Always `multi_agent_call`.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// The unique ID of this multi-agent call.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub id: Option<String>,
+    /// The agent that produced this item.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub agent: Option<MultiAgentCallAgent>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct MultiAgentCallOutputOutputAnnotationFileCitation {
+    /// The ID of the file.
+    pub file_id: String,
+    /// The filename of the file cited.
+    pub filename: String,
+    /// The index of the file in the list of files.
+    pub index: i64,
+    /// The citation type. Always `file_citation`.
+    #[serde(rename = "type")]
+    pub type_: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct MultiAgentCallOutputOutputAnnotationURLCitation {
+    /// The index of the last character of the citation in the message.
+    pub end_index: i64,
+    /// The index of the first character of the citation in the message.
+    pub start_index: i64,
+    /// The title of the cited resource.
+    pub title: String,
+    /// The citation type. Always `url_citation`.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// The URL of the cited resource.
+    pub url: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct MultiAgentCallOutputOutputAnnotationContainerFileCitation {
+    /// The ID of the container.
+    pub container_id: String,
+    /// The index of the last character of the citation in the message.
+    pub end_index: i64,
+    /// The ID of the container file.
+    pub file_id: String,
+    /// The filename of the container file cited.
+    pub filename: String,
+    /// The index of the first character of the citation in the message.
+    pub start_index: i64,
+    /// The citation type. Always `container_file_citation`.
+    #[serde(rename = "type")]
+    pub type_: String,
+}
+
+pub type MultiAgentCallOutputOutputAnnotation = serde_json::Value;
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct MultiAgentCallOutputOutput {
+    /// The text content.
+    pub text: String,
+    /// The content type. Always `output_text`.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// Citations associated with the text content.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub annotations: Option<Vec<MultiAgentCallOutputOutputAnnotation>>,
+}
+
+/// The agent that produced this item.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct MultiAgentCallOutputAgent {
+    /// The canonical name of the agent that produced this item.
+    pub agent_name: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+#[non_exhaustive]
+pub enum MultiAgentCallOutputAction {
+    #[serde(rename = "spawn_agent")]
+    SpawnAgent,
+    #[serde(rename = "interrupt_agent")]
+    InterruptAgent,
+    #[serde(rename = "list_agents")]
+    ListAgents,
+    #[serde(rename = "send_message")]
+    SendMessage,
+    #[serde(rename = "followup_task")]
+    FollowupTask,
+    #[serde(rename = "wait_agent")]
+    WaitAgent,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct MultiAgentCallOutput {
+    /// The multi-agent action that produced this result.
+    pub action: MultiAgentCallOutputAction,
+    /// The unique ID of the multi-agent call.
+    pub call_id: String,
+    /// Text output returned by the multi-agent action.
+    pub output: Vec<MultiAgentCallOutputOutput>,
+    /// The item type. Always `multi_agent_call_output`.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// The unique ID of this multi-agent call output.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub id: Option<String>,
+    /// The agent that produced this item.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub agent: Option<MultiAgentCallOutputAgent>,
+}
+
+/// The agent that produced this item.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct ToolSearchCallAgent {
+    /// The canonical name of the agent that produced this item.
+    pub agent_name: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+#[non_exhaustive]
+pub enum ToolSearchCallExecution {
+    #[serde(rename = "server")]
+    Server,
+    #[serde(rename = "client")]
+    Client,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+#[non_exhaustive]
+pub enum ToolSearchCallStatus {
+    #[serde(rename = "in_progress")]
+    InProgress,
+    #[serde(rename = "completed")]
+    Completed,
+    #[serde(rename = "incomplete")]
+    Incomplete,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct ToolSearchCall {
+    /// The arguments supplied to the tool search call.
+    pub arguments: serde_json::Value,
+    /// The item type. Always `tool_search_call`.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// The unique ID of this tool search call.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub id: Option<String>,
+    /// The agent that produced this item.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub agent: Option<ToolSearchCallAgent>,
+    /// The unique ID of the tool search call generated by the model.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub call_id: Option<String>,
+    /// Whether tool search was executed by the server or by the client.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub execution: Option<ToolSearchCallExecution>,
+    /// The status of the tool search call.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub status: Option<ToolSearchCallStatus>,
+}
+
+/// The agent that produced this item.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct AdditionalToolsAgent {
+    /// The canonical name of the agent that produced this item.
+    pub agent_name: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct AdditionalTools {
+    /// The role that provided the additional tools. Only `developer` is supported.
+    pub role: String,
+    /// A list of additional tools made available at this item.
+    pub tools: Vec<BetaTool>,
+    /// The item type. Always `additional_tools`.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// The unique ID of this additional tools item.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub id: Option<String>,
+    /// The agent that produced this item.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub agent: Option<AdditionalToolsAgent>,
+}
+
+/// The agent that produced this item.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct ImageGenerationCallAgent {
+    /// The canonical name of the agent that produced this item.
+    pub agent_name: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+#[non_exhaustive]
+pub enum ImageGenerationCallStatus {
+    #[serde(rename = "in_progress")]
+    InProgress,
+    #[serde(rename = "completed")]
+    Completed,
+    #[serde(rename = "generating")]
+    Generating,
+    #[serde(rename = "failed")]
+    Failed,
+}
+
+/// An image generation request made by the model.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct ImageGenerationCall {
+    /// The unique ID of the image generation call.
+    pub id: String,
+    /// The generated image encoded in base64.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub result: Option<String>,
+    /// The status of the image generation call.
+    pub status: ImageGenerationCallStatus,
+    /// The type of the image generation call. Always `image_generation_call`.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// The agent that produced this item.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub agent: Option<ImageGenerationCallAgent>,
+}
+
+/// Execute a shell command on the server.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct LocalShellCallAction {
+    /// The command to run.
+    pub command: Vec<String>,
+    /// Environment variables to set for the command.
+    pub env: std::collections::HashMap<String, String>,
+    /// The type of the local shell action. Always `exec`.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// Optional timeout in milliseconds for the command.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub timeout_ms: Option<i64>,
+    /// Optional user to run the command as.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub user: Option<String>,
+    /// Optional working directory to run the command in.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub working_directory: Option<String>,
+}
+
+/// The agent that produced this item.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct LocalShellCallAgent {
+    /// The canonical name of the agent that produced this item.
+    pub agent_name: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+#[non_exhaustive]
+pub enum LocalShellCallStatus {
+    #[serde(rename = "in_progress")]
+    InProgress,
+    #[serde(rename = "completed")]
+    Completed,
+    #[serde(rename = "incomplete")]
+    Incomplete,
+}
+
+/// A tool call to run a command on the local shell.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct LocalShellCall {
+    /// The unique ID of the local shell call.
+    pub id: String,
+    /// Execute a shell command on the server.
+    pub action: LocalShellCallAction,
+    /// The unique ID of the local shell tool call generated by the model.
+    pub call_id: String,
+    /// The status of the local shell call.
+    pub status: LocalShellCallStatus,
+    /// The type of the local shell call. Always `local_shell_call`.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// The agent that produced this item.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub agent: Option<LocalShellCallAgent>,
+}
+
+/// The agent that produced this item.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct LocalShellCallOutputAgent {
+    /// The canonical name of the agent that produced this item.
+    pub agent_name: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+#[non_exhaustive]
+pub enum LocalShellCallOutputStatus {
+    #[serde(rename = "in_progress")]
+    InProgress,
+    #[serde(rename = "completed")]
+    Completed,
+    #[serde(rename = "incomplete")]
+    Incomplete,
+}
+
+/// The output of a local shell tool call.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct LocalShellCallOutput {
+    /// The unique ID of the local shell tool call generated by the model.
+    pub id: String,
+    /// A JSON string of the output of the local shell tool call.
+    pub output: String,
+    /// The type of the local shell tool call output. Always `local_shell_call_output`.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// The agent that produced this item.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub agent: Option<LocalShellCallOutputAgent>,
+    /// The status of the item. One of `in_progress`, `completed`, or `incomplete`.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub status: Option<LocalShellCallOutputStatus>,
+}
+
+/// The shell commands and limits that describe how to run the tool call.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct ShellCallAction {
+    /// Ordered shell commands for the execution environment to run.
+    pub commands: Vec<String>,
+    /// Maximum number of UTF-8 characters to capture from combined stdout and stderr
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub max_output_length: Option<i64>,
+    /// Maximum wall-clock time in milliseconds to allow the shell commands to run.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub timeout_ms: Option<i64>,
+}
+
+/// The agent that produced this item.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct ShellCallAgent {
+    /// The canonical name of the agent that produced this item.
+    pub agent_name: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct ShellCallCallerDirect {
+    /// The caller type. Always `direct`.
+    #[serde(rename = "type")]
+    pub type_: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct ShellCallCallerProgram {
+    /// The call ID of the program item that produced this tool call.
+    pub caller_id: String,
+    /// The caller type. Always `program`.
+    #[serde(rename = "type")]
+    pub type_: String,
+}
+
+pub type ShellCallCaller = serde_json::Value;
+
+pub type ShellCallEnvironment = serde_json::Value;
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+#[non_exhaustive]
+pub enum ShellCallStatus {
+    #[serde(rename = "in_progress")]
+    InProgress,
+    #[serde(rename = "completed")]
+    Completed,
+    #[serde(rename = "incomplete")]
+    Incomplete,
+}
+
+/// A tool representing a request to execute one or more shell commands.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct ShellCall {
+    /// The shell commands and limits that describe how to run the tool call.
+    pub action: ShellCallAction,
+    /// The unique ID of the shell tool call generated by the model.
+    pub call_id: String,
+    /// The type of the item. Always `shell_call`.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// The unique ID of the shell tool call.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub id: Option<String>,
+    /// The agent that produced this item.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub agent: Option<ShellCallAgent>,
+    /// The execution context that produced this tool call.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub caller: Option<ShellCallCaller>,
+    /// The environment to execute the shell commands in.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub environment: Option<ShellCallEnvironment>,
+    /// The status of the shell call.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub status: Option<ShellCallStatus>,
+}
+
+/// The agent that produced this item.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct ShellCallOutputAgent {
+    /// The canonical name of the agent that produced this item.
+    pub agent_name: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct ShellCallOutputCallerDirect {
+    /// The caller type. Always `direct`.
+    #[serde(rename = "type")]
+    pub type_: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct ShellCallOutputCallerProgram {
+    /// The call ID of the program item that produced this tool call.
+    pub caller_id: String,
+    /// The caller type. Always `program`.
+    #[serde(rename = "type")]
+    pub type_: String,
+}
+
+pub type ShellCallOutputCaller = serde_json::Value;
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+#[non_exhaustive]
+pub enum ShellCallOutputStatus {
+    #[serde(rename = "in_progress")]
+    InProgress,
+    #[serde(rename = "completed")]
+    Completed,
+    #[serde(rename = "incomplete")]
+    Incomplete,
+}
+
+/// The streamed output items emitted by a shell tool call.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct ShellCallOutput {
+    /// The unique ID of the shell tool call generated by the model.
+    pub call_id: String,
+    /// Captured chunks of stdout and stderr output, along with their associated
+    pub output: Vec<BetaResponseFunctionShellCallOutputContent>,
+    /// The type of the item. Always `shell_call_output`.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// The unique ID of the shell tool call output.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub id: Option<String>,
+    /// The agent that produced this item.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub agent: Option<ShellCallOutputAgent>,
+    /// The execution context that produced this tool call.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub caller: Option<ShellCallOutputCaller>,
+    /// The maximum number of UTF-8 characters captured for this shell call's combined
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub max_output_length: Option<i64>,
+    /// The status of the shell call output.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub status: Option<ShellCallOutputStatus>,
+}
+
+/// Instruction for creating a new file via the apply_patch tool.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct ApplyPatchCallOperationCreateFile {
+    /// Unified diff content to apply when creating the file.
+    pub diff: String,
+    /// Path of the file to create relative to the workspace root.
+    pub path: String,
+    /// The operation type. Always `create_file`.
+    #[serde(rename = "type")]
+    pub type_: String,
+}
+
+/// Instruction for deleting an existing file via the apply_patch tool.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct ApplyPatchCallOperationDeleteFile {
+    /// Path of the file to delete relative to the workspace root.
+    pub path: String,
+    /// The operation type. Always `delete_file`.
+    #[serde(rename = "type")]
+    pub type_: String,
+}
+
+/// Instruction for updating an existing file via the apply_patch tool.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct ApplyPatchCallOperationUpdateFile {
+    /// Unified diff content to apply to the existing file.
+    pub diff: String,
+    /// Path of the file to update relative to the workspace root.
+    pub path: String,
+    /// The operation type. Always `update_file`.
+    #[serde(rename = "type")]
+    pub type_: String,
+}
+
+pub type ApplyPatchCallOperation = serde_json::Value;
+
+/// The agent that produced this item.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct ApplyPatchCallAgent {
+    /// The canonical name of the agent that produced this item.
+    pub agent_name: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct ApplyPatchCallCallerDirect {
+    /// The caller type. Always `direct`.
+    #[serde(rename = "type")]
+    pub type_: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct ApplyPatchCallCallerProgram {
+    /// The call ID of the program item that produced this tool call.
+    pub caller_id: String,
+    /// The caller type. Always `program`.
+    #[serde(rename = "type")]
+    pub type_: String,
+}
+
+pub type ApplyPatchCallCaller = serde_json::Value;
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+#[non_exhaustive]
+pub enum ApplyPatchCallStatus {
+    #[serde(rename = "in_progress")]
+    InProgress,
+    #[serde(rename = "completed")]
+    Completed,
+}
+
+/// A tool call representing a request to create, delete, or update files using diff patches.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct ApplyPatchCall {
+    /// The unique ID of the apply patch tool call generated by the model.
+    pub call_id: String,
+    /// The specific create, delete, or update instruction for the apply_patch tool
+    pub operation: ApplyPatchCallOperation,
+    /// The status of the apply patch tool call. One of `in_progress` or `completed`.
+    pub status: ApplyPatchCallStatus,
+    /// The type of the item. Always `apply_patch_call`.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// The unique ID of the apply patch tool call.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub id: Option<String>,
+    /// The agent that produced this item.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub agent: Option<ApplyPatchCallAgent>,
+    /// The execution context that produced this tool call.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub caller: Option<ApplyPatchCallCaller>,
+}
+
+/// The agent that produced this item.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct ApplyPatchCallOutputAgent {
+    /// The canonical name of the agent that produced this item.
+    pub agent_name: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct ApplyPatchCallOutputCallerDirect {
+    /// The caller type. Always `direct`.
+    #[serde(rename = "type")]
+    pub type_: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct ApplyPatchCallOutputCallerProgram {
+    /// The call ID of the program item that produced this tool call.
+    pub caller_id: String,
+    /// The caller type. Always `program`.
+    #[serde(rename = "type")]
+    pub type_: String,
+}
+
+pub type ApplyPatchCallOutputCaller = serde_json::Value;
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+#[non_exhaustive]
+pub enum ApplyPatchCallOutputStatus {
+    #[serde(rename = "completed")]
+    Completed,
+    #[serde(rename = "failed")]
+    Failed,
+}
+
+/// The streamed output emitted by an apply patch tool call.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct ApplyPatchCallOutput {
+    /// The unique ID of the apply patch tool call generated by the model.
+    pub call_id: String,
+    /// The status of the apply patch tool call output. One of `completed` or `failed`.
+    pub status: ApplyPatchCallOutputStatus,
+    /// The type of the item. Always `apply_patch_call_output`.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// The unique ID of the apply patch tool call output.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub id: Option<String>,
+    /// The agent that produced this item.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub agent: Option<ApplyPatchCallOutputAgent>,
+    /// The execution context that produced this tool call.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub caller: Option<ApplyPatchCallOutputCaller>,
+    /// Optional human-readable log text from the apply patch tool (e.g., patch results
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub output: Option<String>,
+}
+
+/// A tool available on an MCP server.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct McpListToolsTool {
+    /// The JSON schema describing the tool's input.
+    pub input_schema: serde_json::Value,
+    /// The name of the tool.
+    pub name: String,
+    /// Additional annotations about the tool.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub annotations: Option<serde_json::Value>,
+    /// The description of the tool.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub description: Option<String>,
+}
+
+/// The agent that produced this item.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct McpListToolsAgent {
+    /// The canonical name of the agent that produced this item.
+    pub agent_name: String,
+}
+
+/// A list of tools available on an MCP server.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct McpListTools {
+    /// The unique ID of the list.
+    pub id: String,
+    /// The label of the MCP server.
+    pub server_label: String,
+    /// The tools available on the server.
+    pub tools: Vec<McpListToolsTool>,
+    /// The type of the item. Always `mcp_list_tools`.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// The agent that produced this item.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub agent: Option<McpListToolsAgent>,
+    /// Error message if the server could not list tools.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub error: Option<String>,
+}
+
+/// The agent that produced this item.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct McpApprovalRequestAgent {
+    /// The canonical name of the agent that produced this item.
+    pub agent_name: String,
+}
+
+/// A request for human approval of a tool invocation.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct McpApprovalRequest {
+    /// The unique ID of the approval request.
+    pub id: String,
+    /// A JSON string of arguments for the tool.
+    pub arguments: String,
+    /// The name of the tool to run.
+    pub name: String,
+    /// The label of the MCP server making the request.
+    pub server_label: String,
+    /// The type of the item. Always `mcp_approval_request`.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// The agent that produced this item.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub agent: Option<McpApprovalRequestAgent>,
+}
+
+/// The agent that produced this item.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct McpApprovalResponseAgent {
+    /// The canonical name of the agent that produced this item.
+    pub agent_name: String,
+}
+
+/// A response to an MCP approval request.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct McpApprovalResponse {
+    /// The ID of the approval request being answered.
+    pub approval_request_id: String,
+    /// Whether the request was approved.
+    pub approve: bool,
+    /// The type of the item. Always `mcp_approval_response`.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// The unique ID of the approval response
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub id: Option<String>,
+    /// The agent that produced this item.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub agent: Option<McpApprovalResponseAgent>,
+    /// Optional reason for the decision.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub reason: Option<String>,
+}
+
+/// The agent that produced this item.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct McpCallAgent {
+    /// The canonical name of the agent that produced this item.
+    pub agent_name: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+#[non_exhaustive]
+pub enum McpCallStatus {
+    #[serde(rename = "in_progress")]
+    InProgress,
+    #[serde(rename = "completed")]
+    Completed,
+    #[serde(rename = "incomplete")]
+    Incomplete,
+    #[serde(rename = "calling")]
+    Calling,
+    #[serde(rename = "failed")]
+    Failed,
+}
+
+/// An invocation of a tool on an MCP server.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct McpCall {
+    /// The unique ID of the tool call.
+    pub id: String,
+    /// A JSON string of the arguments passed to the tool.
+    pub arguments: String,
+    /// The name of the tool that was run.
+    pub name: String,
+    /// The label of the MCP server running the tool.
+    pub server_label: String,
+    /// The type of the item. Always `mcp_call`.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// The agent that produced this item.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub agent: Option<McpCallAgent>,
+    /// Unique identifier for the MCP tool call approval request. Include this value in
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub approval_request_id: Option<String>,
+    /// The error from the tool call, if any.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub error: Option<BetaMcpToolCallError>,
+    /// The output from the tool call.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub output: Option<String>,
+    /// The status of the tool call.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub status: Option<McpCallStatus>,
+}
+
+/// The agent that produced this item.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct CompactionTriggerAgent {
+    /// The canonical name of the agent that produced this item.
+    pub agent_name: String,
+}
+
+/// Compacts the current context. Must be the final input item.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct CompactionTrigger {
+    /// The type of the item. Always `compaction_trigger`.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// The agent that produced this item.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub agent: Option<CompactionTriggerAgent>,
+}
+
+/// The agent that produced this item.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct ItemReferenceAgent {
+    /// The canonical name of the agent that produced this item.
+    pub agent_name: String,
+}
+
+/// An internal identifier for an item to reference.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct ItemReference {
+    /// The ID of the item to reference.
+    pub id: String,
+    /// The agent that produced this item.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub agent: Option<ItemReferenceAgent>,
+    /// The type of item to reference. Always `item_reference`.
+    #[serde(rename = "type", skip_serializing_if = "Option::is_none", default)]
+    pub type_: Option<String>,
+}
+
+/// The agent that produced this item.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct ProgramAgent {
+    /// The canonical name of the agent that produced this item.
+    pub agent_name: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct Program {
+    /// The unique ID of this program item.
+    pub id: String,
+    /// The stable call ID of the program item.
+    pub call_id: String,
+    /// The JavaScript source executed by programmatic tool calling.
+    pub code: String,
+    /// Opaque program replay fingerprint that must be round-tripped.
+    pub fingerprint: String,
+    /// The item type. Always `program`.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// The agent that produced this item.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub agent: Option<ProgramAgent>,
+}
+
+/// The agent that produced this item.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct ProgramOutputAgent {
+    /// The canonical name of the agent that produced this item.
+    pub agent_name: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+#[non_exhaustive]
+pub enum ProgramOutputStatus {
+    #[serde(rename = "completed")]
+    Completed,
+    #[serde(rename = "incomplete")]
+    Incomplete,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct ProgramOutput {
+    /// The unique ID of this program output item.
+    pub id: String,
+    /// The call ID of the program item.
+    pub call_id: String,
+    /// The result produced by the program item.
+    pub result: String,
+    /// The terminal status of the program output.
+    pub status: ProgramOutputStatus,
+    /// The item type. Always `program_output`.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// The agent that produced this item.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub agent: Option<ProgramOutputAgent>,
+}
+
+pub type BetaResponseInputItem = serde_json::Value;
+
+pub type BetaResponseInputMessageContentList = Vec<BetaResponseInputContent>;
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+#[non_exhaustive]
+pub enum BetaResponseInputMessageItemRole {
+    #[serde(rename = "user")]
+    User,
+    #[serde(rename = "system")]
+    System,
+    #[serde(rename = "developer")]
+    Developer,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+#[non_exhaustive]
+pub enum BetaResponseInputMessageItemStatus {
+    #[serde(rename = "in_progress")]
+    InProgress,
+    #[serde(rename = "completed")]
+    Completed,
+    #[serde(rename = "incomplete")]
+    Incomplete,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct BetaResponseInputMessageItem {
+    /// The unique ID of the message input.
+    pub id: String,
+    /// A list of one or many input items to the model, containing different content
+    pub content: BetaResponseInputMessageContentList,
+    /// The role of the message input. One of `user`, `system`, or `developer`.
+    pub role: BetaResponseInputMessageItemRole,
+    /// The type of the message input. Always set to `message`.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// The agent that produced this item.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub agent: Option<Agent>,
+    /// The status of item.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub status: Option<BetaResponseInputMessageItemStatus>,
+}
+
+/// A text input to the model.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct BetaResponseInputText {
+    /// The text input to the model.
+    pub text: String,
+    /// The type of the input item. Always `input_text`.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// Marks the exact end of a reusable prompt prefix.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub prompt_cache_breakpoint: Option<PromptCacheBreakpoint>,
+}
+
+/// A text input to the model.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct BetaResponseInputTextContent {
+    /// The text input to the model.
+    pub text: String,
+    /// The type of the input item. Always `input_text`.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// Marks the exact end of a reusable prompt prefix.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub prompt_cache_breakpoint: Option<PromptCacheBreakpoint>,
+}
+
+/// A text content.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct AgentMessageContentText {
+    pub text: String,
+    #[serde(rename = "type")]
+    pub type_: String,
+}
+
+/// A summary text from the model.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct AgentMessageContentSummaryText {
+    /// A summary of the reasoning output from the model so far.
+    pub text: String,
+    /// The type of the object. Always `summary_text`.
+    #[serde(rename = "type")]
+    pub type_: String,
+}
+
+/// Reasoning text from the model.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct AgentMessageContentReasoningText {
+    /// The reasoning text from the model.
+    pub text: String,
+    /// The type of the reasoning text. Always `reasoning_text`.
+    #[serde(rename = "type")]
+    pub type_: String,
+}
+
+/// Marks the exact end of a reusable prompt prefix.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct AgentMessageContentComputerScreenshotPromptCacheBreakpoint {
+    /// The breakpoint mode. Always `explicit`.
+    pub mode: String,
+}
+
+/// A screenshot of a computer.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct AgentMessageContentComputerScreenshot {
+    /// The detail level of the screenshot image to be sent to the model.
+    pub detail: BetaImageDetail,
+    /// The identifier of an uploaded file that contains the screenshot.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub file_id: Option<String>,
+    /// The URL of the screenshot image.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub image_url: Option<String>,
+    /// Specifies the event type.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// Marks the exact end of a reusable prompt prefix.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub prompt_cache_breakpoint: Option<AgentMessageContentComputerScreenshotPromptCacheBreakpoint>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+#[non_exhaustive]
+pub enum AdditionalToolsRole {
+    #[serde(rename = "unknown")]
+    Unknown,
+    #[serde(rename = "user")]
+    User,
+    #[serde(rename = "assistant")]
+    Assistant,
+    #[serde(rename = "system")]
+    System,
+    #[serde(rename = "critic")]
+    Critic,
+    #[serde(rename = "discriminator")]
+    Discriminator,
+    #[serde(rename = "developer")]
+    Developer,
+    #[serde(rename = "tool")]
+    Tool,
+}
+
+pub type BetaResponseItem = serde_json::Value;
+
+/// Represents the use of a local environment to perform shell actions.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct BetaResponseLocalEnvironment {
+    /// The environment type. Always `local`.
+    #[serde(rename = "type")]
+    pub type_: String,
+}
+
+/// Emitted when there is a delta (partial update) to the arguments of an MCP tool call.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct BetaResponseMcpCallArgumentsDeltaEvent {
+    /// A JSON string containing the partial update to the arguments for the MCP tool
+    pub delta: String,
+    /// The unique identifier of the MCP tool call item being processed.
+    pub item_id: String,
+    /// The index of the output item in the response's output array.
+    pub output_index: i64,
+    /// The sequence number of this event.
+    pub sequence_number: i64,
+    /// The type of the event. Always 'response.mcp_call_arguments.delta'.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// The agent that owns this multi-agent streaming event.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub agent: Option<Agent>,
+}
+
+/// Emitted when the arguments for an MCP tool call are finalized.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct BetaResponseMcpCallArgumentsDoneEvent {
+    /// A JSON string containing the finalized arguments for the MCP tool call.
+    pub arguments: String,
+    /// The unique identifier of the MCP tool call item being processed.
+    pub item_id: String,
+    /// The index of the output item in the response's output array.
+    pub output_index: i64,
+    /// The sequence number of this event.
+    pub sequence_number: i64,
+    /// The type of the event. Always 'response.mcp_call_arguments.done'.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// The agent that owns this multi-agent streaming event.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub agent: Option<Agent>,
+}
+
+/// Emitted when an MCP  tool call has completed successfully.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct BetaResponseMcpCallCompletedEvent {
+    /// The ID of the MCP tool call item that completed.
+    pub item_id: String,
+    /// The index of the output item that completed.
+    pub output_index: i64,
+    /// The sequence number of this event.
+    pub sequence_number: i64,
+    /// The type of the event. Always 'response.mcp_call.completed'.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// The agent that owns this multi-agent streaming event.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub agent: Option<Agent>,
+}
+
+/// Emitted when an MCP  tool call has failed.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct BetaResponseMcpCallFailedEvent {
+    /// The ID of the MCP tool call item that failed.
+    pub item_id: String,
+    /// The index of the output item that failed.
+    pub output_index: i64,
+    /// The sequence number of this event.
+    pub sequence_number: i64,
+    /// The type of the event. Always 'response.mcp_call.failed'.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// The agent that owns this multi-agent streaming event.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub agent: Option<Agent>,
+}
+
+/// Emitted when an MCP  tool call is in progress.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct BetaResponseMcpCallInProgressEvent {
+    /// The unique identifier of the MCP tool call item being processed.
+    pub item_id: String,
+    /// The index of the output item in the response's output array.
+    pub output_index: i64,
+    /// The sequence number of this event.
+    pub sequence_number: i64,
+    /// The type of the event. Always 'response.mcp_call.in_progress'.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// The agent that owns this multi-agent streaming event.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub agent: Option<Agent>,
+}
+
+/// Emitted when the list of available MCP tools has been successfully retrieved.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct BetaResponseMcpListToolsCompletedEvent {
+    /// The ID of the MCP tool call item that produced this output.
+    pub item_id: String,
+    /// The index of the output item that was processed.
+    pub output_index: i64,
+    /// The sequence number of this event.
+    pub sequence_number: i64,
+    /// The type of the event. Always 'response.mcp_list_tools.completed'.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// The agent that owns this multi-agent streaming event.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub agent: Option<Agent>,
+}
+
+/// Emitted when the attempt to list available MCP tools has failed.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct BetaResponseMcpListToolsFailedEvent {
+    /// The ID of the MCP tool call item that failed.
+    pub item_id: String,
+    /// The index of the output item that failed.
+    pub output_index: i64,
+    /// The sequence number of this event.
+    pub sequence_number: i64,
+    /// The type of the event. Always 'response.mcp_list_tools.failed'.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// The agent that owns this multi-agent streaming event.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub agent: Option<Agent>,
+}
+
+/// Emitted when the system is in the process of retrieving the list of available MCP tools.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct BetaResponseMcpListToolsInProgressEvent {
+    /// The ID of the MCP tool call item that is being processed.
+    pub item_id: String,
+    /// The index of the output item that is being processed.
+    pub output_index: i64,
+    /// The sequence number of this event.
+    pub sequence_number: i64,
+    /// The type of the event. Always 'response.mcp_list_tools.in_progress'.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// The agent that owns this multi-agent streaming event.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub agent: Option<Agent>,
+}
+
+pub type BetaResponseOutputItem = serde_json::Value;
+
+/// Emitted when a new output item is added.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct BetaResponseOutputItemAddedEvent {
+    /// The output item that was added.
+    pub item: BetaResponseOutputItem,
+    /// The index of the output item that was added.
+    pub output_index: i64,
+    /// The sequence number of this event.
+    pub sequence_number: i64,
+    /// The type of the event. Always `response.output_item.added`.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// The agent that owns this multi-agent streaming event.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub agent: Option<Agent>,
+}
+
+/// Emitted when an output item is marked done.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct BetaResponseOutputItemDoneEvent {
+    /// The output item that was marked done.
+    pub item: BetaResponseOutputItem,
+    /// The index of the output item that was marked done.
+    pub output_index: i64,
+    /// The sequence number of this event.
+    pub sequence_number: i64,
+    /// The type of the event. Always `response.output_item.done`.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// The agent that owns this multi-agent streaming event.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub agent: Option<Agent>,
+}
+
+pub type Content = serde_json::Value;
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+#[non_exhaustive]
+pub enum BetaResponseOutputMessageStatus {
+    #[serde(rename = "in_progress")]
+    InProgress,
+    #[serde(rename = "completed")]
+    Completed,
+    #[serde(rename = "incomplete")]
+    Incomplete,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+#[non_exhaustive]
+pub enum BetaResponseOutputMessagePhase {
+    #[serde(rename = "commentary")]
+    Commentary,
+    #[serde(rename = "final_answer")]
+    FinalAnswer,
+}
+
+/// An output message from the model.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct BetaResponseOutputMessage {
+    /// The unique ID of the output message.
+    pub id: String,
+    /// The content of the output message.
+    pub content: Vec<BetaResponseContent>,
+    /// The role of the output message. Always `assistant`.
+    pub role: String,
+    /// The status of the message input.
+    pub status: BetaResponseOutputMessageStatus,
+    /// The type of the output message. Always `message`.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// The agent that produced this item.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub agent: Option<Agent>,
+    /// Labels an `assistant` message as intermediate commentary (`commentary`) or the
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub phase: Option<BetaResponseOutputMessagePhase>,
+}
+
+/// A refusal from the model.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct BetaResponseOutputRefusal {
+    /// The refusal explanation from the model.
+    pub refusal: String,
+    /// The type of the refusal. Always `refusal`.
+    #[serde(rename = "type")]
+    pub type_: String,
+}
+
+/// A citation to a file.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct AnnotationFileCitation {
+    /// The ID of the file.
+    pub file_id: String,
+    /// The filename of the file cited.
+    pub filename: String,
+    /// The index of the file in the list of files.
+    pub index: i64,
+    /// The type of the file citation. Always `file_citation`.
+    #[serde(rename = "type")]
+    pub type_: String,
+}
+
+/// A citation for a web resource used to generate a model response.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct AnnotationURLCitation {
+    /// The index of the last character of the URL citation in the message.
+    pub end_index: i64,
+    /// The index of the first character of the URL citation in the message.
+    pub start_index: i64,
+    /// The title of the web resource.
+    pub title: String,
+    /// The type of the URL citation. Always `url_citation`.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// The URL of the web resource.
+    pub url: String,
+}
+
+/// A citation for a container file used to generate a model response.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct AnnotationContainerFileCitation {
+    /// The ID of the container file.
+    pub container_id: String,
+    /// The index of the last character of the container file citation in the message.
+    pub end_index: i64,
+    /// The ID of the file.
+    pub file_id: String,
+    /// The filename of the container file cited.
+    pub filename: String,
+    /// The index of the first character of the container file citation in the message.
+    pub start_index: i64,
+    /// The type of the container file citation. Always `container_file_citation`.
+    #[serde(rename = "type")]
+    pub type_: String,
+}
+
+/// A path to a file.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct AnnotationFilePath {
+    /// The ID of the file.
+    pub file_id: String,
+    /// The index of the file in the list of files.
+    pub index: i64,
+    /// The type of the file path. Always `file_path`.
+    #[serde(rename = "type")]
+    pub type_: String,
+}
+
+pub type Annotation = serde_json::Value;
+
+/// The top log probability of a token.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct LogprobTopLogprob {
+    pub token: String,
+    pub bytes: Vec<i64>,
+    pub logprob: f64,
+}
+
+/// The log probability of a token.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct Logprob {
+    pub token: String,
+    pub bytes: Vec<i64>,
+    pub logprob: f64,
+    pub top_logprobs: Vec<LogprobTopLogprob>,
+}
+
+/// A text output from the model.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct BetaResponseOutputText {
+    /// The annotations of the text output.
+    pub annotations: Vec<Annotation>,
+    /// The text output from the model.
+    pub text: String,
+    /// The type of the output text. Always `output_text`.
+    #[serde(rename = "type")]
+    pub type_: String,
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub logprobs: Option<Vec<Logprob>>,
+}
+
+/// Emitted when an annotation is added to output text content.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct BetaResponseOutputTextAnnotationAddedEvent {
+    /// An annotation that applies to a span of output text.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub annotation: Option<Annotation>,
+    /// The index of the annotation within the content part.
+    pub annotation_index: i64,
+    /// The index of the content part within the output item.
+    pub content_index: i64,
+    /// The unique identifier of the item to which the annotation is being added.
+    pub item_id: String,
+    /// The index of the output item in the response's output array.
+    pub output_index: i64,
+    /// The sequence number of this event.
+    pub sequence_number: i64,
+    /// The type of the event. Always 'response.output_text.annotation.added'.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// The agent that owns this multi-agent streaming event.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub agent: Option<Agent>,
+}
+
+pub type Variables = serde_json::Value;
+
+/// Reference to a prompt template and its variables.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct BetaResponsePrompt {
+    /// The unique identifier of the prompt template to use.
+    pub id: String,
+    /// Optional map of values to substitute in for variables in your prompt.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub variables: Option<std::collections::HashMap<String, Variables>>,
+    /// Optional version of the prompt template.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub version: Option<String>,
+}
+
+/// Emitted when a response is queued and waiting to be processed.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct BetaResponseQueuedEvent {
+    /// The full response object that is queued.
+    pub response: BetaResponse,
+    /// The sequence number for this event.
+    pub sequence_number: i64,
+    /// The type of the event. Always 'response.queued'.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// The agent that owns this multi-agent streaming event.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub agent: Option<Agent>,
+}
+
+/// A summary text from the model.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct BetaResponseSummary {
+    /// A summary of the reasoning output from the model so far.
+    pub text: String,
+    /// The type of the object. Always `summary_text`.
+    #[serde(rename = "type")]
+    pub type_: String,
+}
+
+/// Reasoning text from the model.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct BetaResponseContent {
+    /// The reasoning text from the model.
+    pub text: String,
+    /// The type of the reasoning text. Always `reasoning_text`.
+    #[serde(rename = "type")]
+    pub type_: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+#[non_exhaustive]
+pub enum BetaResponseReasoningItemStatus {
+    #[serde(rename = "in_progress")]
+    InProgress,
+    #[serde(rename = "completed")]
+    Completed,
+    #[serde(rename = "incomplete")]
+    Incomplete,
+}
+
+/// A description of the chain of thought used by a reasoning model while generating
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct BetaResponseReasoningItem {
+    /// The unique identifier of the reasoning content.
+    pub id: String,
+    /// Reasoning summary content.
+    pub summary: Vec<BetaResponseSummary>,
+    /// The type of the object. Always `reasoning`.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// The agent that produced this item.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub agent: Option<Agent>,
+    /// Reasoning text content.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub content: Option<Vec<BetaResponseContent>>,
+    /// The encrypted content of the reasoning item.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub encrypted_content: Option<String>,
+    /// The status of the item.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub status: Option<BetaResponseReasoningItemStatus>,
+}
+
+/// The summary part that was added.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct BetaResponsePart {
+    /// The text of the summary part.
+    pub text: String,
+    /// The type of the summary part. Always `summary_text`.
+    #[serde(rename = "type")]
+    pub type_: String,
+}
+
+/// Emitted when a new reasoning summary part is added.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct BetaResponseReasoningSummaryPartAddedEvent {
+    /// The ID of the item this summary part is associated with.
+    pub item_id: String,
+    /// The index of the output item this summary part is associated with.
+    pub output_index: i64,
+    /// The summary part that was added.
+    pub part: BetaResponsePart,
+    /// The sequence number of this event.
+    pub sequence_number: i64,
+    /// The index of the summary part within the reasoning summary.
+    pub summary_index: i64,
+    /// The type of the event. Always `response.reasoning_summary_part.added`.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// The agent that owns this multi-agent streaming event.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub agent: Option<Agent>,
+}
+
+/// Emitted when a reasoning summary part is completed.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct BetaResponseReasoningSummaryPartDoneEvent {
+    /// The ID of the item this summary part is associated with.
+    pub item_id: String,
+    /// The index of the output item this summary part is associated with.
+    pub output_index: i64,
+    /// The completed summary part.
+    pub part: BetaResponsePart,
+    /// The sequence number of this event.
+    pub sequence_number: i64,
+    /// The index of the summary part within the reasoning summary.
+    pub summary_index: i64,
+    /// The type of the event. Always `response.reasoning_summary_part.done`.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// The agent that owns this multi-agent streaming event.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub agent: Option<Agent>,
+    /// The completion status of the summary part.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub status: Option<String>,
+}
+
+/// Emitted when a delta is added to a reasoning summary text.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct BetaResponseReasoningSummaryTextDeltaEvent {
+    /// The text delta that was added to the summary.
+    pub delta: String,
+    /// The ID of the item this summary text delta is associated with.
+    pub item_id: String,
+    /// The index of the output item this summary text delta is associated with.
+    pub output_index: i64,
+    /// The sequence number of this event.
+    pub sequence_number: i64,
+    /// The index of the summary part within the reasoning summary.
+    pub summary_index: i64,
+    /// The type of the event. Always `response.reasoning_summary_text.delta`.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// The agent that owns this multi-agent streaming event.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub agent: Option<Agent>,
+}
+
+/// Emitted when a reasoning summary text is completed.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct BetaResponseReasoningSummaryTextDoneEvent {
+    /// The ID of the item this summary text is associated with.
+    pub item_id: String,
+    /// The index of the output item this summary text is associated with.
+    pub output_index: i64,
+    /// The sequence number of this event.
+    pub sequence_number: i64,
+    /// The index of the summary part within the reasoning summary.
+    pub summary_index: i64,
+    /// The full text of the completed reasoning summary.
+    pub text: String,
+    /// The type of the event. Always `response.reasoning_summary_text.done`.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// The agent that owns this multi-agent streaming event.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub agent: Option<Agent>,
+}
+
+/// Emitted when a delta is added to a reasoning text.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct BetaResponseReasoningTextDeltaEvent {
+    /// The index of the reasoning content part this delta is associated with.
+    pub content_index: i64,
+    /// The text delta that was added to the reasoning content.
+    pub delta: String,
+    /// The ID of the item this reasoning text delta is associated with.
+    pub item_id: String,
+    /// The index of the output item this reasoning text delta is associated with.
+    pub output_index: i64,
+    /// The sequence number of this event.
+    pub sequence_number: i64,
+    /// The type of the event. Always `response.reasoning_text.delta`.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// The agent that owns this multi-agent streaming event.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub agent: Option<Agent>,
+}
+
+/// Emitted when a reasoning text is completed.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct BetaResponseReasoningTextDoneEvent {
+    /// The index of the reasoning content part.
+    pub content_index: i64,
+    /// The ID of the item this reasoning text is associated with.
+    pub item_id: String,
+    /// The index of the output item this reasoning text is associated with.
+    pub output_index: i64,
+    /// The sequence number of this event.
+    pub sequence_number: i64,
+    /// The full text of the completed reasoning content.
+    pub text: String,
+    /// The type of the event. Always `response.reasoning_text.done`.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// The agent that owns this multi-agent streaming event.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub agent: Option<Agent>,
+}
+
+/// Emitted when there is a partial refusal text.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct BetaResponseRefusalDeltaEvent {
+    /// The index of the content part that the refusal text is added to.
+    pub content_index: i64,
+    /// The refusal text that is added.
+    pub delta: String,
+    /// The ID of the output item that the refusal text is added to.
+    pub item_id: String,
+    /// The index of the output item that the refusal text is added to.
+    pub output_index: i64,
+    /// The sequence number of this event.
+    pub sequence_number: i64,
+    /// The type of the event. Always `response.refusal.delta`.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// The agent that owns this multi-agent streaming event.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub agent: Option<Agent>,
+}
+
+/// Emitted when refusal text is finalized.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct BetaResponseRefusalDoneEvent {
+    /// The index of the content part that the refusal text is finalized.
+    pub content_index: i64,
+    /// The ID of the output item that the refusal text is finalized.
+    pub item_id: String,
+    /// The index of the output item that the refusal text is finalized.
+    pub output_index: i64,
+    /// The refusal text that is finalized.
+    pub refusal: String,
+    /// The sequence number of this event.
+    pub sequence_number: i64,
+    /// The type of the event. Always `response.refusal.done`.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// The agent that owns this multi-agent streaming event.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub agent: Option<Agent>,
+}
+
+/// A streaming event that indicated a shell command was added to a tool call.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct BetaResponseShellCallCommandAddedEvent {
+    /// The shell command that was added.
+    pub command: String,
+    /// The index of the shell command that was added.
+    pub command_index: i64,
+    /// The index of the output item that was updated.
+    pub output_index: i64,
+    /// The sequence number of the event that was emitted.
+    pub sequence_number: i64,
+    /// The type of the event, always `response.shell_call_command.added`.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// The agent that owns this multi-agent streaming event.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub agent: Option<Agent>,
+}
+
+/// A streaming event that indicated a shell command was incrementally updated.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct BetaResponseShellCallCommandDeltaEvent {
+    /// The index of the shell command that was updated.
+    pub command_index: i64,
+    /// The shell command delta that was appended.
+    pub delta: String,
+    /// The index of the output item that was updated.
+    pub output_index: i64,
+    /// The sequence number of the event that was emitted.
+    pub sequence_number: i64,
+    /// The type of the event, always `response.shell_call_command.delta`.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// The agent that owns this multi-agent streaming event.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub agent: Option<Agent>,
+    /// An obfuscation string that was added to pad the event payload.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub obfuscation: Option<String>,
+}
+
+/// A streaming event that indicated a shell command was completed.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct BetaResponseShellCallCommandDoneEvent {
+    /// The final shell command that was emitted.
+    pub command: String,
+    /// The index of the shell command that was completed.
+    pub command_index: i64,
+    /// The index of the output item that was updated.
+    pub output_index: i64,
+    /// The sequence number of the event that was emitted.
+    pub sequence_number: i64,
+    /// The type of the event, always `response.shell_call_command.done`.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// The agent that owns this multi-agent streaming event.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub agent: Option<Agent>,
+}
+
+/// The stdout/stderr delta that was emitted.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct Delta {
+    /// The stderr delta that was emitted.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub stderr: Option<String>,
+    /// The stdout delta that was emitted.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub stdout: Option<String>,
+}
+
+/// A streaming event that indicated shell call output was incrementally added.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct BetaResponseShellCallOutputContentDeltaEvent {
+    /// The index of the shell command that produced output.
+    pub command_index: i64,
+    /// The stdout/stderr delta that was emitted.
+    pub delta: Delta,
+    /// The ID of the output item that was updated.
+    pub item_id: String,
+    /// The index of the output item that was updated.
+    pub output_index: i64,
+    /// The sequence number of the event that was emitted.
+    pub sequence_number: i64,
+    /// The type of the event, always `response.shell_call_output_content.delta`.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// The agent that owns this multi-agent streaming event.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub agent: Option<Agent>,
+}
+
+/// A streaming event that indicated shell call output was completed.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct BetaResponseShellCallOutputContentDoneEvent {
+    /// The index of the shell command that produced output.
+    pub command_index: i64,
+    /// The ID of the output item that was updated.
+    pub item_id: String,
+    /// The output contents emitted for the shell command.
+    pub output: Vec<BetaResponseOutput>,
+    /// The index of the output item that was updated.
+    pub output_index: i64,
+    /// The sequence number of the event that was emitted.
+    pub sequence_number: i64,
+    /// The type of the event, always `response.shell_call_output_content.done`.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// The agent that owns this multi-agent streaming event.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub agent: Option<Agent>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+#[non_exhaustive]
+pub enum BetaResponseStatus {
+    #[serde(rename = "completed")]
+    Completed,
+    #[serde(rename = "failed")]
+    Failed,
+    #[serde(rename = "in_progress")]
+    InProgress,
+    #[serde(rename = "cancelled")]
+    Cancelled,
+    #[serde(rename = "queued")]
+    Queued,
+    #[serde(rename = "incomplete")]
+    Incomplete,
+}
+
+pub type BetaResponseStreamEvent = serde_json::Value;
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+#[non_exhaustive]
+pub enum BetaResponseTextConfigVerbosity {
+    #[serde(rename = "low")]
+    Low,
+    #[serde(rename = "medium")]
+    Medium,
+    #[serde(rename = "high")]
+    High,
+}
+
+/// Configuration options for a text response from the model.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct BetaResponseTextConfig {
+    /// An object specifying the format that the model must output.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub format: Option<BetaResponseFormatTextConfig>,
+    /// Constrains the verbosity of the model's response.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub verbosity: Option<BetaResponseTextConfigVerbosity>,
+}
+
+/// Emitted when there is an additional text delta.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct BetaResponseTextDeltaEvent {
+    /// The index of the content part that the text delta was added to.
+    pub content_index: i64,
+    /// The text delta that was added.
+    pub delta: String,
+    /// The ID of the output item that the text delta was added to.
+    pub item_id: String,
+    /// The log probabilities of the tokens in the delta.
+    pub logprobs: Vec<Logprob>,
+    /// The index of the output item that the text delta was added to.
+    pub output_index: i64,
+    /// The sequence number for this event.
+    pub sequence_number: i64,
+    /// The type of the event. Always `response.output_text.delta`.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// The agent that owns this multi-agent streaming event.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub agent: Option<Agent>,
+}
+
+/// Emitted when text content is finalized.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct BetaResponseTextDoneEvent {
+    /// The index of the content part that the text content is finalized.
+    pub content_index: i64,
+    /// The ID of the output item that the text content is finalized.
+    pub item_id: String,
+    /// The log probabilities of the tokens in the delta.
+    pub logprobs: Vec<Logprob>,
+    /// The index of the output item that the text content is finalized.
+    pub output_index: i64,
+    /// The sequence number for this event.
+    pub sequence_number: i64,
+    /// The text content that is finalized.
+    pub text: String,
+    /// The type of the event. Always `response.output_text.done`.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// The agent that owns this multi-agent streaming event.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub agent: Option<Agent>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+#[non_exhaustive]
+pub enum BetaResponseToolSearchCallExecution {
+    #[serde(rename = "server")]
+    Server,
+    #[serde(rename = "client")]
+    Client,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+#[non_exhaustive]
+pub enum BetaResponseToolSearchCallStatus {
+    #[serde(rename = "in_progress")]
+    InProgress,
+    #[serde(rename = "completed")]
+    Completed,
+    #[serde(rename = "incomplete")]
+    Incomplete,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct BetaResponseToolSearchCall {
+    /// The unique ID of the tool search call item.
+    pub id: String,
+    /// Arguments used for the tool search call.
+    pub arguments: serde_json::Value,
+    /// The unique ID of the tool search call generated by the model.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub call_id: Option<String>,
+    /// Whether tool search was executed by the server or by the client.
+    pub execution: BetaResponseToolSearchCallExecution,
+    /// The status of the tool search call item that was recorded.
+    pub status: BetaResponseToolSearchCallStatus,
+    /// The type of the item. Always `tool_search_call`.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// The agent that produced this item.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub agent: Option<Agent>,
+    /// The identifier of the actor that created the item.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub created_by: Option<String>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+#[non_exhaustive]
+pub enum BetaResponseToolSearchOutputItemExecution {
+    #[serde(rename = "server")]
+    Server,
+    #[serde(rename = "client")]
+    Client,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+#[non_exhaustive]
+pub enum BetaResponseToolSearchOutputItemStatus {
+    #[serde(rename = "in_progress")]
+    InProgress,
+    #[serde(rename = "completed")]
+    Completed,
+    #[serde(rename = "incomplete")]
+    Incomplete,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct BetaResponseToolSearchOutputItem {
+    /// The unique ID of the tool search output item.
+    pub id: String,
+    /// The unique ID of the tool search call generated by the model.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub call_id: Option<String>,
+    /// Whether tool search was executed by the server or by the client.
+    pub execution: BetaResponseToolSearchOutputItemExecution,
+    /// The status of the tool search output item that was recorded.
+    pub status: BetaResponseToolSearchOutputItemStatus,
+    /// The loaded tool definitions returned by tool search.
+    pub tools: Vec<BetaTool>,
+    /// The type of the item. Always `tool_search_output`.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// The agent that produced this item.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub agent: Option<Agent>,
+    /// The identifier of the actor that created the item.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub created_by: Option<String>,
+}
+
+/// A detailed breakdown of the input tokens.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct InputTokensDetails {
+    /// The number of input tokens that were written to the cache.
+    pub cache_write_tokens: i64,
+    /// The number of tokens that were retrieved from the cache.
+    pub cached_tokens: i64,
+}
+
+/// A detailed breakdown of the output tokens.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct OutputTokensDetails {
+    /// The number of reasoning tokens.
+    pub reasoning_tokens: i64,
+}
+
+/// Represents token usage details including input tokens, output tokens,
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct BetaResponseUsage {
+    /// The number of input tokens.
+    pub input_tokens: i64,
+    /// A detailed breakdown of the input tokens.
+    pub input_tokens_details: InputTokensDetails,
+    /// The number of output tokens.
+    pub output_tokens: i64,
+    /// A detailed breakdown of the output tokens.
+    pub output_tokens_details: OutputTokensDetails,
+    /// The total number of tokens used.
+    pub total_tokens: i64,
+}
+
+/// Emitted when a web search call is completed.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct BetaResponseWebSearchCallCompletedEvent {
+    /// Unique ID for the output item associated with the web search call.
+    pub item_id: String,
+    /// The index of the output item that the web search call is associated with.
+    pub output_index: i64,
+    /// The sequence number of the web search call being processed.
+    pub sequence_number: i64,
+    /// The type of the event. Always `response.web_search_call.completed`.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// The agent that owns this multi-agent streaming event.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub agent: Option<Agent>,
+}
+
+/// Emitted when a web search call is initiated.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct BetaResponseWebSearchCallInProgressEvent {
+    /// Unique ID for the output item associated with the web search call.
+    pub item_id: String,
+    /// The index of the output item that the web search call is associated with.
+    pub output_index: i64,
+    /// The sequence number of the web search call being processed.
+    pub sequence_number: i64,
+    /// The type of the event. Always `response.web_search_call.in_progress`.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// The agent that owns this multi-agent streaming event.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub agent: Option<Agent>,
+}
+
+/// Emitted when a web search call is executing.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct BetaResponseWebSearchCallSearchingEvent {
+    /// Unique ID for the output item associated with the web search call.
+    pub item_id: String,
+    /// The index of the output item that the web search call is associated with.
+    pub output_index: i64,
+    /// The sequence number of the web search call being processed.
+    pub sequence_number: i64,
+    /// The type of the event. Always `response.web_search_call.searching`.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// The agent that owns this multi-agent streaming event.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub agent: Option<Agent>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct ResponseCreateContextManagement {
+    /// The context management entry type. Currently only 'compaction' is supported.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// Token threshold at which compaction should be triggered for this entry.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub compact_threshold: Option<i64>,
+}
+
+pub type ResponseCreateConversation = serde_json::Value;
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+#[non_exhaustive]
+pub enum ResponseCreateModerationPolicyInputMode {
+    #[serde(rename = "score")]
+    Score,
+    #[serde(rename = "block")]
+    Block,
+}
+
+/// The moderation policy for the response input.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct ResponseCreateModerationPolicyInput {
+    pub mode: ResponseCreateModerationPolicyInputMode,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+#[non_exhaustive]
+pub enum ResponseCreateModerationPolicyOutputMode {
+    #[serde(rename = "score")]
+    Score,
+    #[serde(rename = "block")]
+    Block,
+}
+
+/// The moderation policy for the response output.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct ResponseCreateModerationPolicyOutput {
+    pub mode: ResponseCreateModerationPolicyOutputMode,
+}
+
+/// The policy to apply to moderated response input and output.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct ResponseCreateModerationPolicy {
+    /// The moderation policy for the response input.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub input: Option<ResponseCreateModerationPolicyInput>,
+    /// The moderation policy for the response output.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub output: Option<ResponseCreateModerationPolicyOutput>,
+}
+
+/// Configuration for running moderation on the input and output of this response.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct ResponseCreateModeration {
+    /// The moderation model to use for moderated completions, e.g.
+    pub model: String,
+    /// The policy to apply to moderated response input and output.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub policy: Option<ResponseCreateModerationPolicy>,
+}
+
+/// Configuration for server-hosted multi-agent execution.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct ResponseCreateMultiAgent {
+    /// Whether to enable server-hosted multi-agent execution for this response.
+    pub enabled: bool,
+    /// `max_concurrent_subagents` sets the maximum number of subagents that can be
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub max_concurrent_subagents: Option<i64>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+#[non_exhaustive]
+pub enum ResponseCreatePromptCacheOptionsMode {
+    #[serde(rename = "implicit")]
+    Implicit,
+    #[serde(rename = "explicit")]
+    Explicit,
+}
+
+/// Options for prompt caching.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct ResponseCreatePromptCacheOptions {
+    /// Controls whether OpenAI automatically creates an implicit cache breakpoint.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub mode: Option<ResponseCreatePromptCacheOptionsMode>,
+    /// The minimum lifetime applied to every implicit and explicit cache breakpoint
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub ttl: Option<String>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+#[non_exhaustive]
+pub enum ResponseCreateReasoningContext {
+    #[serde(rename = "auto")]
+    Auto,
+    #[serde(rename = "current_turn")]
+    CurrentTurn,
+    #[serde(rename = "all_turns")]
+    AllTurns,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+#[non_exhaustive]
+pub enum ResponseCreateReasoningEffort {
+    #[serde(rename = "none")]
+    None,
+    #[serde(rename = "minimal")]
+    Minimal,
+    #[serde(rename = "low")]
+    Low,
+    #[serde(rename = "medium")]
+    Medium,
+    #[serde(rename = "high")]
+    High,
+    #[serde(rename = "xhigh")]
+    Xhigh,
+    #[serde(rename = "max")]
+    Max,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+#[non_exhaustive]
+pub enum ResponseCreateReasoningGenerateSummary {
+    #[serde(rename = "auto")]
+    Auto,
+    #[serde(rename = "concise")]
+    Concise,
+    #[serde(rename = "detailed")]
+    Detailed,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+#[non_exhaustive]
+pub enum ResponseCreateReasoningSummary {
+    #[serde(rename = "auto")]
+    Auto,
+    #[serde(rename = "concise")]
+    Concise,
+    #[serde(rename = "detailed")]
+    Detailed,
+}
+
+/// **gpt-5 and o-series models only**
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct ResponseCreateReasoning {
+    /// Controls which reasoning items are rendered back to the model on later turns. If
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub context: Option<ResponseCreateReasoningContext>,
+    /// Constrains effort on reasoning for reasoning models.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub effort: Option<ResponseCreateReasoningEffort>,
+    /// **Deprecated:** use `summary` instead.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub generate_summary: Option<ResponseCreateReasoningGenerateSummary>,
+    /// Controls the reasoning execution mode for the request.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub mode: Option<String>,
+    /// A summary of the reasoning performed by the model.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub summary: Option<ResponseCreateReasoningSummary>,
+}
+
+/// Options for streaming responses. Only set this when you set `stream: true`.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct ResponseCreateStreamOptions {
+    /// When true, stream obfuscation will be enabled.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub include_obfuscation: Option<bool>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct ResponseCreateToolChoiceBetaSpecificProgrammaticToolCallingParam {
+    /// The tool to call. Always `programmatic_tool_calling`.
+    #[serde(rename = "type")]
+    pub type_: String,
+}
+
+pub type ResponseCreateToolChoice = serde_json::Value;
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+#[non_exhaustive]
+pub enum ResponseCreatePromptCacheRetention {
+    #[serde(rename = "in_memory")]
+    InMemory,
+    #[serde(rename = "24h")]
+    V24h,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+#[non_exhaustive]
+pub enum ResponseCreateTruncation {
+    #[serde(rename = "auto")]
+    Auto,
+    #[serde(rename = "disabled")]
+    Disabled,
+}
+
+/// Client event for creating a response over a persistent WebSocket connection.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct ResponseCreate {
+    /// The type of the client event. Always `response.create`.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// Whether to run the model response in the background.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub background: Option<bool>,
+    /// Context management configuration for this request.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub context_management: Option<Vec<ResponseCreateContextManagement>>,
+    /// The conversation that this response belongs to.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub conversation: Option<ResponseCreateConversation>,
+    /// Specify additional output data to include in the model response.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub include: Option<Vec<BetaResponseIncludable>>,
+    /// Text, image, or file inputs to the model, used to generate a response.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub input: Option<String>,
+    /// A system (or developer) message inserted into the model's context.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub instructions: Option<String>,
+    /// An upper bound for the number of tokens that can be generated for a response,
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub max_output_tokens: Option<i64>,
+    /// The maximum number of total calls to built-in tools that can be processed in a
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub max_tool_calls: Option<i64>,
+    /// Set of 16 key-value pairs that can be attached to an object.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub metadata: Option<std::collections::HashMap<String, String>>,
+    /// Model ID used to generate the response, like `gpt-4o` or `o3`.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub model: Option<String>,
+    /// Configuration for running moderation on the input and output of this response.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub moderation: Option<ResponseCreateModeration>,
+    /// Configuration for server-hosted multi-agent execution.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub multi_agent: Option<ResponseCreateMultiAgent>,
+    /// Whether to allow the model to run tool calls in parallel.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub parallel_tool_calls: Option<bool>,
+    /// The unique ID of the previous response to the model.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub previous_response_id: Option<String>,
+    /// Reference to a prompt template and its variables.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub prompt: Option<BetaResponsePrompt>,
+    /// Used by OpenAI to cache responses for similar requests to optimize your cache
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub prompt_cache_key: Option<String>,
+    /// Options for prompt caching.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub prompt_cache_options: Option<ResponseCreatePromptCacheOptions>,
+    /// Deprecated. Use `prompt_cache_options.ttl` instead.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub prompt_cache_retention: Option<ResponseCreatePromptCacheRetention>,
+    /// **gpt-5 and o-series models only**
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub reasoning: Option<ResponseCreateReasoning>,
+    /// A stable identifier used to help detect users of your application that may be
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub safety_identifier: Option<String>,
+    /// Specifies the processing type used for serving the request.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub service_tier: Option<BetaServiceTier>,
+    /// Whether to store the generated model response for later retrieval via API.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub store: Option<bool>,
+    /// If set to true, the model response data will be streamed to the client as it is
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub stream: Option<bool>,
+    /// The WebSocket lane for this response.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub stream_id: Option<String>,
+    /// Options for streaming responses. Only set this when you set `stream: true`.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub stream_options: Option<ResponseCreateStreamOptions>,
+    /// What sampling temperature to use, between 0 and 2.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub temperature: Option<f64>,
+    /// Configuration options for a text response from the model.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub text: Option<BetaResponseTextConfig>,
+    /// How the model should select which tool (or tools) to use when generating a
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub tool_choice: Option<ResponseCreateToolChoice>,
+    /// An array of tools the model may call while generating a response.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub tools: Option<Vec<BetaTool>>,
+    /// An integer between 0 and 20 specifying the maximum number of most likely tokens
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub top_logprobs: Option<i64>,
+    /// An alternative to sampling with temperature, called nucleus sampling, where the
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub top_p: Option<f64>,
+    /// The truncation strategy to use for the model response.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub truncation: Option<ResponseCreateTruncation>,
+    /// This field is being replaced by `safety_identifier` and `prompt_cache_key`.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub user: Option<String>,
+}
+
+pub type BetaResponsesClientEvent = serde_json::Value;
+
+/// Details about the error.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct BetaResponseWsErrorError {
+    /// The error code that was emitted, if any.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub code: Option<String>,
+    /// The human-readable error message that was emitted.
+    pub message: String,
+    /// The parameter name that was associated with the error, if any.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub param: Option<String>,
+    /// The error type that was emitted.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// The response headers that were emitted with the error, if any.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub headers: Option<std::collections::HashMap<String, String>>,
+}
+
+/// The agent that owns this multi-agent streaming event.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct BetaResponseWsErrorAgent {
+    /// The canonical name of the agent that produced this item.
+    pub agent_name: String,
+}
+
+/// Emitted when an error occurs while processing a Responses WebSocket request.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct BetaResponseWsError {
+    /// Details about the error.
+    pub error: BetaResponseWsErrorError,
+    /// The type of the event. Always `error`.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// The agent that owns this multi-agent streaming event.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub agent: Option<BetaResponseWsErrorAgent>,
+    /// The sequence number of an error emitted by the response stream.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub sequence_number: Option<i64>,
+    /// The HTTP status code associated with a WebSocket protocol error.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub status: Option<i64>,
+    /// The WebSocket lane that emitted this event.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub stream_id: Option<String>,
+}
+
+pub type BetaResponsesServerEvent = serde_json::Value;
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+#[non_exhaustive]
+pub enum BetaServiceTier {
+    #[serde(rename = "auto")]
+    Auto,
+    #[serde(rename = "default")]
+    Default,
+    #[serde(rename = "flex")]
+    Flex,
+    #[serde(rename = "scale")]
+    Scale,
+    #[serde(rename = "priority")]
+    Priority,
+    #[serde(rename = "fast")]
+    Fast,
+    #[serde(rename = "ultrafast")]
+    Ultrafast,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct BetaSkillReference {
+    /// The ID of the referenced skill.
+    pub skill_id: String,
+    /// References a skill created with the /v1/skills endpoint.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// Optional skill version. Use a positive integer or 'latest'. Omit for default.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub version: Option<String>,
+}
+
+/// A filter object to specify which tools are allowed.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct McpAllowedToolsMcpToolFilter {
+    /// Indicates whether or not a tool modifies data or is read-only.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub read_only: Option<bool>,
+    /// List of allowed tool names.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub tool_names: Option<Vec<String>>,
+}
+
+pub type McpAllowedTools = serde_json::Value;
+
+/// A filter object to specify which tools are allowed.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct McpRequireApprovalMcpToolApprovalFilterAlways {
+    /// Indicates whether or not a tool modifies data or is read-only.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub read_only: Option<bool>,
+    /// List of allowed tool names.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub tool_names: Option<Vec<String>>,
+}
+
+/// A filter object to specify which tools are allowed.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct McpRequireApprovalMcpToolApprovalFilterNever {
+    /// Indicates whether or not a tool modifies data or is read-only.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub read_only: Option<bool>,
+    /// List of allowed tool names.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub tool_names: Option<Vec<String>>,
+}
+
+/// Specify which of the MCP server's tools require approval.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct McpRequireApprovalMcpToolApprovalFilter {
+    /// A filter object to specify which tools are allowed.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub always: Option<McpRequireApprovalMcpToolApprovalFilterAlways>,
+    /// A filter object to specify which tools are allowed.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub never: Option<McpRequireApprovalMcpToolApprovalFilterNever>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+#[non_exhaustive]
+pub enum McpRequireApproval {
+    Always,
+    Never,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+#[non_exhaustive]
+pub enum McpConnectorId {
+    #[serde(rename = "connector_dropbox")]
+    ConnectorDropbox,
+    #[serde(rename = "connector_gmail")]
+    ConnectorGmail,
+    #[serde(rename = "connector_googlecalendar")]
+    ConnectorGooglecalendar,
+    #[serde(rename = "connector_googledrive")]
+    ConnectorGoogledrive,
+    #[serde(rename = "connector_microsoftteams")]
+    ConnectorMicrosoftteams,
+    #[serde(rename = "connector_outlookcalendar")]
+    ConnectorOutlookcalendar,
+    #[serde(rename = "connector_outlookemail")]
+    ConnectorOutlookemail,
+    #[serde(rename = "connector_sharepoint")]
+    ConnectorSharepoint,
+}
+
+/// Give the model access to additional tools via remote Model Context Protocol
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct Mcp {
+    /// A label for this MCP server, used to identify it in tool calls.
+    pub server_label: String,
+    /// The type of the MCP tool. Always `mcp`.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// The tool invocation context(s).
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub allowed_callers: Option<Vec<serde_json::Value>>,
+    /// List of allowed tool names or a filter object.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub allowed_tools: Option<McpAllowedTools>,
+    /// An OAuth access token that can be used with a remote MCP server, either with a
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub authorization: Option<String>,
+    /// Identifier for service connectors, like those available in ChatGPT.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub connector_id: Option<McpConnectorId>,
+    /// Whether this MCP tool is deferred and discovered via tool search.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub defer_loading: Option<bool>,
+    /// Optional HTTP headers to send to the MCP server.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub headers: Option<std::collections::HashMap<String, String>>,
+    /// Specify which of the MCP server's tools require approval.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub require_approval: Option<McpRequireApproval>,
+    /// Optional description of the MCP server, used to provide more context.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub server_description: Option<String>,
+    /// The URL for the MCP server.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub server_url: Option<String>,
+    /// The Secure MCP Tunnel ID to use instead of a direct server URL.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub tunnel_id: Option<String>,
+}
+
+pub type CodeInterpreterContainerCodeInterpreterToolAutoNetworkPolicy = serde_json::Value;
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+#[non_exhaustive]
+pub enum CodeInterpreterContainerCodeInterpreterToolAutoMemoryLimit {
+    #[serde(rename = "1g")]
+    V1g,
+    #[serde(rename = "4g")]
+    V4g,
+    #[serde(rename = "16g")]
+    V16g,
+    #[serde(rename = "64g")]
+    V64g,
+}
+
+/// Configuration for a code interpreter container.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct CodeInterpreterContainerCodeInterpreterToolAuto {
+    /// Always `auto`.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// An optional list of uploaded files to make available to your code.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub file_ids: Option<Vec<String>>,
+    /// The memory limit for the code interpreter container.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub memory_limit: Option<CodeInterpreterContainerCodeInterpreterToolAutoMemoryLimit>,
+    /// Network access policy for the container.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub network_policy: Option<CodeInterpreterContainerCodeInterpreterToolAutoNetworkPolicy>,
+}
+
+pub type CodeInterpreterContainer = serde_json::Value;
+
+/// A tool that runs Python code to help generate a response to a prompt.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct CodeInterpreter {
+    /// The code interpreter container.
+    pub container: CodeInterpreterContainer,
+    /// The type of the code interpreter tool. Always `code_interpreter`.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// The tool invocation context(s).
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub allowed_callers: Option<Vec<serde_json::Value>>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct ProgrammaticToolCalling {
+    /// The type of the tool. Always `programmatic_tool_calling`.
+    #[serde(rename = "type")]
+    pub type_: String,
+}
+
+/// Optional mask for inpainting.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct ImageGenerationInputImageMask {
+    /// File ID for the mask image.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub file_id: Option<String>,
+    /// Base64-encoded mask image.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub image_url: Option<String>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+#[non_exhaustive]
+pub enum ImageGenerationAction {
+    #[serde(rename = "generate")]
+    Generate,
+    #[serde(rename = "edit")]
+    Edit,
+    #[serde(rename = "auto")]
+    Auto,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+#[non_exhaustive]
+pub enum ImageGenerationBackground {
+    #[serde(rename = "transparent")]
+    Transparent,
+    #[serde(rename = "opaque")]
+    Opaque,
+    #[serde(rename = "auto")]
+    Auto,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+#[non_exhaustive]
+pub enum ImageGenerationInputFidelity {
+    #[serde(rename = "high")]
+    High,
+    #[serde(rename = "low")]
+    Low,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+#[non_exhaustive]
+pub enum ImageGenerationModeration {
+    #[serde(rename = "auto")]
+    Auto,
+    #[serde(rename = "low")]
+    Low,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+#[non_exhaustive]
+pub enum ImageGenerationOutputFormat {
+    #[serde(rename = "png")]
+    Png,
+    #[serde(rename = "webp")]
+    Webp,
+    #[serde(rename = "jpeg")]
+    Jpeg,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+#[non_exhaustive]
+pub enum ImageGenerationQuality {
+    #[serde(rename = "low")]
+    Low,
+    #[serde(rename = "medium")]
+    Medium,
+    #[serde(rename = "high")]
+    High,
+    #[serde(rename = "auto")]
+    Auto,
+}
+
+/// A tool that generates images using the GPT image models.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct ImageGeneration {
+    /// The type of the image generation tool. Always `image_generation`.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// Whether to generate a new image or edit an existing image. Default: `auto`.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub action: Option<ImageGenerationAction>,
+    /// Allows to set transparency for the background of the generated image(s). This
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub background: Option<ImageGenerationBackground>,
+    /// Control how much effort the model will exert to match the style and features,
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub input_fidelity: Option<ImageGenerationInputFidelity>,
+    /// Optional mask for inpainting.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub input_image_mask: Option<ImageGenerationInputImageMask>,
+    /// The image generation model to use. Default: `gpt-image-1`.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub model: Option<String>,
+    /// Moderation level for the generated image. Default: `auto`.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub moderation: Option<ImageGenerationModeration>,
+    /// Compression level for the output image. Default: 100.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub output_compression: Option<i64>,
+    /// The output format of the generated image.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub output_format: Option<ImageGenerationOutputFormat>,
+    /// Number of partial images to generate in streaming mode, from 0 (default value)
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub partial_images: Option<i64>,
+    /// The quality of the generated image.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub quality: Option<ImageGenerationQuality>,
+    /// The size of the generated images.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub size: Option<String>,
+}
+
+/// A tool that allows the model to execute shell commands in a local environment.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct LocalShell {
+    /// The type of the local shell tool. Always `local_shell`.
+    #[serde(rename = "type")]
+    pub type_: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+#[non_exhaustive]
+pub enum BetaToolChoiceAllowedMode {
+    #[serde(rename = "auto")]
+    Auto,
+    #[serde(rename = "required")]
+    Required,
+}
+
+/// Constrains the tools available to the model to a pre-defined set.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct BetaToolChoiceAllowed {
+    /// Constrains the tools available to the model to a pre-defined set.
+    pub mode: BetaToolChoiceAllowedMode,
+    /// A list of tool definitions that the model should be allowed to call.
+    pub tools: Vec<std::collections::HashMap<String, serde_json::Value>>,
+    /// Allowed tool configuration type. Always `allowed_tools`.
+    #[serde(rename = "type")]
+    pub type_: String,
+}
+
+/// Forces the model to call the apply_patch tool when executing a tool call.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct BetaToolChoiceApplyPatch {
+    /// The tool to call. Always `apply_patch`.
+    #[serde(rename = "type")]
+    pub type_: String,
+}
+
+/// Use this option to force the model to call a specific custom tool.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct BetaToolChoiceCustom {
+    /// The name of the custom tool to call.
+    pub name: String,
+    /// For custom tool calling, the type is always `custom`.
+    #[serde(rename = "type")]
+    pub type_: String,
+}
+
+/// Use this option to force the model to call a specific function.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct BetaToolChoiceFunction {
+    /// The name of the function to call.
+    pub name: String,
+    /// For function calling, the type is always `function`.
+    #[serde(rename = "type")]
+    pub type_: String,
+}
+
+/// Use this option to force the model to call a specific tool on a remote MCP server.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct BetaToolChoiceMcp {
+    /// The label of the MCP server to use.
+    pub server_label: String,
+    /// For MCP tools, the type is always `mcp`.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// The name of the tool to call on the server.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub name: Option<String>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+#[non_exhaustive]
+pub enum BetaToolChoiceOptions {
+    #[serde(rename = "none")]
+    None,
+    #[serde(rename = "auto")]
+    Auto,
+    #[serde(rename = "required")]
+    Required,
+}
+
+/// Forces the model to call the shell tool when a tool call is required.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct BetaToolChoiceShell {
+    /// The tool to call. Always `shell`.
+    #[serde(rename = "type")]
+    pub type_: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+#[non_exhaustive]
+pub enum BetaToolChoiceTypesType {
+    #[serde(rename = "file_search")]
+    FileSearch,
+    #[serde(rename = "web_search_preview")]
+    WebSearchPreview,
+    #[serde(rename = "computer")]
+    Computer,
+    #[serde(rename = "computer_use_preview")]
+    ComputerUsePreview,
+    #[serde(rename = "computer_use")]
+    ComputerUse,
+    #[serde(rename = "web_search_preview_2025_03_11")]
+    WebSearchPreview20250311,
+    #[serde(rename = "image_generation")]
+    ImageGeneration,
+    #[serde(rename = "code_interpreter")]
+    CodeInterpreter,
+}
+
+/// Indicates that the model should use a built-in tool to generate a response.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct BetaToolChoiceTypes {
+    /// The type of hosted tool the model should to use.
+    #[serde(rename = "type")]
+    pub type_: BetaToolChoiceTypesType,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+#[non_exhaustive]
+pub enum BetaToolSearchToolExecution {
+    #[serde(rename = "server")]
+    Server,
+    #[serde(rename = "client")]
+    Client,
+}
+
+/// Hosted or BYOT tool search configuration for deferred tools.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct BetaToolSearchTool {
+    /// The type of the tool. Always `tool_search`.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// Description shown to the model for a client-executed tool search tool.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub description: Option<String>,
+    /// Whether tool search is executed by the server or by the client.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub execution: Option<BetaToolSearchToolExecution>,
+    /// Parameter schema for a client-executed tool search tool.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub parameters: Option<serde_json::Value>,
+}
+
+/// The user's location.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct UserLocation {
+    /// The type of location approximation. Always `approximate`.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// Free text input for the city of the user, e.g. `San Francisco`.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub city: Option<String>,
+    /// The two-letter [ISO country code](https://en.wikipedia.org/wiki/ISO_3166-1) of
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub country: Option<String>,
+    /// Free text input for the region of the user, e.g. `California`.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub region: Option<String>,
+    /// The [IANA timezone](https://timeapi.io/documentation/iana-timezones) of the
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub timezone: Option<String>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+#[non_exhaustive]
+pub enum BetaWebSearchPreviewToolType {
+    #[serde(rename = "web_search_preview")]
+    WebSearchPreview,
+    #[serde(rename = "web_search_preview_2025_03_11")]
+    WebSearchPreview20250311,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+#[non_exhaustive]
+pub enum BetaWebSearchPreviewToolSearchContextSize {
+    #[serde(rename = "low")]
+    Low,
+    #[serde(rename = "medium")]
+    Medium,
+    #[serde(rename = "high")]
+    High,
+}
+
+/// This tool searches the web for relevant results to use in a response.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct BetaWebSearchPreviewTool {
+    /// The type of the web search tool.
+    #[serde(rename = "type")]
+    pub type_: BetaWebSearchPreviewToolType,
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub search_content_types: Option<Vec<serde_json::Value>>,
+    /// High level guidance for the amount of context window space to use for the
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub search_context_size: Option<BetaWebSearchPreviewToolSearchContextSize>,
+    /// The user's location.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub user_location: Option<UserLocation>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+#[non_exhaustive]
+pub enum BetaWebSearchToolType {
+    #[serde(rename = "web_search")]
+    WebSearch,
+    #[serde(rename = "web_search_2025_08_26")]
+    WebSearch20250826,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+#[non_exhaustive]
+pub enum BetaWebSearchToolSearchContextSize {
+    #[serde(rename = "low")]
+    Low,
+    #[serde(rename = "medium")]
+    Medium,
+    #[serde(rename = "high")]
+    High,
+}
+
+/// Search the Internet for sources related to the prompt.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct BetaWebSearchTool {
+    /// The type of the web search tool.
+    #[serde(rename = "type")]
+    pub type_: BetaWebSearchToolType,
+    /// Allow live internet access for web search.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub external_web_access: Option<bool>,
+    /// Filters for the search.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub filters: Option<Filters>,
+    /// High level guidance for the amount of context window space to use for the
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub search_context_size: Option<BetaWebSearchToolSearchContextSize>,
+    /// The approximate location of the user.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub user_location: Option<UserLocation>,
 }
 
 /// Tracing settings applied to the workflow.
@@ -502,6 +6546,279 @@ pub struct FunctionTool {
     #[serde(rename = "type")]
     pub type_: String,
 }
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+#[non_exhaustive]
+pub enum ResponseCompactParamsPromptCacheRetention {
+    #[serde(rename = "in_memory")]
+    InMemory,
+    #[serde(rename = "24h")]
+    V24h,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+#[non_exhaustive]
+pub enum ResponseCompactParamsServiceTier {
+    #[serde(rename = "auto")]
+    Auto,
+    #[serde(rename = "default")]
+    Default,
+    #[serde(rename = "fast")]
+    Fast,
+    #[serde(rename = "flex")]
+    Flex,
+    #[serde(rename = "priority")]
+    Priority,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct ResponseCompactParams {
+    /// Model ID used to generate the response, like `gpt-5` or `o3`.
+    pub model: Option<String>,
+    /// Text, image, or file inputs to the model, used to generate a response
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub input: Option<String>,
+    /// A system (or developer) message inserted into the model's context. When used
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub instructions: Option<String>,
+    /// The unique ID of the previous response to the model.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub previous_response_id: Option<String>,
+    /// A key to use when reading from or writing to the prompt cache.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub prompt_cache_key: Option<String>,
+    /// Options for prompt caching.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub prompt_cache_options: Option<PromptCacheOptions>,
+    /// How long to retain a prompt cache entry created by this request.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub prompt_cache_retention: Option<ResponseCompactParamsPromptCacheRetention>,
+    /// Specifies the processing type used for serving the request.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub service_tier: Option<ResponseCompactParamsServiceTier>,
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub betas: Option<Vec<String>>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+#[non_exhaustive]
+pub enum ResponseCreateParamsBasePromptCacheRetention {
+    #[serde(rename = "in_memory")]
+    InMemory,
+    #[serde(rename = "24h")]
+    V24h,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+#[non_exhaustive]
+pub enum ResponseCreateParamsBaseTruncation {
+    #[serde(rename = "auto")]
+    Auto,
+    #[serde(rename = "disabled")]
+    Disabled,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct ResponseCreateParamsBase {
+    /// Whether to run the model response in the background.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub background: Option<bool>,
+    /// Context management configuration for this request.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub context_management: Option<Vec<ContextManagement>>,
+    /// The conversation that this response belongs to.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub conversation: Option<Conversation>,
+    /// Specify additional output data to include in the model response.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub include: Option<Vec<BetaResponseIncludable>>,
+    /// Text, image, or file inputs to the model, used to generate a response.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub input: Option<String>,
+    /// A system (or developer) message inserted into the model's context.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub instructions: Option<String>,
+    /// An upper bound for the number of tokens that can be generated for a response,
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub max_output_tokens: Option<i64>,
+    /// The maximum number of total calls to built-in tools that can be processed in a
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub max_tool_calls: Option<i64>,
+    /// Set of 16 key-value pairs that can be attached to an object.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub metadata: Option<std::collections::HashMap<String, String>>,
+    /// Model ID used to generate the response, like `gpt-4o` or `o3`.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub model: Option<String>,
+    /// Configuration for running moderation on the input and output of this response.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub moderation: Option<Moderation>,
+    /// Configuration for server-hosted multi-agent execution.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub multi_agent: Option<MultiAgent>,
+    /// Whether to allow the model to run tool calls in parallel.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub parallel_tool_calls: Option<bool>,
+    /// The unique ID of the previous response to the model.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub previous_response_id: Option<String>,
+    /// Reference to a prompt template and its variables.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub prompt: Option<serde_json::Value>,
+    /// Used by OpenAI to cache responses for similar requests to optimize your cache
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub prompt_cache_key: Option<String>,
+    /// Options for prompt caching.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub prompt_cache_options: Option<PromptCacheOptions>,
+    /// Deprecated. Use `prompt_cache_options.ttl` instead.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub prompt_cache_retention: Option<ResponseCreateParamsBasePromptCacheRetention>,
+    /// **gpt-5 and o-series models only**
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub reasoning: Option<Reasoning>,
+    /// A stable identifier used to help detect users of your application that may be
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub safety_identifier: Option<String>,
+    /// Specifies the processing type used for serving the request.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub service_tier: Option<BetaServiceTier>,
+    /// Whether to store the generated model response for later retrieval via API.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub store: Option<bool>,
+    /// Options for streaming responses. Only set this when you set `stream: true`.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub stream_options: Option<StreamOptions>,
+    /// What sampling temperature to use, between 0 and 2.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub temperature: Option<f64>,
+    /// Configuration options for a text response from the model.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub text: Option<serde_json::Value>,
+    /// How the model should select which tool (or tools) to use when generating a
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub tool_choice: Option<ToolChoice>,
+    /// An array of tools the model may call while generating a response.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub tools: Option<Vec<serde_json::Value>>,
+    /// An integer between 0 and 20 specifying the maximum number of most likely tokens
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub top_logprobs: Option<i64>,
+    /// An alternative to sampling with temperature, called nucleus sampling, where the
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub top_p: Option<f64>,
+    /// The truncation strategy to use for the model response.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub truncation: Option<ResponseCreateParamsBaseTruncation>,
+    /// This field is being replaced by `safety_identifier` and `prompt_cache_key`.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub user: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub betas: Option<Vec<String>>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct ContextManagement {
+    /// The context management entry type. Currently only 'compaction' is supported.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// Token threshold at which compaction should be triggered for this entry.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub compact_threshold: Option<i64>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+#[non_exhaustive]
+pub enum ModerationPolicyInputMode {
+    #[serde(rename = "score")]
+    Score,
+    #[serde(rename = "block")]
+    Block,
+}
+
+/// The moderation policy for the response input.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct ModerationPolicyInput {
+    pub mode: ModerationPolicyInputMode,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+#[non_exhaustive]
+pub enum ModerationPolicyOutputMode {
+    #[serde(rename = "score")]
+    Score,
+    #[serde(rename = "block")]
+    Block,
+}
+
+/// The moderation policy for the response output.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct ModerationPolicyOutput {
+    pub mode: ModerationPolicyOutputMode,
+}
+
+/// The policy to apply to moderated response input and output.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct ModerationPolicy {
+    /// The moderation policy for the response input.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub input: Option<ModerationPolicyInput>,
+    /// The moderation policy for the response output.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub output: Option<ModerationPolicyOutput>,
+}
+
+/// Configuration for server-hosted multi-agent execution.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct MultiAgent {
+    /// Whether to enable server-hosted multi-agent execution for this response.
+    pub enabled: bool,
+    /// `max_concurrent_subagents` sets the maximum number of subagents that can be
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub max_concurrent_subagents: Option<i64>,
+}
+
+/// Options for streaming responses. Only set this when you set `stream: true`.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct StreamOptions {
+    /// When true, stream obfuscation will be enabled.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub include_obfuscation: Option<bool>,
+}
+
+pub type ResponseCreateParams = serde_json::Value;
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct ResponseRetrieveParamsBase {
+    /// Additional fields to include in the response.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub include: Option<Vec<BetaResponseIncludable>>,
+    /// When true, stream obfuscation will be enabled.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub include_obfuscation: Option<bool>,
+    /// The sequence number of the event after which to start streaming.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub starting_after: Option<i64>,
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub betas: Option<Vec<String>>,
+}
+
+pub type ResponseRetrieveParams = serde_json::Value;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
@@ -713,16 +7030,6 @@ pub struct MessageAttachment {
     /// The tools to add this file to.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub tools: Option<Vec<MessageAttachmentTool>>,
-}
-
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
-#[non_exhaustive]
-pub enum MessageRole {
-    #[serde(rename = "user")]
-    User,
-    #[serde(rename = "assistant")]
-    Assistant,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

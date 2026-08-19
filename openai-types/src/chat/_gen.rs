@@ -3,8 +3,8 @@
 // Domain: chat
 #![allow(unused_imports)]
 
-use serde::{Deserialize, Serialize};
 use super::*;
+use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
@@ -22,6 +22,110 @@ pub enum ChatCompletionChoiceFinishReason {
     FunctionCall,
 }
 
+/// A moderation result produced for the response input or output.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct ModerationInputModerationResultsResult {
+    /// A dictionary of moderation categories to booleans, True if the input is flagged
+    pub categories: std::collections::HashMap<String, bool>,
+    /// Which modalities of input are reflected by the score for each category.
+    pub category_applied_input_types: std::collections::HashMap<String, Vec<serde_json::Value>>,
+    /// A dictionary of moderation categories to scores.
+    pub category_scores: std::collections::HashMap<String, f64>,
+    /// A boolean indicating whether the content was flagged by any category.
+    pub flagged: bool,
+    /// The moderation model that produced this result.
+    pub model: String,
+    /// The object type, which was always `moderation_result` for successful moderation
+    #[serde(rename = "type")]
+    pub type_: String,
+}
+
+/// Successful moderation results for the request input or generated output.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct ModerationInputModerationResults {
+    /// The moderation model used to generate the results.
+    pub model: String,
+    /// A list of moderation results.
+    pub results: Vec<ModerationInputModerationResultsResult>,
+    /// The object type, which is always `moderation_results`.
+    #[serde(rename = "type")]
+    pub type_: String,
+}
+
+/// An error produced while attempting moderation.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct ModerationInputError {
+    /// The error code.
+    pub code: String,
+    /// The error message.
+    pub message: String,
+    /// The object type, which is always `error`.
+    #[serde(rename = "type")]
+    pub type_: String,
+}
+
+pub type ModerationInput = serde_json::Value;
+
+/// A moderation result produced for the response input or output.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct ModerationOutputModerationResultsResult {
+    /// A dictionary of moderation categories to booleans, True if the input is flagged
+    pub categories: std::collections::HashMap<String, bool>,
+    /// Which modalities of input are reflected by the score for each category.
+    pub category_applied_input_types: std::collections::HashMap<String, Vec<serde_json::Value>>,
+    /// A dictionary of moderation categories to scores.
+    pub category_scores: std::collections::HashMap<String, f64>,
+    /// A boolean indicating whether the content was flagged by any category.
+    pub flagged: bool,
+    /// The moderation model that produced this result.
+    pub model: String,
+    /// The object type, which was always `moderation_result` for successful moderation
+    #[serde(rename = "type")]
+    pub type_: String,
+}
+
+/// Successful moderation results for the request input or generated output.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct ModerationOutputModerationResults {
+    /// The moderation model used to generate the results.
+    pub model: String,
+    /// A list of moderation results.
+    pub results: Vec<ModerationOutputModerationResultsResult>,
+    /// The object type, which is always `moderation_results`.
+    #[serde(rename = "type")]
+    pub type_: String,
+}
+
+/// An error produced while attempting moderation.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct ModerationOutputError {
+    /// The error code.
+    pub code: String,
+    /// The error message.
+    pub message: String,
+    /// The object type, which is always `error`.
+    #[serde(rename = "type")]
+    pub type_: String,
+}
+
+pub type ModerationOutput = serde_json::Value;
+
+/// Moderation results for the request input and generated output, if moderated
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct Moderation {
+    /// Moderation for the request input.
+    pub input: ModerationInput,
+    /// Moderation for the generated output.
+    pub output: ModerationOutput,
+}
+
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
 #[non_exhaustive]
@@ -36,6 +140,8 @@ pub enum ChatCompletionServiceTier {
     Scale,
     #[serde(rename = "priority")]
     Priority,
+    #[serde(rename = "fast")]
+    Fast,
 }
 
 /// Represents a chat completion response returned by model, based on the provided input.
@@ -52,6 +158,12 @@ pub struct ChatCompletion {
     pub model: String,
     /// The object type, which is always `chat.completion`.
     pub object: String,
+    /// Set of 16 key-value pairs that can be attached to an object.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub metadata: Option<serde_json::Value>,
+    /// Moderation results for the request input and generated output, if moderated
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub moderation: Option<Moderation>,
     /// Specifies the processing type used for serving the request.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub service_tier: Option<ChatCompletionServiceTier>,
@@ -160,6 +272,8 @@ pub enum ChatCompletionChunkServiceTier {
     Scale,
     #[serde(rename = "priority")]
     Priority,
+    #[serde(rename = "fast")]
+    Fast,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -184,6 +298,14 @@ pub struct ImageURL {
     pub detail: Option<ImageURLDetail>,
 }
 
+/// Marks the exact end of a reusable prompt prefix.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct PromptCacheBreakpoint {
+    /// The breakpoint mode. Always `explicit`.
+    pub mode: String,
+}
+
 /// Learn about [image inputs](https://platform.openai.com/docs/guides/vision).
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
@@ -192,6 +314,9 @@ pub struct ChatCompletionContentPartImage {
     /// The type of the content part.
     #[serde(rename = "type")]
     pub type_: String,
+    /// Marks the exact end of a reusable prompt prefix.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub prompt_cache_breakpoint: Option<PromptCacheBreakpoint>,
 }
 
 /// Learn about [text inputs](https://platform.openai.com/docs/guides/text-generation).
@@ -203,6 +328,9 @@ pub struct ChatCompletionContentPartText {
     /// The type of the content part.
     #[serde(rename = "type")]
     pub type_: String,
+    /// Marks the exact end of a reusable prompt prefix.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub prompt_cache_breakpoint: Option<PromptCacheBreakpoint>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -338,7 +466,7 @@ pub struct ChatCompletionTokenLogprob {
 #[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
 #[non_exhaustive]
 pub enum CompletionCreateParamsBasePromptCacheRetention {
-    #[serde(rename = "in-memory")]
+    #[serde(rename = "in_memory")]
     InMemory,
     #[serde(rename = "24h")]
     V24h,
@@ -358,6 +486,8 @@ pub enum CompletionCreateParamsBaseServiceTier {
     Scale,
     #[serde(rename = "priority")]
     Priority,
+    #[serde(rename = "fast")]
+    Fast,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -409,6 +539,9 @@ pub struct CompletionCreateParamsBase {
     /// Output types that you would like the model to generate. Most models are capable
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub modalities: Option<Vec<serde_json::Value>>,
+    /// Configuration for running moderation on the request input and generated output.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub moderation: Option<Moderation>,
     /// How many chat completion choices to generate for each input message.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub n: Option<i64>,
@@ -424,10 +557,13 @@ pub struct CompletionCreateParamsBase {
     /// Used by OpenAI to cache responses for similar requests to optimize your cache
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub prompt_cache_key: Option<String>,
-    /// The retention policy for the prompt cache.
+    /// Options for prompt caching.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub prompt_cache_options: Option<PromptCacheOptions>,
+    /// Deprecated. Use `prompt_cache_options.ttl` instead.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub prompt_cache_retention: Option<CompletionCreateParamsBasePromptCacheRetention>,
-    /// Constrains effort on reasoning for
+    /// Constrains effort on reasoning for reasoning models.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub reasoning_effort: Option<serde_json::Value>,
     /// An object specifying the format that the model must output.
@@ -460,7 +596,7 @@ pub struct CompletionCreateParamsBase {
     /// A list of tools the model may call.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub tools: Option<Vec<serde_json::Value>>,
-    /// An integer between 0 and 20 specifying the number of most likely tokens to
+    /// An integer between 0 and 20 specifying the maximum number of most likely tokens
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub top_logprobs: Option<i64>,
     /// An alternative to sampling with temperature, called nucleus sampling, where the
@@ -488,6 +624,74 @@ pub struct CompletionCreateFunction {
     /// The parameters the functions accepts, described as a JSON Schema object.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub parameters: Option<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+#[non_exhaustive]
+pub enum ModerationPolicyInputMode {
+    #[serde(rename = "score")]
+    Score,
+    #[serde(rename = "block")]
+    Block,
+}
+
+/// The moderation policy for the response input.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct ModerationPolicyInput {
+    pub mode: ModerationPolicyInputMode,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+#[non_exhaustive]
+pub enum ModerationPolicyOutputMode {
+    #[serde(rename = "score")]
+    Score,
+    #[serde(rename = "block")]
+    Block,
+}
+
+/// The moderation policy for the response output.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct ModerationPolicyOutput {
+    pub mode: ModerationPolicyOutputMode,
+}
+
+/// The policy to apply to moderated response input and output.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct ModerationPolicy {
+    /// The moderation policy for the response input.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub input: Option<ModerationPolicyInput>,
+    /// The moderation policy for the response output.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub output: Option<ModerationPolicyOutput>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+#[non_exhaustive]
+pub enum PromptCacheOptionsMode {
+    #[serde(rename = "implicit")]
+    Implicit,
+    #[serde(rename = "explicit")]
+    Explicit,
+}
+
+/// Options for prompt caching.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct PromptCacheOptions {
+    /// Controls whether OpenAI automatically creates an implicit cache breakpoint.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub mode: Option<PromptCacheOptionsMode>,
+    /// The minimum lifetime applied to every implicit and explicit cache breakpoint
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub ttl: Option<String>,
 }
 
 /// Approximate location parameters for the search.

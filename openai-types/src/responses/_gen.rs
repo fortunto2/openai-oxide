@@ -3,8 +3,8 @@
 // Domain: responses
 #![allow(unused_imports)]
 
-use serde::{Deserialize, Serialize};
 use super::*;
+use serde::{Deserialize, Serialize};
 
 /// Allows the assistant to create, delete, or update files using unified diffs.
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -13,6 +13,9 @@ pub struct ApplyPatchTool {
     /// The type of the tool. Always `apply_patch`.
     #[serde(rename = "type")]
     pub type_: String,
+    /// The tool invocation context(s).
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub allowed_callers: Option<Vec<serde_json::Value>>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -59,12 +62,18 @@ pub struct Click {
     pub x: i64,
     /// The y-coordinate where the click occurred.
     pub y: i64,
+    /// The keys being held while clicking.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub keys: Option<Vec<String>>,
 }
 
 /// A double click action.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
 pub struct DoubleClick {
+    /// The keys being held while double-clicking.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub keys: Option<Vec<String>>,
     /// Specifies the event type.
     #[serde(rename = "type")]
     pub type_: String,
@@ -93,6 +102,9 @@ pub struct Drag {
     /// Specifies the event type.
     #[serde(rename = "type")]
     pub type_: String,
+    /// The keys being held while dragging the mouse.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub keys: Option<Vec<String>>,
 }
 
 /// A collection of keypresses the model would like to perform.
@@ -117,6 +129,9 @@ pub struct Move {
     pub x: i64,
     /// The y-coordinate to move to.
     pub y: i64,
+    /// The keys being held while moving the mouse.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub keys: Option<Vec<String>>,
 }
 
 /// A screenshot action.
@@ -143,6 +158,9 @@ pub struct Scroll {
     pub x: i64,
     /// The y-coordinate where the scroll occurred.
     pub y: i64,
+    /// The keys being held while scrolling.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub keys: Option<Vec<String>>,
 }
 
 /// An action to type in text.
@@ -298,6 +316,9 @@ pub struct CustomTool {
     /// The type of the custom tool. Always `custom`.
     #[serde(rename = "type")]
     pub type_: String,
+    /// The tool invocation context(s).
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub allowed_callers: Option<Vec<serde_json::Value>>,
     /// Whether this tool should be deferred and discovered via tool search.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub defer_loading: Option<bool>,
@@ -399,6 +420,9 @@ pub struct FunctionShellTool {
     /// The type of the shell tool. Always `shell`.
     #[serde(rename = "type")]
     pub type_: String,
+    /// The tool invocation context(s).
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub allowed_callers: Option<Vec<serde_json::Value>>,
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub environment: Option<Environment>,
 }
@@ -485,6 +509,9 @@ pub struct InputTokenCountParams {
     /// Whether to allow the model to run tool calls in parallel.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub parallel_tool_calls: Option<bool>,
+    /// A model-owned style preset to apply to this request.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub personality: Option<String>,
     /// The unique ID of the previous response to the model.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub previous_response_id: Option<String>,
@@ -531,6 +558,14 @@ pub struct Text {
     pub verbosity: Option<TextVerbosity>,
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct ToolChoiceSpecificProgrammaticToolCallingParam {
+    /// The tool to call. Always `programmatic_tool_calling`.
+    #[serde(rename = "type")]
+    pub type_: String,
+}
+
 pub type ToolChoice = serde_json::Value;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -564,17 +599,52 @@ pub struct LocalSkill {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct McpProtocolError {
+    pub code: i64,
+    pub message: String,
+    #[serde(rename = "type")]
+    pub type_: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct McpToolExecutionError {
+    pub content: serde_json::Value,
+    #[serde(rename = "type")]
+    pub type_: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct HTTPError {
+    pub code: i64,
+    pub message: String,
+    #[serde(rename = "type")]
+    pub type_: String,
+}
+
+pub type McpToolCallError = serde_json::Value;
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
 pub struct ToolFunction {
     pub name: String,
     #[serde(rename = "type")]
     pub type_: String,
+    /// The tool invocation context(s).
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub allowed_callers: Option<Vec<serde_json::Value>>,
     /// Whether this function should be deferred and discovered via tool search.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub defer_loading: Option<bool>,
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub description: Option<String>,
+    /// A JSON Schema describing the JSON value encoded in string outputs for this
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub output_schema: Option<std::collections::HashMap<String, serde_json::Value>>,
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub parameters: Option<serde_json::Value>,
+    /// Whether to enforce strict parameter validation.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub strict: Option<bool>,
 }
@@ -610,30 +680,112 @@ pub enum IncompleteDetailsReason {
     ContentFilter,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+/// A moderation result produced for the response input or output.
+#[derive(Debug, Clone, Serialize, Deserialize)]
 #[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
-#[non_exhaustive]
-pub enum ResponsePromptCacheRetention {
-    #[serde(rename = "in-memory")]
-    InMemory,
-    #[serde(rename = "24h")]
-    V24h,
+pub struct ModerationInputModerationResult {
+    /// A dictionary of moderation categories to booleans, True if the input is flagged
+    pub categories: std::collections::HashMap<String, bool>,
+    /// Which modalities of input are reflected by the score for each category.
+    pub category_applied_input_types: std::collections::HashMap<String, Vec<serde_json::Value>>,
+    /// A dictionary of moderation categories to scores.
+    pub category_scores: std::collections::HashMap<String, f64>,
+    /// A boolean indicating whether the content was flagged by any category.
+    pub flagged: bool,
+    /// The moderation model that produced this result.
+    pub model: String,
+    /// The object type, which was always `moderation_result` for successful moderation
+    #[serde(rename = "type")]
+    pub type_: String,
+}
+
+/// An error produced while attempting moderation for the response input or output.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct ModerationInputError {
+    /// The error code.
+    pub code: String,
+    /// The error message.
+    pub message: String,
+    /// The object type, which was always `error` for moderation failures.
+    #[serde(rename = "type")]
+    pub type_: String,
+}
+
+pub type ModerationInput = serde_json::Value;
+
+/// A moderation result produced for the response input or output.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct ModerationOutputModerationResult {
+    /// A dictionary of moderation categories to booleans, True if the input is flagged
+    pub categories: std::collections::HashMap<String, bool>,
+    /// Which modalities of input are reflected by the score for each category.
+    pub category_applied_input_types: std::collections::HashMap<String, Vec<serde_json::Value>>,
+    /// A dictionary of moderation categories to scores.
+    pub category_scores: std::collections::HashMap<String, f64>,
+    /// A boolean indicating whether the content was flagged by any category.
+    pub flagged: bool,
+    /// The moderation model that produced this result.
+    pub model: String,
+    /// The object type, which was always `moderation_result` for successful moderation
+    #[serde(rename = "type")]
+    pub type_: String,
+}
+
+/// An error produced while attempting moderation for the response input or output.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct ModerationOutputError {
+    /// The error code.
+    pub code: String,
+    /// The error message.
+    pub message: String,
+    /// The object type, which was always `error` for moderation failures.
+    #[serde(rename = "type")]
+    pub type_: String,
+}
+
+pub type ModerationOutput = serde_json::Value;
+
+/// Moderation results for the response input and output, if moderated completions were requested.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct Moderation {
+    /// Moderation for the response input.
+    pub input: ModerationInput,
+    /// Moderation for the response output.
+    pub output: ModerationOutput,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
 #[non_exhaustive]
-pub enum ResponseServiceTier {
-    #[serde(rename = "auto")]
-    Auto,
-    #[serde(rename = "default")]
-    Default,
-    #[serde(rename = "flex")]
-    Flex,
-    #[serde(rename = "scale")]
-    Scale,
-    #[serde(rename = "priority")]
-    Priority,
+pub enum PromptCacheOptionsMode {
+    #[serde(rename = "implicit")]
+    Implicit,
+    #[serde(rename = "explicit")]
+    Explicit,
+}
+
+/// The prompt-caching options that were applied to the response.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct PromptCacheOptions {
+    /// Whether implicit prompt-cache breakpoints were enabled.
+    pub mode: PromptCacheOptionsMode,
+    /// The minimum lifetime applied to each cache breakpoint.
+    pub ttl: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+#[non_exhaustive]
+pub enum ResponsePromptCacheRetention {
+    #[serde(rename = "in_memory")]
+    InMemory,
+    #[serde(rename = "24h")]
+    V24h,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -685,6 +837,24 @@ pub struct OperationUpdateFile {
 
 pub type Operation = serde_json::Value;
 
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct CallerDirect {
+    #[serde(rename = "type")]
+    pub type_: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct CallerProgram {
+    /// The call ID of the program item that produced this tool call.
+    pub caller_id: String,
+    #[serde(rename = "type")]
+    pub type_: String,
+}
+
+pub type Caller = serde_json::Value;
+
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
 #[non_exhaustive]
@@ -710,6 +880,9 @@ pub struct ResponseApplyPatchToolCall {
     /// The type of the item. Always `apply_patch_call`.
     #[serde(rename = "type")]
     pub type_: String,
+    /// The execution context that produced this tool call.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub caller: Option<Caller>,
     /// The ID of the entity that created this tool call.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub created_by: Option<String>,
@@ -738,6 +911,9 @@ pub struct ResponseApplyPatchToolCallOutput {
     /// The type of the item. Always `apply_patch_call_output`.
     #[serde(rename = "type")]
     pub type_: String,
+    /// The execution context that produced this tool call.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub caller: Option<Caller>,
     /// The ID of the entity that created this tool call output.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub created_by: Option<String>,
@@ -926,12 +1102,38 @@ pub struct ResponseCodeInterpreterToolCall {
     pub container_id: String,
     /// The outputs generated by the code interpreter, such as logs or images. Can be
     #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub outputs: Option<Vec<FunctionShellOutput>>,
+    pub outputs: Option<Vec<Output>>,
     /// The status of the code interpreter tool call.
     pub status: ResponseCodeInterpreterToolCallStatus,
     /// The type of the code interpreter tool call. Always `code_interpreter_call`.
     #[serde(rename = "type")]
     pub type_: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+#[non_exhaustive]
+pub enum ResponseCompactParamsPromptCacheRetention {
+    #[serde(rename = "in_memory")]
+    InMemory,
+    #[serde(rename = "24h")]
+    V24h,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+#[non_exhaustive]
+pub enum ResponseCompactParamsServiceTier {
+    #[serde(rename = "auto")]
+    Auto,
+    #[serde(rename = "default")]
+    Default,
+    #[serde(rename = "fast")]
+    Fast,
+    #[serde(rename = "flex")]
+    Flex,
+    #[serde(rename = "priority")]
+    Priority,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -951,6 +1153,15 @@ pub struct ResponseCompactParams {
     /// A key to use when reading from or writing to the prompt cache.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub prompt_cache_key: Option<String>,
+    /// Options for prompt caching.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub prompt_cache_options: Option<PromptCacheOptions>,
+    /// How long to retain a prompt cache entry created by this request.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub prompt_cache_retention: Option<ResponseCompactParamsPromptCacheRetention>,
+    /// Specifies the processing type used for serving the request.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub service_tier: Option<ResponseCompactParamsServiceTier>,
 }
 
 /// A compaction item generated by the [`v1/responses/compact` API](https://platform.openai.com/docs/api-reference/responses/compact).
@@ -1012,12 +1223,18 @@ pub struct ActionClick {
     pub x: i64,
     /// The y-coordinate where the click occurred.
     pub y: i64,
+    /// The keys being held while clicking.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub keys: Option<Vec<String>>,
 }
 
 /// A double click action.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
 pub struct ActionDoubleClick {
+    /// The keys being held while double-clicking.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub keys: Option<Vec<String>>,
     /// Specifies the event type.
     #[serde(rename = "type")]
     pub type_: String,
@@ -1046,6 +1263,9 @@ pub struct ActionDrag {
     /// Specifies the event type.
     #[serde(rename = "type")]
     pub type_: String,
+    /// The keys being held while dragging the mouse.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub keys: Option<Vec<String>>,
 }
 
 /// A collection of keypresses the model would like to perform.
@@ -1070,6 +1290,9 @@ pub struct ActionMove {
     pub x: i64,
     /// The y-coordinate to move to.
     pub y: i64,
+    /// The keys being held while moving the mouse.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub keys: Option<Vec<String>>,
 }
 
 /// A screenshot action.
@@ -1096,6 +1319,9 @@ pub struct ActionScroll {
     pub x: i64,
     /// The y-coordinate where the scroll occurred.
     pub y: i64,
+    /// The keys being held while scrolling.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub keys: Option<Vec<String>>,
 }
 
 /// An action to type in text.
@@ -1173,12 +1399,14 @@ pub struct AcknowledgedSafetyCheck {
 #[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
 #[non_exhaustive]
 pub enum ResponseComputerToolCallOutputItemStatus {
-    #[serde(rename = "in_progress")]
-    InProgress,
     #[serde(rename = "completed")]
     Completed,
     #[serde(rename = "incomplete")]
     Incomplete,
+    #[serde(rename = "failed")]
+    Failed,
+    #[serde(rename = "in_progress")]
+    InProgress,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -1190,15 +1418,17 @@ pub struct ResponseComputerToolCallOutputItem {
     pub call_id: String,
     /// A computer screenshot image used with the computer use tool.
     pub output: ResponseComputerToolCallOutputScreenshot,
+    /// The status of the message input.
+    pub status: ResponseComputerToolCallOutputItemStatus,
     /// The type of the computer tool call output. Always `computer_call_output`.
     #[serde(rename = "type")]
     pub type_: String,
     /// The safety checks reported by the API that have been acknowledged by the
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub acknowledged_safety_checks: Option<Vec<AcknowledgedSafetyCheck>>,
-    /// The status of the message input.
+    /// The identifier of the actor that created the item.
     #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub status: Option<ResponseComputerToolCallOutputItemStatus>,
+    pub created_by: Option<String>,
 }
 
 /// A computer screenshot image used with the computer use tool.
@@ -1281,26 +1511,10 @@ pub struct ResponseContentPartDoneEvent {
 #[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
 #[non_exhaustive]
 pub enum ResponseCreateParamsBasePromptCacheRetention {
-    #[serde(rename = "in-memory")]
+    #[serde(rename = "in_memory")]
     InMemory,
     #[serde(rename = "24h")]
     V24h,
-}
-
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
-#[non_exhaustive]
-pub enum ResponseCreateParamsBaseServiceTier {
-    #[serde(rename = "auto")]
-    Auto,
-    #[serde(rename = "default")]
-    Default,
-    #[serde(rename = "flex")]
-    Flex,
-    #[serde(rename = "scale")]
-    Scale,
-    #[serde(rename = "priority")]
-    Priority,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -1346,6 +1560,9 @@ pub struct ResponseCreateParamsBase {
     /// Model ID used to generate the response, like `gpt-4o` or `o3`.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub model: Option<serde_json::Value>,
+    /// Configuration for running moderation on the input and output of this response.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub moderation: Option<Moderation>,
     /// Whether to allow the model to run tool calls in parallel.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub parallel_tool_calls: Option<bool>,
@@ -1358,7 +1575,10 @@ pub struct ResponseCreateParamsBase {
     /// Used by OpenAI to cache responses for similar requests to optimize your cache
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub prompt_cache_key: Option<String>,
-    /// The retention policy for the prompt cache.
+    /// Options for prompt caching.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub prompt_cache_options: Option<PromptCacheOptions>,
+    /// Deprecated. Use `prompt_cache_options.ttl` instead.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub prompt_cache_retention: Option<ResponseCreateParamsBasePromptCacheRetention>,
     /// **gpt-5 and o-series models only**
@@ -1369,7 +1589,7 @@ pub struct ResponseCreateParamsBase {
     pub safety_identifier: Option<String>,
     /// Specifies the processing type used for serving the request.
     #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub service_tier: Option<ResponseCreateParamsBaseServiceTier>,
+    pub service_tier: Option<ServiceTier>,
     /// Whether to store the generated model response for later retrieval via API.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub store: Option<bool>,
@@ -1388,7 +1608,7 @@ pub struct ResponseCreateParamsBase {
     /// An array of tools the model may call while generating a response.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub tools: Option<Vec<serde_json::Value>>,
-    /// An integer between 0 and 20 specifying the number of most likely tokens to
+    /// An integer between 0 and 20 specifying the maximum number of most likely tokens
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub top_logprobs: Option<i64>,
     /// An alternative to sampling with temperature, called nucleus sampling, where the
@@ -1411,6 +1631,52 @@ pub struct ContextManagement {
     /// Token threshold at which compaction should be triggered for this entry.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub compact_threshold: Option<i64>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+#[non_exhaustive]
+pub enum ModerationPolicyInputMode {
+    #[serde(rename = "score")]
+    Score,
+    #[serde(rename = "block")]
+    Block,
+}
+
+/// The moderation policy for the response input.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct ModerationPolicyInput {
+    pub mode: ModerationPolicyInputMode,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+#[non_exhaustive]
+pub enum ModerationPolicyOutputMode {
+    #[serde(rename = "score")]
+    Score,
+    #[serde(rename = "block")]
+    Block,
+}
+
+/// The moderation policy for the response output.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct ModerationPolicyOutput {
+    pub mode: ModerationPolicyOutputMode,
+}
+
+/// The policy to apply to moderated response input and output.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct ModerationPolicy {
+    /// The moderation policy for the response input.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub input: Option<ModerationPolicyInput>,
+    /// The moderation policy for the response output.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub output: Option<ModerationPolicyOutput>,
 }
 
 /// Options for streaming responses. Only set this when you set `stream: true`.
@@ -1453,6 +1719,9 @@ pub struct ResponseCustomToolCall {
     /// The unique ID of the custom tool call in the OpenAI platform.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub id: Option<String>,
+    /// The execution context that produced this tool call.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub caller: Option<Caller>,
     /// The namespace of the custom tool being called.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub namespace: Option<String>,
@@ -1508,6 +1777,9 @@ pub struct ResponseCustomToolCallOutput {
     /// The unique ID of the custom tool call output in the OpenAI platform.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub id: Option<String>,
+    /// The execution context that produced this tool call.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub caller: Option<Caller>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -1520,6 +1792,10 @@ pub enum ResponseErrorCode {
     RateLimitExceeded,
     #[serde(rename = "invalid_prompt")]
     InvalidPrompt,
+    #[serde(rename = "data_residency_mismatch")]
+    DataResidencyMismatch,
+    #[serde(rename = "bio_policy")]
+    BioPolicy,
     #[serde(rename = "vector_store_timeout")]
     VectorStoreTimeout,
     #[serde(rename = "invalid_image")]
@@ -1754,6 +2030,9 @@ pub struct ResponseFunctionShellToolCall {
     /// The type of the item. Always `shell_call`.
     #[serde(rename = "type")]
     pub type_: String,
+    /// The execution context that produced this tool call.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub caller: Option<Caller>,
     /// The ID of the entity that created this tool call.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub created_by: Option<String>,
@@ -1820,12 +2099,15 @@ pub struct ResponseFunctionShellToolCallOutput {
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub max_output_length: Option<i64>,
     /// An array of shell call output contents
-    pub output: Vec<FunctionShellOutput>,
+    pub output: Vec<Output>,
     /// The status of the shell call output.
     pub status: ResponseFunctionShellToolCallOutputStatus,
     /// The type of the shell call output. Always `shell_call_output`.
     #[serde(rename = "type")]
     pub type_: String,
+    /// The execution context that produced this tool call.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub caller: Option<Caller>,
     /// The identifier of the actor that created the item.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub created_by: Option<String>,
@@ -1859,6 +2141,9 @@ pub struct ResponseFunctionToolCall {
     /// The unique ID of the function tool call.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub id: Option<String>,
+    /// The execution context that produced this tool call.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub caller: Option<Caller>,
     /// The namespace of the function to run.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub namespace: Option<String>,
@@ -1888,12 +2173,23 @@ pub struct ResponseFunctionToolCallOutputItem {
     pub call_id: String,
     /// The output from the function call generated by your code. Can be a string or an
     pub output: String,
+    /// The status of the item.
+    pub status: ResponseFunctionToolCallOutputItemStatus,
     /// The type of the function tool call output. Always `function_call_output`.
     #[serde(rename = "type")]
     pub type_: String,
-    /// The status of the item.
+    /// The execution context that produced this tool call.
     #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub status: Option<ResponseFunctionToolCallOutputItemStatus>,
+    pub caller: Option<Caller>,
+    /// The identifier of the actor that created the item.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub created_by: Option<String>,
+    /// The name of the tool that produced the output.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub name: Option<String>,
+    /// The namespace of the tool that produced the output.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub namespace: Option<String>,
 }
 
 /// A source used in the search.
@@ -1911,14 +2207,15 @@ pub struct ActionSearchSource {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
 pub struct ActionSearch {
-    /// [DEPRECATED] The search query.
-    pub query: String,
     /// The action type.
     #[serde(rename = "type")]
     pub type_: String,
     /// The search queries.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub queries: Option<Vec<String>>,
+    /// The search query.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub query: Option<String>,
     /// The sources used in the search.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub sources: Option<Vec<ActionSearchSource>>,
@@ -2040,6 +2337,18 @@ pub struct ResponseImageGenCallPartialImageEvent {
     /// The type of the event. Always 'response.image_generation_call.partial_image'.
     #[serde(rename = "type")]
     pub type_: String,
+    /// The background setting that was used.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub background: Option<String>,
+    /// The output format that was used.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub output_format: Option<String>,
+    /// The image quality that was used.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub quality: Option<String>,
+    /// The image size that was used.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub size: Option<String>,
 }
 
 /// Emitted when the response is in progress.
@@ -2108,6 +2417,26 @@ pub struct ResponseInputAudio {
 
 pub type ResponseInputContent = serde_json::Value;
 
+/// Marks the exact end of a reusable prompt prefix.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct PromptCacheBreakpoint {
+    /// The breakpoint mode. Always `explicit`.
+    pub mode: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+#[non_exhaustive]
+pub enum ResponseInputFileDetail {
+    #[serde(rename = "auto")]
+    Auto,
+    #[serde(rename = "low")]
+    Low,
+    #[serde(rename = "high")]
+    High,
+}
+
 /// A file input to the model.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
@@ -2115,6 +2444,9 @@ pub struct ResponseInputFile {
     /// The type of the input item. Always `input_file`.
     #[serde(rename = "type")]
     pub type_: String,
+    /// The detail level of the file to be sent to the model.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub detail: Option<ResponseInputFileDetail>,
     /// The content of the file to be sent to the model.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub file_data: Option<String>,
@@ -2127,6 +2459,21 @@ pub struct ResponseInputFile {
     /// The name of the file to be sent to the model.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub filename: Option<String>,
+    /// Marks the exact end of a reusable prompt prefix.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub prompt_cache_breakpoint: Option<PromptCacheBreakpoint>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+#[non_exhaustive]
+pub enum ResponseInputFileContentDetail {
+    #[serde(rename = "auto")]
+    Auto,
+    #[serde(rename = "low")]
+    Low,
+    #[serde(rename = "high")]
+    High,
 }
 
 /// A file input to the model.
@@ -2136,6 +2483,9 @@ pub struct ResponseInputFileContent {
     /// The type of the input item. Always `input_file`.
     #[serde(rename = "type")]
     pub type_: String,
+    /// The detail level of the file to be sent to the model.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub detail: Option<ResponseInputFileContentDetail>,
     /// The base64-encoded data of the file to be sent to the model.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub file_data: Option<String>,
@@ -2148,20 +2498,9 @@ pub struct ResponseInputFileContent {
     /// The name of the file to be sent to the model.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub filename: Option<String>,
-}
-
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
-#[non_exhaustive]
-pub enum ResponseInputImageDetail {
-    #[serde(rename = "low")]
-    Low,
-    #[serde(rename = "high")]
-    High,
-    #[serde(rename = "auto")]
-    Auto,
-    #[serde(rename = "original")]
-    Original,
+    /// Marks the exact end of a reusable prompt prefix.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub prompt_cache_breakpoint: Option<PromptCacheBreakpoint>,
 }
 
 /// An image input to the model.
@@ -2169,7 +2508,7 @@ pub enum ResponseInputImageDetail {
 #[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
 pub struct ResponseInputImage {
     /// The detail level of the image to be sent to the model.
-    pub detail: ResponseInputImageDetail,
+    pub detail: ImageDetail,
     /// The type of the input item. Always `input_image`.
     #[serde(rename = "type")]
     pub type_: String,
@@ -2179,20 +2518,9 @@ pub struct ResponseInputImage {
     /// The URL of the image to be sent to the model.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub image_url: Option<String>,
-}
-
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
-#[non_exhaustive]
-pub enum ResponseInputImageContentDetail {
-    #[serde(rename = "low")]
-    Low,
-    #[serde(rename = "high")]
-    High,
-    #[serde(rename = "auto")]
-    Auto,
-    #[serde(rename = "original")]
-    Original,
+    /// Marks the exact end of a reusable prompt prefix.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub prompt_cache_breakpoint: Option<PromptCacheBreakpoint>,
 }
 
 /// An image input to the model.
@@ -2204,13 +2532,16 @@ pub struct ResponseInputImageContent {
     pub type_: String,
     /// The detail level of the image to be sent to the model.
     #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub detail: Option<ResponseInputImageContentDetail>,
+    pub detail: Option<ImageDetail>,
     /// The ID of the file to be sent to the model.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub file_id: Option<String>,
     /// The URL of the image to be sent to the model.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub image_url: Option<String>,
+    /// Marks the exact end of a reusable prompt prefix.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub prompt_cache_breakpoint: Option<PromptCacheBreakpoint>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -2301,6 +2632,26 @@ pub struct ComputerCallOutput {
     pub status: Option<ComputerCallOutputStatus>,
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct FunctionCallOutputCallerDirect {
+    /// The caller type. Always `direct`.
+    #[serde(rename = "type")]
+    pub type_: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct FunctionCallOutputCallerProgram {
+    /// The call ID of the program item that produced this tool call.
+    pub caller_id: String,
+    /// The caller type. Always `program`.
+    #[serde(rename = "type")]
+    pub type_: String,
+}
+
+pub type FunctionCallOutputCaller = serde_json::Value;
+
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
 #[non_exhaustive]
@@ -2355,6 +2706,21 @@ pub struct ToolSearchCall {
     /// The status of the tool search call.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub status: Option<ToolSearchCallStatus>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct AdditionalTools {
+    /// The role that provided the additional tools. Only `developer` is supported.
+    pub role: String,
+    /// A list of additional tools made available at this item.
+    pub tools: Vec<Tool>,
+    /// The item type. Always `additional_tools`.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// The unique ID of this additional tools item.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub id: Option<String>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -2480,6 +2846,26 @@ pub struct ShellCallAction {
     pub timeout_ms: Option<i64>,
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct ShellCallCallerDirect {
+    /// The caller type. Always `direct`.
+    #[serde(rename = "type")]
+    pub type_: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct ShellCallCallerProgram {
+    /// The call ID of the program item that produced this tool call.
+    pub caller_id: String,
+    /// The caller type. Always `program`.
+    #[serde(rename = "type")]
+    pub type_: String,
+}
+
+pub type ShellCallCaller = serde_json::Value;
+
 pub type ShellCallEnvironment = serde_json::Value;
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -2508,6 +2894,9 @@ pub struct ShellCall {
     /// The unique ID of the shell tool call.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub id: Option<String>,
+    /// The execution context that produced this tool call.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub caller: Option<ShellCallCaller>,
     /// The environment to execute the shell commands in.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub environment: Option<ShellCallEnvironment>,
@@ -2515,6 +2904,26 @@ pub struct ShellCall {
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub status: Option<ShellCallStatus>,
 }
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct ShellCallOutputCallerDirect {
+    /// The caller type. Always `direct`.
+    #[serde(rename = "type")]
+    pub type_: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct ShellCallOutputCallerProgram {
+    /// The call ID of the program item that produced this tool call.
+    pub caller_id: String,
+    /// The caller type. Always `program`.
+    #[serde(rename = "type")]
+    pub type_: String,
+}
+
+pub type ShellCallOutputCaller = serde_json::Value;
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
@@ -2542,6 +2951,9 @@ pub struct ShellCallOutput {
     /// The unique ID of the shell tool call output.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub id: Option<String>,
+    /// The execution context that produced this tool call.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub caller: Option<ShellCallOutputCaller>,
     /// The maximum number of UTF-8 characters captured for this shell call's combined
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub max_output_length: Option<i64>,
@@ -2589,6 +3001,26 @@ pub struct ApplyPatchCallOperationUpdateFile {
 
 pub type ApplyPatchCallOperation = serde_json::Value;
 
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct ApplyPatchCallCallerDirect {
+    /// The caller type. Always `direct`.
+    #[serde(rename = "type")]
+    pub type_: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct ApplyPatchCallCallerProgram {
+    /// The call ID of the program item that produced this tool call.
+    pub caller_id: String,
+    /// The caller type. Always `program`.
+    #[serde(rename = "type")]
+    pub type_: String,
+}
+
+pub type ApplyPatchCallCaller = serde_json::Value;
+
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
 #[non_exhaustive]
@@ -2615,7 +3047,30 @@ pub struct ApplyPatchCall {
     /// The unique ID of the apply patch tool call.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub id: Option<String>,
+    /// The execution context that produced this tool call.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub caller: Option<ApplyPatchCallCaller>,
 }
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct ApplyPatchCallOutputCallerDirect {
+    /// The caller type. Always `direct`.
+    #[serde(rename = "type")]
+    pub type_: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct ApplyPatchCallOutputCallerProgram {
+    /// The call ID of the program item that produced this tool call.
+    pub caller_id: String,
+    /// The caller type. Always `program`.
+    #[serde(rename = "type")]
+    pub type_: String,
+}
+
+pub type ApplyPatchCallOutputCaller = serde_json::Value;
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
@@ -2641,6 +3096,9 @@ pub struct ApplyPatchCallOutput {
     /// The unique ID of the apply patch tool call output.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub id: Option<String>,
+    /// The execution context that produced this tool call.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub caller: Option<ApplyPatchCallOutputCaller>,
     /// Optional human-readable log text from the apply patch tool (e.g., patch results
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub output: Option<String>,
@@ -2752,13 +3210,22 @@ pub struct McpCall {
     pub approval_request_id: Option<String>,
     /// The error from the tool call, if any.
     #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub error: Option<String>,
+    pub error: Option<McpToolCallError>,
     /// The output from the tool call.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub output: Option<String>,
     /// The status of the tool call.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub status: Option<McpCallStatus>,
+}
+
+/// Compacts the current context. Must be the final input item.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct CompactionTrigger {
+    /// The type of the item. Always `compaction_trigger`.
+    #[serde(rename = "type")]
+    pub type_: String,
 }
 
 /// An internal identifier for an item to reference.
@@ -2770,6 +3237,48 @@ pub struct ItemReference {
     /// The type of item to reference. Always `item_reference`.
     #[serde(rename = "type", skip_serializing_if = "Option::is_none", default)]
     pub type_: Option<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct Program {
+    /// The unique ID of this program item.
+    pub id: String,
+    /// The stable call ID of the program item.
+    pub call_id: String,
+    /// The JavaScript source executed by programmatic tool calling.
+    pub code: String,
+    /// Opaque program replay fingerprint that must be round-tripped.
+    pub fingerprint: String,
+    /// The item type. Always `program`.
+    #[serde(rename = "type")]
+    pub type_: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+#[non_exhaustive]
+pub enum ProgramOutputStatus {
+    #[serde(rename = "completed")]
+    Completed,
+    #[serde(rename = "incomplete")]
+    Incomplete,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct ProgramOutput {
+    /// The unique ID of this program output item.
+    pub id: String,
+    /// The call ID of the program item.
+    pub call_id: String,
+    /// The result produced by the program item.
+    pub result: String,
+    /// The terminal status of the program output.
+    pub status: ProgramOutputStatus,
+    /// The item type. Always `program_output`.
+    #[serde(rename = "type")]
+    pub type_: String,
 }
 
 pub type ResponseInputMessageContentList = Vec<ResponseInputContent>;
@@ -2807,12 +3316,12 @@ pub struct ResponseInputMessageItem {
     pub content: ResponseInputMessageContentList,
     /// The role of the message input. One of `user`, `system`, or `developer`.
     pub role: ResponseInputMessageItemRole,
+    /// The type of the message input. Always set to `message`.
+    #[serde(rename = "type")]
+    pub type_: String,
     /// The status of item.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub status: Option<ResponseInputMessageItemStatus>,
-    /// The type of the message input. Always set to `message`.
-    #[serde(rename = "type", skip_serializing_if = "Option::is_none", default)]
-    pub type_: Option<String>,
 }
 
 /// A text input to the model.
@@ -2824,6 +3333,9 @@ pub struct ResponseInputText {
     /// The type of the input item. Always `input_text`.
     #[serde(rename = "type")]
     pub type_: String,
+    /// Marks the exact end of a reusable prompt prefix.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub prompt_cache_breakpoint: Option<PromptCacheBreakpoint>,
 }
 
 /// A text input to the model.
@@ -2835,6 +3347,31 @@ pub struct ResponseInputTextContent {
     /// The type of the input item. Always `input_text`.
     #[serde(rename = "type")]
     pub type_: String,
+    /// Marks the exact end of a reusable prompt prefix.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub prompt_cache_breakpoint: Option<PromptCacheBreakpoint>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+#[non_exhaustive]
+pub enum AdditionalToolsRole {
+    #[serde(rename = "unknown")]
+    Unknown,
+    #[serde(rename = "user")]
+    User,
+    #[serde(rename = "assistant")]
+    Assistant,
+    #[serde(rename = "system")]
+    System,
+    #[serde(rename = "critic")]
+    Critic,
+    #[serde(rename = "discriminator")]
+    Discriminator,
+    #[serde(rename = "developer")]
+    Developer,
+    #[serde(rename = "tool")]
+    Tool,
 }
 
 pub type ResponseItem = serde_json::Value;
@@ -3162,8 +3699,9 @@ pub struct ResponseOutputText {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
 pub struct ResponseOutputTextAnnotationAddedEvent {
-    /// The annotation object being added. (See annotation schema for details.)
-    pub annotation: serde_json::Value,
+    /// An annotation that applies to a span of output text.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub annotation: Option<Annotation>,
     /// The index of the annotation within the content part.
     pub annotation_index: i64,
     /// The index of the content part within the output item.
@@ -3256,7 +3794,7 @@ pub struct ResponseReasoningItem {
     /// Reasoning text content.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub content: Option<Vec<ReasoningItemContent>>,
-    /// The encrypted content of the reasoning item - populated when a response is
+    /// The encrypted content of the reasoning item.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub encrypted_content: Option<String>,
     /// The status of the item.
@@ -3311,6 +3849,9 @@ pub struct ResponseReasoningSummaryPartDoneEvent {
     /// The type of the event. Always `response.reasoning_summary_part.done`.
     #[serde(rename = "type")]
     pub type_: String,
+    /// The completion status of the summary part.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub status: Option<String>,
 }
 
 /// Emitted when a reasoning summary text is completed.
@@ -3404,6 +3945,110 @@ pub struct ResponseRetrieveParamsBase {
 }
 
 pub type ResponseRetrieveParams = serde_json::Value;
+
+/// A streaming event that indicated a shell command was added to a tool call.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct ResponseShellCallCommandAddedEvent {
+    /// The shell command that was added.
+    pub command: String,
+    /// The index of the shell command that was added.
+    pub command_index: i64,
+    /// The index of the output item that was updated.
+    pub output_index: i64,
+    /// The sequence number of the event that was emitted.
+    pub sequence_number: i64,
+    /// The type of the event, always `response.shell_call_command.added`.
+    #[serde(rename = "type")]
+    pub type_: String,
+}
+
+/// A streaming event that indicated a shell command was incrementally updated.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct ResponseShellCallCommandDeltaEvent {
+    /// The index of the shell command that was updated.
+    pub command_index: i64,
+    /// The shell command delta that was appended.
+    pub delta: String,
+    /// The index of the output item that was updated.
+    pub output_index: i64,
+    /// The sequence number of the event that was emitted.
+    pub sequence_number: i64,
+    /// The type of the event, always `response.shell_call_command.delta`.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// An obfuscation string that was added to pad the event payload.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub obfuscation: Option<String>,
+}
+
+/// A streaming event that indicated a shell command was completed.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct ResponseShellCallCommandDoneEvent {
+    /// The final shell command that was emitted.
+    pub command: String,
+    /// The index of the shell command that was completed.
+    pub command_index: i64,
+    /// The index of the output item that was updated.
+    pub output_index: i64,
+    /// The sequence number of the event that was emitted.
+    pub sequence_number: i64,
+    /// The type of the event, always `response.shell_call_command.done`.
+    #[serde(rename = "type")]
+    pub type_: String,
+}
+
+/// The stdout/stderr delta that was emitted.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct Delta {
+    /// The stderr delta that was emitted.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub stderr: Option<String>,
+    /// The stdout delta that was emitted.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub stdout: Option<String>,
+}
+
+/// A streaming event that indicated shell call output was incrementally added.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct ResponseShellCallOutputContentDeltaEvent {
+    /// The index of the shell command that produced output.
+    pub command_index: i64,
+    /// The stdout/stderr delta that was emitted.
+    pub delta: Delta,
+    /// The ID of the output item that was updated.
+    pub item_id: String,
+    /// The index of the output item that was updated.
+    pub output_index: i64,
+    /// The sequence number of the event that was emitted.
+    pub sequence_number: i64,
+    /// The type of the event, always `response.shell_call_output_content.delta`.
+    #[serde(rename = "type")]
+    pub type_: String,
+}
+
+/// A streaming event that indicated shell call output was completed.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct ResponseShellCallOutputContentDoneEvent {
+    /// The index of the shell command that produced output.
+    pub command_index: i64,
+    /// The ID of the output item that was updated.
+    pub item_id: String,
+    /// The output contents emitted for the shell command.
+    pub output: Vec<Output>,
+    /// The index of the output item that was updated.
+    pub output_index: i64,
+    /// The sequence number of the event that was emitted.
+    pub sequence_number: i64,
+    /// The type of the event, always `response.shell_call_output_content.done`.
+    #[serde(rename = "type")]
+    pub type_: String,
+}
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
@@ -3593,26 +4238,10 @@ pub struct ResponseWebSearchCallSearchingEvent {
 #[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
 #[non_exhaustive]
 pub enum ResponsesClientEventPromptCacheRetention {
-    #[serde(rename = "in-memory")]
+    #[serde(rename = "in_memory")]
     InMemory,
     #[serde(rename = "24h")]
     V24h,
-}
-
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
-#[non_exhaustive]
-pub enum ResponsesClientEventServiceTier {
-    #[serde(rename = "auto")]
-    Auto,
-    #[serde(rename = "default")]
-    Default,
-    #[serde(rename = "flex")]
-    Flex,
-    #[serde(rename = "scale")]
-    Scale,
-    #[serde(rename = "priority")]
-    Priority,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -3661,6 +4290,9 @@ pub struct ResponsesClientEvent {
     /// Model ID used to generate the response, like `gpt-4o` or `o3`.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub model: Option<serde_json::Value>,
+    /// Configuration for running moderation on the input and output of this response.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub moderation: Option<Moderation>,
     /// Whether to allow the model to run tool calls in parallel.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub parallel_tool_calls: Option<bool>,
@@ -3673,7 +4305,10 @@ pub struct ResponsesClientEvent {
     /// Used by OpenAI to cache responses for similar requests to optimize your cache
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub prompt_cache_key: Option<String>,
-    /// The retention policy for the prompt cache.
+    /// Options for prompt caching.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub prompt_cache_options: Option<PromptCacheOptions>,
+    /// Deprecated. Use `prompt_cache_options.ttl` instead.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub prompt_cache_retention: Option<ResponsesClientEventPromptCacheRetention>,
     /// **gpt-5 and o-series models only**
@@ -3684,13 +4319,16 @@ pub struct ResponsesClientEvent {
     pub safety_identifier: Option<String>,
     /// Specifies the processing type used for serving the request.
     #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub service_tier: Option<ResponsesClientEventServiceTier>,
+    pub service_tier: Option<ServiceTier>,
     /// Whether to store the generated model response for later retrieval via API.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub store: Option<bool>,
     /// If set to true, the model response data will be streamed to the client as it is
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub stream: Option<bool>,
+    /// The WebSocket lane for this response.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub stream_id: Option<String>,
     /// Options for streaming responses. Only set this when you set `stream: true`.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub stream_options: Option<StreamOptions>,
@@ -3706,7 +4344,7 @@ pub struct ResponsesClientEvent {
     /// An array of tools the model may call while generating a response.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub tools: Option<Vec<Tool>>,
-    /// An integer between 0 and 20 specifying the number of most likely tokens to
+    /// An integer between 0 and 20 specifying the maximum number of most likely tokens
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub top_logprobs: Option<i64>,
     /// An alternative to sampling with temperature, called nucleus sampling, where the
@@ -3718,6 +4356,46 @@ pub struct ResponsesClientEvent {
     /// This field is being replaced by `safety_identifier` and `prompt_cache_key`.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub user: Option<String>,
+}
+
+/// Details about the error.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct ResponseWsErrorError {
+    /// The error code that was emitted, if any.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub code: Option<String>,
+    /// The human-readable error message that was emitted.
+    pub message: String,
+    /// The parameter name that was associated with the error, if any.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub param: Option<String>,
+    /// The error type that was emitted.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// The response headers that were emitted with the error, if any.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub headers: Option<std::collections::HashMap<String, String>>,
+}
+
+/// Emitted when an error occurs while processing a Responses WebSocket request.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct ResponseWsError {
+    /// Details about the error.
+    pub error: ResponseWsErrorError,
+    /// The type of the event. Always `error`.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// The sequence number of an error emitted by the response stream.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub sequence_number: Option<i64>,
+    /// The HTTP status code associated with a WebSocket protocol error.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub status: Option<i64>,
+    /// The WebSocket lane that emitted this event.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub stream_id: Option<String>,
 }
 
 pub type ResponsesServerEvent = serde_json::Value;
@@ -3824,6 +4502,9 @@ pub struct Mcp {
     /// The type of the MCP tool. Always `mcp`.
     #[serde(rename = "type")]
     pub type_: String,
+    /// The tool invocation context(s).
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub allowed_callers: Option<Vec<serde_json::Value>>,
     /// List of allowed tool names or a filter object.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub allowed_tools: Option<McpAllowedTools>,
@@ -3848,6 +4529,9 @@ pub struct Mcp {
     /// The URL for the MCP server.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub server_url: Option<String>,
+    /// The Secure MCP Tunnel ID to use instead of a direct server URL.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub tunnel_id: Option<String>,
 }
 
 pub type CodeInterpreterContainerCodeInterpreterToolAutoNetworkPolicy = serde_json::Value;
@@ -3893,6 +4577,17 @@ pub struct CodeInterpreter {
     /// The code interpreter container.
     pub container: CodeInterpreterContainer,
     /// The type of the code interpreter tool. Always `code_interpreter`.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// The tool invocation context(s).
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub allowed_callers: Option<Vec<serde_json::Value>>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct ProgrammaticToolCalling {
+    /// The type of the tool. Always `programmatic_tool_calling`.
     #[serde(rename = "type")]
     pub type_: String,
 }
@@ -3979,20 +4674,6 @@ pub enum ImageGenerationQuality {
     Auto,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
-#[non_exhaustive]
-pub enum ImageGenerationSize {
-    #[serde(rename = "1024x1024")]
-    V1024x1024,
-    #[serde(rename = "1024x1536")]
-    V1024x1536,
-    #[serde(rename = "1536x1024")]
-    V1536x1024,
-    #[serde(rename = "auto")]
-    Auto,
-}
-
 /// A tool that generates images using the GPT image models.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
@@ -4003,7 +4684,7 @@ pub struct ImageGeneration {
     /// Whether to generate a new image or edit an existing image. Default: `auto`.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub action: Option<ImageGenerationAction>,
-    /// Background type for the generated image.
+    /// Allows to set transparency for the background of the generated image(s). This
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub background: Option<ImageGenerationBackground>,
     /// Control how much effort the model will exert to match the style and features,
@@ -4030,9 +4711,9 @@ pub struct ImageGeneration {
     /// The quality of the generated image.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub quality: Option<ImageGenerationQuality>,
-    /// The size of the generated image.
+    /// The size of the generated images.
     #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub size: Option<ImageGenerationSize>,
+    pub size: Option<String>,
 }
 
 /// A tool that allows the model to execute shell commands in a local environment.
@@ -4258,6 +4939,9 @@ pub struct WebSearchTool {
     /// The type of the web search tool.
     #[serde(rename = "type")]
     pub type_: WebSearchToolType,
+    /// Allow live internet access for web search.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub external_web_access: Option<bool>,
     /// Filters for the search.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub filters: Option<Filters>,

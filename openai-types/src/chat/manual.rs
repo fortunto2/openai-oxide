@@ -10,6 +10,9 @@ pub use crate::shared::{
     SearchContextSize, ServiceTier, Usage,
 };
 
+// Generated types referenced by the manual request/response structs
+use super::_gen::{Moderation, ModerationPolicy};
+
 // ── Request types ──
 
 /// Request body for `POST /chat/completions`.
@@ -106,6 +109,10 @@ pub struct ChatCompletionRequest {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub metadata: Option<HashMap<String, String>>,
 
+    /// Configuration for running moderation on the request input and generated output.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub moderation: Option<ModerationConfig>,
+
     /// Output modalities: ["text"] or ["text", "audio"].
     #[serde(skip_serializing_if = "Option::is_none")]
     pub modalities: Option<Vec<String>>,
@@ -186,6 +193,7 @@ impl ChatCompletionRequest {
             user: None,
             store: None,
             metadata: None,
+            moderation: None,
             modalities: None,
             reasoning_effort: None,
             verbosity: None,
@@ -283,6 +291,12 @@ impl ChatCompletionRequest {
     /// Enable storage for evals/distillation.
     pub fn store(mut self, store: bool) -> Self {
         self.store = Some(store);
+        self
+    }
+
+    /// Configure moderated completions (moderation model + optional policy).
+    pub fn moderation(mut self, moderation: ModerationConfig) -> Self {
+        self.moderation = Some(moderation);
         self
     }
 
@@ -667,9 +681,47 @@ pub struct ChatCompletionResponse {
     pub system_fingerprint: Option<String>,
     #[serde(default)]
     pub usage: Option<Usage>,
+    /// Metadata key-value pairs attached to the completion.
+    #[serde(default)]
+    pub metadata: Option<HashMap<String, String>>,
+    /// Moderation results, present when moderated completions were requested.
+    #[serde(default)]
+    pub moderation: Option<Moderation>,
     /// Session ID echoed back (OpenRouter sticky routing).
     #[serde(default)]
     pub session_id: Option<String>,
+}
+
+/// Request-side moderation configuration for moderated completions.
+///
+/// Python SDK calls this `Moderation` in `completion_create_params.py`; the
+/// response-side results type in `chat_completion.py` also uses that name, and
+/// it owns `Moderation` in this module — so the request config is
+/// `ModerationConfig` here.
+#[derive(Debug, Clone, Serialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct ModerationConfig {
+    /// The moderation model to use, e.g. "omni-moderation-latest".
+    pub model: String,
+    /// The policy to apply to moderated response input and output.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub policy: Option<ModerationPolicy>,
+}
+
+impl ModerationConfig {
+    /// Moderated completions with the given moderation model and default policy.
+    pub fn new(model: impl Into<String>) -> Self {
+        Self {
+            model: model.into(),
+            policy: None,
+        }
+    }
+
+    /// Set the moderation policy for input and output.
+    pub fn policy(mut self, policy: ModerationPolicy) -> Self {
+        self.policy = Some(policy);
+        self
+    }
 }
 
 /// A single choice in a chat completion response.

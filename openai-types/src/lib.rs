@@ -14,6 +14,8 @@ pub mod chat;
 pub mod completion;
 #[cfg(feature = "containers")]
 pub mod containers;
+#[cfg(feature = "content-provenance")]
+pub mod content_provenance;
 #[cfg(feature = "conversations")]
 pub mod conversations;
 #[cfg(feature = "embedding")]
@@ -50,4 +52,3 @@ pub mod video;
 pub mod webhooks;
 #[cfg(feature = "websocket")]
 pub mod websocket;
-

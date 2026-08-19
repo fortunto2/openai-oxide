@@ -145,7 +145,7 @@ pub struct SamplingParams {
     /// The maximum number of tokens the grader model may generate in its response.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub max_completions_tokens: Option<i64>,
-    /// Constrains effort on reasoning for
+    /// Constrains effort on reasoning for reasoning models.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub reasoning_effort: Option<serde_json::Value>,
     /// A seed value to initialize the randomness, during sampling.

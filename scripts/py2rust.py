@@ -111,6 +111,9 @@ RustItem = RustStruct | RustEnum | RustTypeAlias
 # ── Domain routing — Python directory → Rust module ──
 
 # Subdirectories map 1:1
+# AI-TODO: types/admin/** (Org Admin API, Python SDK v3.x) is a NESTED domain
+# (admin/organization/projects/…) — sync_all only globs one level, so listing
+# it here is not enough; teach the walker recursion first.
 SUBDIR_DOMAINS = {
     "responses", "chat", "audio", "beta", "fine_tuning",
     "realtime", "conversations", "containers", "evals",
@@ -122,6 +125,7 @@ SUBDIR_DOMAINS = {
 # Top-level files route INTO existing subdir domains where possible
 TOPLEVEL_ROUTES: list[tuple[str, str]] = [
     ("batch*", "batch"),
+    ("content_provenance*", "content_provenance"),
     ("completion*", "completion"),
     ("create_embedding*", "embedding"),
     ("embedding*", "embedding"),
@@ -1055,7 +1059,8 @@ class SyncEngine:
         types: set[str] = set()
         if not path.exists():
             return types
-        for line in path.read_text().split("\n"):
+        text = path.read_text()
+        for line in text.split("\n"):
             line = line.strip()
             if line.startswith("pub struct ") or line.startswith("pub enum "):
                 # Extract name: "pub struct Foo {" → "Foo", "pub enum Bar" → "Bar"
@@ -1067,6 +1072,22 @@ class SyncEngine:
                 parts = line.split("=")[0].strip().split()
                 if len(parts) >= 3:
                     types.add(parts[2])
+        # Re-exports also claim a name in this module's namespace:
+        # `pub use crate::shared::{Role, ServiceTier};` must suppress
+        # generating a second ServiceTier or the glob re-exports go ambiguous.
+        for m in re.finditer(r"pub use\s+([^;]+);", text, re.DOTALL):
+            target = m.group(1).strip()
+            if "{" in target:
+                inner = target[target.index("{") + 1 : target.rindex("}")]
+                names = [n.strip() for n in inner.split(",")]
+            else:
+                names = [target]
+            for n in names:
+                if not n or n == "*" or n.endswith("::*"):
+                    continue
+                if " as " in n:
+                    n = n.split(" as ")[-1].strip()
+                types.add(n.split("::")[-1].strip())
         return types
 
 

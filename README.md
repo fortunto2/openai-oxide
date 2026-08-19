@@ -421,6 +421,7 @@ At the moment, the Node bindings expose Chat Completions, Responses, streaming h
 | **Files** | `client.files().create()` / `list()` / `retrieve()` / `delete()` / `content()` |
 | **Fine-tuning** | `client.fine_tuning().jobs().create()` / `list()` / `cancel()` / `list_events()` |
 | **Moderations** | `client.moderations().create()` |
+| **Content Provenance** | `client.content_provenance_checks().create()` / `from_path()` |
 | **Batches** | `client.batches().create()` / `list()` / `retrieve()` / `cancel()` |
 | **Uploads** | `client.uploads().create()` / `add_part()` / `cancel()` / `complete()` |
 | **Conversations** | `client.conversations()` CRUD + items CRUD |

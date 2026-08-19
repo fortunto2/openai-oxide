@@ -83,6 +83,7 @@ scripts/
 | Files | `client.files().create()` / `list()` / `list_page()` / `list_auto()` / `retrieve()` / `delete()` / `content()` | Done |
 | Fine-tuning | `client.fine_tuning().jobs().create()` / `list()` / `list_page()` / `list_auto()` / `cancel()` / `list_events()` / `list_events_auto()` | Done |
 | Moderations | `client.moderations().create()` | Done |
+| Content Provenance | `client.content_provenance_checks().create()` / `from_path()` | Done |
 | Batches | `client.batches().create()` / `list()` / `list_page()` / `list_auto()` / `retrieve()` / `cancel()` | Done |
 | Uploads | `client.uploads().create()` / `add_part()` / `cancel()` / `complete()` | Done |
 | Conversations | `client.conversations()` CRUD + items CRUD | Done |
@@ -94,7 +95,7 @@ scripts/
 | Vector Stores (beta) | `client.beta().vector_stores()` CRUD + `search()` + `list_page()` / `list_auto()` | Done |
 | Realtime (beta) | `client.beta().realtime().sessions().create()` | Done |
 
-**Current version:** v0.9.7 on crates.io
+**Current version:** v0.16.0 on crates.io (openai-types v0.2.0)
 
 **Feature flags:** Each resource is gated behind an optional Cargo feature (`chat`, `responses`, `embeddings`, `images`, `audio`, `files`, `fine-tuning`, `models`, `moderations`, `batches`, `uploads`, `beta`). Additional optional features: `structured` (schemars), `webhooks` (hmac+sha2), `websocket`, `simd`. All resource features enabled by default. `cargo check --no-default-features` compiles with zero resources (just client + types).
 

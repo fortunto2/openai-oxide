@@ -234,6 +234,13 @@ impl OpenAI {
         crate::resources::conversations::Conversations::new(self)
     }
 
+    /// Access the Content Provenance Checks resource.
+    pub fn content_provenance_checks(
+        &self,
+    ) -> crate::resources::content_provenance::ContentProvenanceChecks<'_> {
+        crate::resources::content_provenance::ContentProvenanceChecks::new(self)
+    }
+
     /// Access video generation endpoints (Sora).
     pub fn videos(&self) -> crate::resources::videos::Videos<'_> {
         crate::resources::videos::Videos::new(self)

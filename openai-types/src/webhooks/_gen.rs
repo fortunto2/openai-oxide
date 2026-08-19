@@ -202,7 +202,25 @@ pub struct DataSipHeader {
     pub value: String,
 }
 
-/// Sent when Realtime API Receives a incoming SIP call.
+/// Sent when an incoming API SIP session is available for Live acceptance.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct LiveCallIncomingWebhookEvent {
+    /// The unique ID of the event.
+    pub id: String,
+    /// The Unix timestamp (in seconds) of when the event was created.
+    pub created_at: i64,
+    /// Event data payload.
+    pub data: Data,
+    /// The type of the event. Always `live.call.incoming`.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// The object of the event. Always `event`.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub object: Option<String>,
+}
+
+/// Sent when an incoming API SIP session is available for Realtime acceptance.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
 pub struct RealtimeCallIncomingWebhookEvent {
@@ -285,6 +303,24 @@ pub struct ResponseIncompleteWebhookEvent {
     /// Event data payload.
     pub data: Data,
     /// The type of the event. Always `response.incomplete`.
+    #[serde(rename = "type")]
+    pub type_: String,
+    /// The object of the event. Always `event`.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub object: Option<String>,
+}
+
+/// Sent when a request associated with a safety identifier has been blocked.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct SafetyIdentifierBlockedWebhookEvent {
+    /// The unique ID of the event.
+    pub id: String,
+    /// The Unix timestamp (in seconds) of when the request was blocked.
+    pub created_at: i64,
+    /// Event data payload.
+    pub data: Data,
+    /// The type of the event. Always `safety_identifier.blocked`.
     #[serde(rename = "type")]
     pub type_: String,
     /// The object of the event. Always `event`.

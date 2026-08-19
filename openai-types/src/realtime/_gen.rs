@@ -3,15 +3,40 @@
 // Domain: realtime
 #![allow(unused_imports)]
 
-use serde::{Deserialize, Serialize};
 use super::*;
+use serde::{Deserialize, Serialize};
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+#[non_exhaustive]
+pub enum AudioTranscriptionDelay {
+    #[serde(rename = "minimal")]
+    Minimal,
+    #[serde(rename = "low")]
+    Low,
+    #[serde(rename = "medium")]
+    Medium,
+    #[serde(rename = "high")]
+    High,
+    #[serde(rename = "xhigh")]
+    Xhigh,
+}
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
 pub struct AudioTranscription {
+    /// Controls how long the model waits before emitting transcription text. Higher
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub delay: Option<AudioTranscriptionDelay>,
+    /// Words or phrases to guide transcription of the input audio.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub keywords: Option<Vec<String>>,
     /// The language of the input audio.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub language: Option<String>,
+    /// Possible languages of the input audio, in
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub languages: Option<Vec<String>>,
     /// The model to use for transcription.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub model: Option<String>,
@@ -44,9 +69,15 @@ pub struct CallAcceptParams {
     /// The set of modalities the model can respond with.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub output_modalities: Option<Vec<serde_json::Value>>,
+    /// Whether the model may call multiple tools in parallel.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub parallel_tool_calls: Option<bool>,
     /// Reference to a prompt template and its variables.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub prompt: Option<serde_json::Value>,
+    /// Configuration for reasoning-capable Realtime models such as `gpt-realtime-2`.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub reasoning: Option<serde_json::Value>,
     /// How the model chooses tools.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub tool_choice: Option<serde_json::Value>,
@@ -302,6 +333,9 @@ pub struct ConversationItemInputAudioTranscriptionCompletedEvent {
     pub type_: String,
     /// Usage statistics for the transcription, this is billed according to the ASR
     pub usage: Usage,
+    /// The languages detected in the audio.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub languages: Option<Vec<serde_json::Value>>,
     /// The log probabilities of the transcription.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub logprobs: Option<Vec<LogProbProperties>>,
@@ -1227,6 +1261,31 @@ pub struct RealtimeMcphttpError {
     pub type_: String,
 }
 
+/// Configuration for reasoning-capable Realtime models such as `gpt-realtime-2`.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+pub struct RealtimeReasoning {
+    /// Constrains effort on reasoning for reasoning-capable Realtime models such as
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub effort: Option<RealtimeReasoningEffort>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+#[non_exhaustive]
+pub enum RealtimeReasoningEffort {
+    #[serde(rename = "minimal")]
+    Minimal,
+    #[serde(rename = "low")]
+    Low,
+    #[serde(rename = "medium")]
+    Medium,
+    #[serde(rename = "high")]
+    High,
+    #[serde(rename = "xhigh")]
+    Xhigh,
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
 pub struct AudioOutput {
@@ -1417,6 +1476,9 @@ pub struct RealtimeResponseCreateMcpTool {
     /// The type of the MCP tool. Always `mcp`.
     #[serde(rename = "type")]
     pub type_: String,
+    /// The tool invocation context(s).
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub allowed_callers: Option<Vec<serde_json::Value>>,
     /// List of allowed tool names or a filter object.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub allowed_tools: Option<AllowedTools>,
@@ -1441,6 +1503,9 @@ pub struct RealtimeResponseCreateMcpTool {
     /// The URL for the MCP server.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub server_url: Option<String>,
+    /// The Secure MCP Tunnel ID to use instead of a direct server URL.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub tunnel_id: Option<String>,
 }
 
 pub type ToolChoice = serde_json::Value;
@@ -1472,9 +1537,15 @@ pub struct RealtimeResponseCreateParams {
     /// The set of modalities the model used to respond, currently the only possible
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub output_modalities: Option<Vec<serde_json::Value>>,
+    /// Whether the model may call multiple tools in parallel.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub parallel_tool_calls: Option<bool>,
     /// Reference to a prompt template and its variables.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub prompt: Option<serde_json::Value>,
+    /// Configuration for reasoning-capable Realtime models such as `gpt-realtime-2`.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub reasoning: Option<RealtimeReasoning>,
     /// How the model chooses tools.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub tool_choice: Option<ToolChoice>,
@@ -1661,16 +1732,6 @@ pub struct OutputAudioBufferCleared {
 
 pub type RealtimeServerEvent = serde_json::Value;
 
-/// Ephemeral key returned by the API.
-#[derive(Debug, Clone, Serialize, Deserialize)]
-#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
-pub struct RealtimeSessionClientSecret {
-    /// Timestamp for when the token expires.
-    pub expires_at: i64,
-    /// Ephemeral key usable in client environments to authenticate connections to the
-    pub value: String,
-}
-
 /// Realtime session object configuration.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
@@ -1696,9 +1757,15 @@ pub struct RealtimeSessionCreateRequest {
     /// The set of modalities the model can respond with.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub output_modalities: Option<Vec<serde_json::Value>>,
+    /// Whether the model may call multiple tools in parallel.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub parallel_tool_calls: Option<bool>,
     /// Reference to a prompt template and its variables.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub prompt: Option<serde_json::Value>,
+    /// Configuration for reasoning-capable Realtime models such as `gpt-realtime-2`.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub reasoning: Option<RealtimeReasoning>,
     /// How the model chooses tools.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub tool_choice: Option<RealtimeToolChoiceConfig>,
@@ -1792,7 +1859,6 @@ pub struct AudioInput {
     /// Configuration for input audio noise reduction.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub noise_reduction: Option<AudioInputNoiseReduction>,
-    /// Configuration for input audio transcription, defaults to off and can be set to
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub transcription: Option<AudioTranscription>,
     /// Configuration for turn detection, ether Server VAD or Semantic VAD.
@@ -1889,6 +1955,9 @@ pub struct ToolMcpTool {
     /// The type of the MCP tool. Always `mcp`.
     #[serde(rename = "type")]
     pub type_: String,
+    /// The tool invocation context(s).
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub allowed_callers: Option<Vec<serde_json::Value>>,
     /// List of allowed tool names or a filter object.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub allowed_tools: Option<ToolMcpToolAllowedTools>,
@@ -1913,6 +1982,9 @@ pub struct ToolMcpTool {
     /// The URL for the MCP server.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub server_url: Option<String>,
+    /// The Secure MCP Tunnel ID to use instead of a direct server URL.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub tunnel_id: Option<String>,
 }
 
 /// Granular configuration for tracing.
@@ -1937,18 +2009,23 @@ pub enum Tracing {
     Auto,
 }
 
-/// A new Realtime session configuration, with an ephemeral key.
+/// A Realtime session configuration object.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
 pub struct RealtimeSessionCreateResponse {
-    /// Ephemeral key returned by the API.
-    pub client_secret: RealtimeSessionClientSecret,
+    /// Unique identifier for the session that looks like `sess_1234567890abcdef`.
+    pub id: String,
+    /// The object type. Always `realtime.session`.
+    pub object: String,
     /// The type of session to create. Always `realtime` for the Realtime API.
     #[serde(rename = "type")]
     pub type_: String,
     /// Configuration for input and output audio.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub audio: Option<Audio>,
+    /// Expiration timestamp for the session, in seconds since epoch.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub expires_at: Option<i64>,
     /// Additional fields to include in server outputs.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub include: Option<Vec<String>>,
@@ -1967,6 +2044,9 @@ pub struct RealtimeSessionCreateResponse {
     /// Reference to a prompt template and its variables.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub prompt: Option<serde_json::Value>,
+    /// Configuration for reasoning-capable Realtime models such as `gpt-realtime-2`.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub reasoning: Option<RealtimeReasoning>,
     /// How the model chooses tools.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub tool_choice: Option<ToolChoice>,
@@ -2074,6 +2154,9 @@ pub struct Mcp {
     /// The type of the MCP tool. Always `mcp`.
     #[serde(rename = "type")]
     pub type_: String,
+    /// The tool invocation context(s).
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub allowed_callers: Option<Vec<serde_json::Value>>,
     /// List of allowed tool names or a filter object.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub allowed_tools: Option<McpAllowedTools>,
@@ -2098,6 +2181,9 @@ pub struct Mcp {
     /// The URL for the MCP server.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub server_url: Option<String>,
+    /// The Secure MCP Tunnel ID to use instead of a direct server URL.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub tunnel_id: Option<String>,
 }
 
 pub type RealtimeToolsConfigUnion = serde_json::Value;

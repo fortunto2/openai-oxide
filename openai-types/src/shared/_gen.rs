@@ -3,8 +3,8 @@
 // Domain: shared
 #![allow(unused_imports)]
 
-use serde::{Deserialize, Serialize};
 use super::*;
+use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
@@ -30,6 +30,10 @@ pub enum AllModels {
     ComputerUsePreview,
     #[serde(rename = "computer-use-preview-2025-03-11")]
     ComputerUsePreview20250311,
+    #[serde(rename = "gpt-5.5-pro")]
+    Gpt55Pro,
+    #[serde(rename = "gpt-5.5-pro-2026-04-23")]
+    Gpt55Pro20260423,
     #[serde(rename = "gpt-5-codex")]
     Gpt5Codex,
     #[serde(rename = "gpt-5-pro")]
@@ -38,12 +42,28 @@ pub enum AllModels {
     Gpt5Pro20251006,
     #[serde(rename = "gpt-5.1-codex-max")]
     Gpt51CodexMax,
+    #[serde(rename = "gpt-daybreak-blue-latest")]
+    GptDaybreakBlueLatest,
+    #[serde(rename = "gpt-daybreak-red-latest")]
+    GptDaybreakRedLatest,
+    #[serde(rename = "gpt-5.6-cyber")]
+    Gpt56Cyber,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
 #[non_exhaustive]
 pub enum ChatModel {
+    #[serde(rename = "gpt-5.6-sol")]
+    Gpt56Sol,
+    #[serde(rename = "gpt-5.6-terra")]
+    Gpt56Terra,
+    #[serde(rename = "gpt-5.6-luna")]
+    Gpt56Luna,
+    #[serde(rename = "gpt-5.5")]
+    Gpt55,
+    #[serde(rename = "gpt-5.5-2026-04-23")]
+    Gpt5520260423,
     #[serde(rename = "gpt-5.4")]
     Gpt54,
     #[serde(rename = "gpt-5.4-mini")]
@@ -329,6 +349,28 @@ pub type Metadata = std::collections::HashMap<String, String>;
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
 #[non_exhaustive]
+pub enum OAuthErrorCode {
+    #[serde(rename = "invalid_grant")]
+    InvalidGrant,
+    #[serde(rename = "invalid_subject_token")]
+    InvalidSubjectToken,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+#[non_exhaustive]
+pub enum ReasoningContext {
+    #[serde(rename = "auto")]
+    Auto,
+    #[serde(rename = "current_turn")]
+    CurrentTurn,
+    #[serde(rename = "all_turns")]
+    AllTurns,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
+#[non_exhaustive]
 pub enum ReasoningGenerateSummary {
     #[serde(rename = "auto")]
     Auto,
@@ -354,12 +396,18 @@ pub enum ReasoningSummary {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[cfg_attr(feature = "structured", derive(schemars::JsonSchema))]
 pub struct Reasoning {
-    /// Constrains effort on reasoning for
+    /// Controls which reasoning items are rendered back to the model on later turns. If
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub context: Option<ReasoningContext>,
+    /// Constrains effort on reasoning for reasoning models.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub effort: Option<ReasoningEffort>,
     /// **Deprecated:** use `summary` instead.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub generate_summary: Option<ReasoningGenerateSummary>,
+    /// Controls the reasoning execution mode for the request.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub mode: Option<String>,
     /// A summary of the reasoning performed by the model.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub summary: Option<ReasoningSummary>,
@@ -381,6 +429,8 @@ pub enum ReasoningEffort {
     High,
     #[serde(rename = "xhigh")]
     Xhigh,
+    #[serde(rename = "max")]
+    Max,
 }
 
 /// JSON object response format.
@@ -473,6 +523,10 @@ pub enum ResponsesModel {
     ComputerUsePreview,
     #[serde(rename = "computer-use-preview-2025-03-11")]
     ComputerUsePreview20250311,
+    #[serde(rename = "gpt-5.5-pro")]
+    Gpt55Pro,
+    #[serde(rename = "gpt-5.5-pro-2026-04-23")]
+    Gpt55Pro20260423,
     #[serde(rename = "gpt-5-codex")]
     Gpt5Codex,
     #[serde(rename = "gpt-5-pro")]
@@ -481,4 +535,10 @@ pub enum ResponsesModel {
     Gpt5Pro20251006,
     #[serde(rename = "gpt-5.1-codex-max")]
     Gpt51CodexMax,
+    #[serde(rename = "gpt-daybreak-blue-latest")]
+    GptDaybreakBlueLatest,
+    #[serde(rename = "gpt-daybreak-red-latest")]
+    GptDaybreakRedLatest,
+    #[serde(rename = "gpt-5.6-cyber")]
+    Gpt56Cyber,
 }
