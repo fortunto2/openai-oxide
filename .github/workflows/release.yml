@@ -20,6 +20,15 @@ jobs:
           CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
       - name: Wait for crates.io index
         run: sleep 30
+      # openai-oxide pulls openai-types from the registry, not from the workspace
+      # path, so skipping it here ships a client built against the previous types.
+      - name: Publish openai-types
+        continue-on-error: true
+        run: cargo publish --package openai-types --no-verify
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+      - name: Wait for crates.io index
+        run: sleep 30
       - name: Publish openai-oxide
         continue-on-error: true
         run: cargo publish --package openai-oxide --no-verify --allow-dirty
