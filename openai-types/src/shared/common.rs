@@ -232,10 +232,14 @@ impl Usage {
     }
 
     /// Cache hit ratio as percentage (0-100).
+    ///
+    /// Zero input tokens gives 0, not a division by zero. Counts are clamped at
+    /// zero first: they arrive as `i64` from the wire, and a negative one cast
+    /// straight to `u64` would read as an astronomical percentage.
     pub fn cache_hit_pct(&self) -> u64 {
-        let input = self.prompt_tokens.unwrap_or(0) as u64;
-        let cached = self.cached_tokens() as u64;
-        if input > 0 { (cached * 100) / input } else { 0 }
+        let input = self.prompt_tokens.unwrap_or(0).max(0) as u64;
+        let cached = self.cached_tokens().max(0) as u64;
+        cached.saturating_mul(100).checked_div(input).unwrap_or(0)
     }
 }
 
@@ -320,5 +324,39 @@ impl<'de> Deserialize<'de> for MaxResponseTokens {
                 .ok_or_else(|| serde::de::Error::custom("expected integer")),
             _ => Err(serde::de::Error::custom("expected \"inf\" or integer")),
         }
+    }
+}
+
+#[cfg(test)]
+mod usage_tests {
+    use super::*;
+
+    fn usage(prompt: Option<i64>, cached: Option<i64>) -> Usage {
+        let mut u: Usage = serde_json::from_str("{}").unwrap();
+        u.prompt_tokens = prompt;
+        u.prompt_tokens_details = cached.map(|c| PromptTokensDetails {
+            cached_tokens: Some(c),
+            audio_tokens: None,
+        });
+        u
+    }
+
+    #[test]
+    fn cache_hit_pct_is_a_plain_percentage() {
+        assert_eq!(usage(Some(1000), Some(250)).cache_hit_pct(), 25);
+        assert_eq!(usage(Some(1000), Some(1000)).cache_hit_pct(), 100);
+        assert_eq!(usage(Some(1000), None).cache_hit_pct(), 0);
+    }
+
+    #[test]
+    fn zero_input_is_zero_not_a_panic() {
+        assert_eq!(usage(Some(0), Some(10)).cache_hit_pct(), 0);
+        assert_eq!(usage(None, Some(10)).cache_hit_pct(), 0);
+    }
+
+    #[test]
+    fn negative_counts_do_not_wrap_into_a_huge_percentage() {
+        assert_eq!(usage(Some(-5), Some(10)).cache_hit_pct(), 0);
+        assert_eq!(usage(Some(100), Some(-10)).cache_hit_pct(), 0);
     }
 }
