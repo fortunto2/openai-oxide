@@ -2,6 +2,9 @@
 //
 // OpenAI signs webhook payloads with HMAC-SHA256. The signature is in the
 // `webhook-signature` header, the timestamp in `webhook-timestamp`.
+//
+// API reference: <https://platform.openai.com/docs/api-reference/webhook-events>
+// Guide: <https://platform.openai.com/docs/guides/webhooks>
 
 use crate::error::OpenAIError;
 
