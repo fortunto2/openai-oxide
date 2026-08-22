@@ -6,6 +6,7 @@ pub mod batches;
 pub mod beta;
 #[cfg(feature = "chat")]
 pub mod chat;
+pub mod containers;
 pub mod content_provenance;
 pub mod conversations;
 #[cfg(feature = "embeddings")]

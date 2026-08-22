@@ -101,18 +101,57 @@ impl ClientConfig {
         }
     }
 
-    /// Create config from the `OPENAI_API_KEY` environment variable.
+    /// Create config from the environment.
+    ///
+    /// `OPENAI_API_KEY` is required. `OPENAI_BASE_URL`, `OPENAI_ORG_ID` and
+    /// `OPENAI_PROJECT_ID` are applied when set and non-empty — the same four
+    /// variables the official Python SDK reads, so pointing the client at a
+    /// proxy or a self-hosted endpoint needs no code change.
     pub fn from_env() -> Result<Self, crate::error::OpenAIError> {
-        let api_key = env::var("OPENAI_API_KEY").map_err(|_| {
+        Self::from_env_with(|key| env::var(key).ok())
+    }
+
+    /// `from_env` with the environment injected.
+    ///
+    /// Process environment variables are global and cargo runs tests in
+    /// parallel threads, so the tests go through this seam instead of mutating
+    /// the real environment.
+    fn from_env_with(
+        lookup: impl Fn(&str) -> Option<String>,
+    ) -> Result<Self, crate::error::OpenAIError> {
+        // An empty key is left alone on purpose: a local proxy behind
+        // OPENAI_BASE_URL often wants no credential at all.
+        let api_key = lookup("OPENAI_API_KEY").ok_or_else(|| {
             crate::error::OpenAIError::InvalidArgument(
                 "OPENAI_API_KEY environment variable not set".to_string(),
             )
         })?;
-        Ok(Self::new(api_key))
+
+        let mut config = Self::new(api_key);
+        let set = |key: &str| {
+            lookup(key)
+                .map(|v| v.trim().to_string())
+                .filter(|v| !v.is_empty())
+        };
+        if let Some(base_url) = set("OPENAI_BASE_URL") {
+            config = config.base_url(base_url);
+        }
+        if let Some(organization) = set("OPENAI_ORG_ID") {
+            config = config.organization(organization);
+        }
+        if let Some(project) = set("OPENAI_PROJECT_ID") {
+            config = config.project(project);
+        }
+        Ok(config)
     }
 
+    /// Set the API base URL.
+    ///
+    /// Trailing slashes are dropped: paths are joined as `{base_url}{path}` with
+    /// `path` already leading with `/`, so `.../v1/` would produce `//chat`.
     pub fn base_url(mut self, url: impl Into<String>) -> Self {
-        self.base_url = url.into();
+        let url = url.into();
+        self.base_url = url.trim_end_matches('/').to_string();
         self
     }
 
@@ -203,5 +242,85 @@ impl Config for ClientConfig {
 
     fn default_query(&self) -> Option<&[(String, String)]> {
         self.default_query.as_deref()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::collections::HashMap;
+
+    fn env_of(pairs: &[(&str, &str)]) -> impl Fn(&str) -> Option<String> + use<> {
+        let map: HashMap<String, String> = pairs
+            .iter()
+            .map(|(k, v)| ((*k).to_string(), (*v).to_string()))
+            .collect();
+        move |key| map.get(key).cloned()
+    }
+
+    #[test]
+    fn api_key_only_keeps_the_default_base_url() {
+        let cfg = ClientConfig::from_env_with(env_of(&[("OPENAI_API_KEY", "sk-test")])).unwrap();
+        assert_eq!(cfg.api_key, "sk-test");
+        assert_eq!(cfg.base_url, DEFAULT_BASE_URL);
+        assert_eq!(cfg.organization, None);
+        assert_eq!(cfg.project, None);
+    }
+
+    #[test]
+    fn base_url_org_and_project_come_from_the_environment() {
+        let cfg = ClientConfig::from_env_with(env_of(&[
+            ("OPENAI_API_KEY", "sk-test"),
+            ("OPENAI_BASE_URL", "https://proxy.internal/v1"),
+            ("OPENAI_ORG_ID", "org-123"),
+            ("OPENAI_PROJECT_ID", "proj-456"),
+        ]))
+        .unwrap();
+        assert_eq!(cfg.base_url, "https://proxy.internal/v1");
+        assert_eq!(cfg.organization.as_deref(), Some("org-123"));
+        assert_eq!(cfg.project.as_deref(), Some("proj-456"));
+    }
+
+    #[test]
+    fn blank_and_padded_values_are_ignored_or_trimmed() {
+        let cfg = ClientConfig::from_env_with(env_of(&[
+            ("OPENAI_API_KEY", "sk-test"),
+            ("OPENAI_BASE_URL", "   "),
+            ("OPENAI_ORG_ID", "  org-pad  "),
+        ]))
+        .unwrap();
+        assert_eq!(cfg.base_url, DEFAULT_BASE_URL);
+        assert_eq!(cfg.organization.as_deref(), Some("org-pad"));
+    }
+
+    #[test]
+    fn a_trailing_slash_would_double_up_in_request_paths() {
+        let cfg = ClientConfig::from_env_with(env_of(&[
+            ("OPENAI_API_KEY", "sk-test"),
+            ("OPENAI_BASE_URL", "https://proxy.internal/v1/"),
+        ]))
+        .unwrap();
+        assert_eq!(cfg.base_url, "https://proxy.internal/v1");
+        assert_eq!(
+            ClientConfig::new("k").base_url("https://x/v1//").base_url,
+            "https://x/v1"
+        );
+    }
+
+    #[test]
+    fn an_empty_api_key_is_accepted_for_keyless_proxies() {
+        let cfg = ClientConfig::from_env_with(env_of(&[
+            ("OPENAI_API_KEY", ""),
+            ("OPENAI_BASE_URL", "http://localhost:11434/v1"),
+        ]))
+        .unwrap();
+        assert_eq!(cfg.api_key, "");
+        assert_eq!(cfg.base_url, "http://localhost:11434/v1");
+    }
+
+    #[test]
+    fn a_missing_api_key_is_an_error() {
+        let err = ClientConfig::from_env_with(env_of(&[("OPENAI_BASE_URL", "https://x")]));
+        assert!(err.is_err());
     }
 }

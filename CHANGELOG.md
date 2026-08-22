@@ -6,6 +6,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [0.17.0]
+
+### Added
+- **Containers resource** — `client.containers()` covers the managed sandboxes behind Code Interpreter: `create` / `list` / `list_page` / `retrieve` / `delete`, and per-container files via `client.containers().files(container_id)` with `create` (by `file_id`), `create_from_bytes`, `create_from_path` (multipart), `list`, `list_page`, `retrieve`, `content` (raw bytes) and `delete`. Responses are the typed `Container*` / `File*` structs from `openai-types`. Closes [#1](https://github.com/fortunto2/openai-oxide/issues/1).
+- `OPENAI_BASE_URL`, `OPENAI_ORG_ID` and `OPENAI_PROJECT_ID` are read by `OpenAI::from_env()` / `ClientConfig::from_env()`, matching the four variables the Python SDK reads — pointing the client at a proxy or self-hosted endpoint no longer needs code. Blank values are ignored and surrounding whitespace is trimmed; an empty `OPENAI_API_KEY` is still accepted, since a local proxy often wants no credential. Closes [#5](https://github.com/fortunto2/openai-oxide/issues/5), reported by @mmastrac.
+
+### Changed
+- **Breaking:** the conversations resource returns typed structs instead of `serde_json::Value` — `create` / `retrieve` / `update` / `delete_item` give `Conversation`, `delete` gives `ConversationDeletedResource`, `list_items` / `create_items` give `ConversationItemList`. Individual items stay `serde_json::Value` (`ConversationItem`): upstream models them as a large open union, and the envelope is what callers were hand-parsing anyway. Closes [#2](https://github.com/fortunto2/openai-oxide/issues/2).
+- `ClientConfig::base_url()` drops trailing slashes. Paths are joined as `{base_url}{path}` with `path` already leading with `/`, so a copied `https://.../v1/` used to produce `//chat/completions`.
+
+---
+
 ## [0.16.0]
 
 ### Added

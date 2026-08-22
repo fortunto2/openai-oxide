@@ -134,7 +134,10 @@ impl OpenAI {
         self
     }
 
-    /// Create a client using the `OPENAI_API_KEY` environment variable.
+    /// Create a client from the environment.
+    ///
+    /// `OPENAI_API_KEY` is required; `OPENAI_BASE_URL`, `OPENAI_ORG_ID` and
+    /// `OPENAI_PROJECT_ID` are picked up when set.
     pub fn from_env() -> Result<Self, OpenAIError> {
         Ok(Self::with_config(ClientConfig::from_env()?))
     }
@@ -232,6 +235,11 @@ impl OpenAI {
     /// Access conversation endpoints (multi-turn server-side state).
     pub fn conversations(&self) -> crate::resources::conversations::Conversations<'_> {
         crate::resources::conversations::Conversations::new(self)
+    }
+
+    /// Access container endpoints (managed sandboxes for Code Interpreter).
+    pub fn containers(&self) -> crate::resources::containers::Containers<'_> {
+        crate::resources::containers::Containers::new(self)
     }
 
     /// Access the Content Provenance Checks resource.
