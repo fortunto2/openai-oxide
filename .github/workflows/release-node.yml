@@ -8,6 +8,8 @@ on:
   push:
     tags:
       - "v*"
+  # See release.yml — lets a failed npm publish be retried without a new tag.
+  workflow_dispatch:
 
 jobs:
   build-node-bindings:
@@ -147,19 +149,21 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           NPM_CONFIG_PROVENANCE: "true"
+        # The dist-tag follows the version being published, not the ref that
+        # triggered the run — a manual re-run has no tag name to parse.
         run: |
-          if [[ "${GITHUB_REF_NAME}" =~ ^(node-)?v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-            node scripts/npm-publish-with-skip.mjs pnpm publish --access public --no-git-checks --ignore-scripts
-          elif [[ "${GITHUB_REF_NAME}" =~ ^(node-)?v[0-9]+\.[0-9]+\.[0-9]+- ]]; then
+          VERSION=$(node -p "require('./package.json').version")
+          echo "publishing openai-oxide@${VERSION}"
+          if [[ "${VERSION}" == *-* ]]; then
             node scripts/npm-publish-with-skip.mjs pnpm publish --tag next --access public --no-git-checks --ignore-scripts
           else
-            echo "Unsupported tag format: ${GITHUB_REF_NAME}"
-            exit 1
+            node scripts/npm-publish-with-skip.mjs pnpm publish --access public --no-git-checks --ignore-scripts
           fi
 
   create-github-release:
     name: Create GitHub Release
     needs: publish-node
+    if: startsWith(github.ref, 'refs/tags/')
     runs-on: ubuntu-latest
     permissions:
       contents: write

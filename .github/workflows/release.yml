@@ -4,6 +4,10 @@ on:
   push:
     tags:
       - 'v*'
+  # Re-run a failed publish without inventing a version. Publishing steps are
+  # idempotent (skip-existing / already-published detection); the GitHub-release
+  # job is tag-only, below.
+  workflow_dispatch:
 
 jobs:
   publish-rust:
@@ -102,7 +106,9 @@ jobs:
   create-github-release:
     name: Create GitHub Release
     needs: [publish-rust, publish-pypi]
-    if: always() && needs.publish-rust.result != 'cancelled'
+    if: >-
+      always() && needs.publish-rust.result != 'cancelled'
+      && startsWith(github.ref, 'refs/tags/')
     runs-on: ubuntu-latest
     permissions:
       contents: write

@@ -69,6 +69,22 @@ const main = async () => {
       )
     }
 
+    if (isAuthError(combinedOutput)) {
+      console.error(
+        [
+          '',
+          'npm refused the write with a 404 on PUT. The packages exist and are owned',
+          'by this account, so this is not a missing name: npm masks "no write access"',
+          'as 404. NODE_AUTH_TOKEN is expired, revoked, or read-only.',
+          '',
+          'Rotate it: npmjs.com -> Access Tokens -> Generate (Automation, or Granular',
+          'with read+write on openai-oxide and every openai-oxide-<platform> package),',
+          'then update the NPM_TOKEN repository secret and re-run this workflow.',
+          '',
+        ].join('\n'),
+      )
+    }
+
     if (result.error) {
       console.error(result.error.message)
     }
@@ -88,6 +104,16 @@ function isAlreadyPublishedError(output) {
     /cannot publish over (?:the )?previously published versions?/i.test(output) ||
     /cannot publish over existing version/i.test(output) ||
     /You cannot publish over the previously published versions/i.test(output)
+  )
+}
+
+// npm answers an unauthorised publish with 404 rather than 403, so a PUT 404 on
+// a package that demonstrably exists means the token, not the name.
+function isAuthError(output) {
+  return (
+    /404 Not Found - PUT/i.test(output) ||
+    /(ENEEDAUTH|EAUTHUNKNOWN|E401|401 Unauthorized)/i.test(output) ||
+    /you must be logged in to publish packages/i.test(output)
   )
 }
 
