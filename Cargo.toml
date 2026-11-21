@@ -46,6 +46,7 @@ reqwest = { version = "0.13", default-features = false, features = ["rustls-no-p
 reqwest012 = { package = "reqwest", version = ">=0.12, <0.13", default-features = false, features = ["rustls-tls-no-provider", "json", "stream", "multipart", "gzip", "http2"], optional = true }
 rustls = { version = "0.23", default-features = false, features = ["ring", "std", "tls12"] }
 tokio = { version = "1", features = ["full"] }
+llm-resilience = { version = "0.2.1", optional = true }
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
 reqwest = { version = "0.13", default-features = false, features = ["json", "stream"] }
@@ -77,6 +78,8 @@ batches = []
 uploads = []
 beta = []
 macros = ["dep:openai-oxide-macros"]
+# Circuit breaker around every request (native only), via llm-resilience.
+circuit-breaker = ["dep:llm-resilience"]
 live-tests = []
 simd = ["dep:simd-json"]
 websocket = ["dep:tokio-tungstenite"]

@@ -59,6 +59,15 @@ pub enum OpenAIError {
     #[error("invalid argument: {0}")]
     InvalidArgument(String),
 
+    /// The client's circuit breaker is open: the request was not sent.
+    ///
+    /// `retry_after` is how long until the breaker lets a probe through.
+    #[cfg(feature = "circuit-breaker")]
+    #[error("circuit breaker open (retry after {retry_after:?})")]
+    CircuitOpen {
+        retry_after: Option<std::time::Duration>,
+    },
+
     /// WebSocket error.
     #[cfg(feature = "websocket")]
     #[error("websocket error: {0}")]
