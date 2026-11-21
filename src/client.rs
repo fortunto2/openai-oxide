@@ -64,6 +64,30 @@ pub struct OpenAI {
     pub(crate) http: reqwest::Client,
     pub(crate) config: std::sync::Arc<dyn crate::config::Config>,
     pub(crate) options: RequestOptions,
+    /// Optional circuit breaker shared by every clone of this client.
+    #[cfg(all(feature = "circuit-breaker", not(target_arch = "wasm32")))]
+    pub(crate) breaker: Option<llm_resilience::CircuitBreaker>,
+}
+
+/// Why a single HTTP attempt produced no response.
+enum AttemptError {
+    /// The request failed on the wire; the retry loop may try again.
+    Transport(reqwest::Error),
+    /// The request was not sent (circuit breaker open); do not retry.
+    #[cfg_attr(
+        not(all(feature = "circuit-breaker", not(target_arch = "wasm32"))),
+        allow(dead_code)
+    )]
+    Rejected(OpenAIError),
+}
+
+/// Parse a `Retry-After` header given in seconds.
+fn retry_after_secs(response: &reqwest::Response) -> Option<f64> {
+    response
+        .headers()
+        .get("retry-after")
+        .and_then(|v| v.to_str().ok())
+        .and_then(|v| v.parse::<f64>().ok())
 }
 
 impl OpenAI {
@@ -101,7 +125,67 @@ impl OpenAI {
             http,
             config: std::sync::Arc::new(config),
             options,
+            #[cfg(all(feature = "circuit-breaker", not(target_arch = "wasm32")))]
+            breaker: None,
         }
+    }
+
+    /// Route every request through a circuit breaker.
+    ///
+    /// Transport errors and 5xx responses count as failures; 2xx counts as a
+    /// success; other 4xx (including 429, which already honours
+    /// `Retry-After`) record nothing. While the breaker is open, requests
+    /// fail immediately with [`OpenAIError::CircuitOpen`] instead of spending
+    /// `max_retries` attempts and their backoff on an upstream that is down.
+    /// Clones made with [`with_options()`](Self::with_options) share the
+    /// same breaker state.
+    ///
+    /// ```
+    /// use std::time::Duration;
+    /// use openai_oxide::{CircuitBreaker, OpenAI};
+    ///
+    /// // Open after 5 failures, probe again after 30 s.
+    /// let client = OpenAI::new("sk-...")
+    ///     .with_circuit_breaker(CircuitBreaker::new(5, 0.8, Duration::from_secs(30)));
+    /// ```
+    #[cfg(all(feature = "circuit-breaker", not(target_arch = "wasm32")))]
+    #[must_use]
+    pub fn with_circuit_breaker(mut self, breaker: llm_resilience::CircuitBreaker) -> Self {
+        self.breaker = Some(breaker);
+        self
+    }
+
+    /// Send one HTTP attempt, through the circuit breaker when one is set.
+    async fn send_attempt(
+        &self,
+        req: reqwest::RequestBuilder,
+    ) -> Result<reqwest::Response, AttemptError> {
+        #[cfg(all(feature = "circuit-breaker", not(target_arch = "wasm32")))]
+        if let Some(breaker) = &self.breaker {
+            let Some(permit) = breaker.try_acquire() else {
+                return Err(AttemptError::Rejected(OpenAIError::CircuitOpen {
+                    retry_after: breaker.retry_after_sync(),
+                }));
+            };
+            return match req.send().await {
+                Ok(resp) => {
+                    let status = resp.status();
+                    if status.is_server_error() {
+                        permit.failure();
+                    } else if status.is_success() {
+                        permit.success();
+                    } else {
+                        drop(permit);
+                    }
+                    Ok(resp)
+                }
+                Err(e) => {
+                    permit.failure();
+                    Err(AttemptError::Transport(e))
+                }
+            };
+        }
+        req.send().await.map_err(AttemptError::Transport)
     }
 
     /// Create a cheap clone of this client with additional request options.
@@ -124,6 +208,8 @@ impl OpenAI {
             http: self.http.clone(),
             config: self.config.clone(),
             options: self.options.merge(&options),
+            #[cfg(all(feature = "circuit-breaker", not(target_arch = "wasm32")))]
+            breaker: self.breaker.clone(),
         }
     }
 
@@ -518,12 +604,13 @@ impl OpenAI {
                 req = req.json(val);
             }
 
-            let response = match req.send().await {
+            let response = match self.send_attempt(req).await {
                 Ok(resp) => resp,
-                Err(e) if attempt == self.config.max_retries() => {
+                Err(AttemptError::Rejected(e)) => return Err(e),
+                Err(AttemptError::Transport(e)) if attempt == self.config.max_retries() => {
                     return Err(OpenAIError::RequestError(e));
                 }
-                Err(_) => {
+                Err(AttemptError::Transport(_)) => {
                     crate::runtime::sleep(crate::runtime::backoff_ms(attempt)).await;
                     continue;
                 }
@@ -534,7 +621,9 @@ impl OpenAI {
                 return Self::handle_response(response).await;
             }
 
-            crate::runtime::sleep(crate::runtime::backoff_ms(attempt)).await;
+            // Honour Retry-After on wasm too, same as the native path.
+            let retry_after = retry_after_secs(&response);
+            crate::runtime::sleep(Self::backoff_delay(attempt, retry_after)).await;
         }
 
         Err(OpenAIError::InvalidArgument("retry exhausted".into()))
@@ -559,10 +648,13 @@ impl OpenAI {
             req = req.json(val);
         }
 
-        let response = match req.send().await {
+        let response = match self.send_attempt(req).await {
             Ok(resp) => resp,
-            Err(e) if self.config.max_retries() == 0 => return Err(OpenAIError::RequestError(e)),
-            Err(e) => {
+            Err(AttemptError::Rejected(e)) => return Err(e),
+            Err(AttemptError::Transport(e)) if self.config.max_retries() == 0 => {
+                return Err(OpenAIError::RequestError(e));
+            }
+            Err(AttemptError::Transport(e)) => {
                 // Enter retry path
                 return self.retry_loop(method, path, &body_value, e, 1).await;
             }
@@ -578,11 +670,7 @@ impl OpenAI {
         }
 
         // Retryable status on first attempt — enter retry loop
-        let retry_after = response
-            .headers()
-            .get("retry-after")
-            .and_then(|v| v.to_str().ok())
-            .and_then(|v| v.parse::<f64>().ok());
+        let retry_after = retry_after_secs(&response);
         let last_error = Self::extract_error(status, response).await;
         tokio::time::sleep(Self::backoff_delay(0, retry_after)).await;
         self.retry_loop(method, path, &body_value, last_error, 1)
@@ -608,9 +696,10 @@ impl OpenAI {
                 req = req.json(val);
             }
 
-            let response = match req.send().await {
+            let response = match self.send_attempt(req).await {
                 Ok(resp) => resp,
-                Err(e) => {
+                Err(AttemptError::Rejected(e)) => return Err(e),
+                Err(AttemptError::Transport(e)) => {
                     last_error = OpenAIError::RequestError(e);
                     if attempt < max_retries {
                         tokio::time::sleep(Self::backoff_delay(attempt, None)).await;
@@ -625,11 +714,7 @@ impl OpenAI {
                 return Self::handle_response(response).await;
             }
 
-            let retry_after = response
-                .headers()
-                .get("retry-after")
-                .and_then(|v| v.to_str().ok())
-                .and_then(|v| v.parse::<f64>().ok());
+            let retry_after = retry_after_secs(&response);
             last_error = Self::extract_error(status, response).await;
             tokio::time::sleep(Self::backoff_delay(attempt, retry_after)).await;
         }
@@ -648,12 +733,13 @@ impl OpenAI {
     ) -> Result<reqwest::Response, OpenAIError> {
         // Fast path: first attempt
         let response = match builder.try_clone() {
-            Some(cloned) => match cloned.send().await {
+            Some(cloned) => match self.send_attempt(cloned).await {
                 Ok(resp) => resp,
-                Err(e) if self.config.max_retries() == 0 => {
+                Err(AttemptError::Rejected(e)) => return Err(e),
+                Err(AttemptError::Transport(e)) if self.config.max_retries() == 0 => {
                     return Err(OpenAIError::RequestError(e));
                 }
-                Err(e) => {
+                Err(AttemptError::Transport(e)) => {
                     return self
                         .retry_loop_raw(builder, OpenAIError::RequestError(e), 1)
                         .await;
@@ -661,7 +747,11 @@ impl OpenAI {
             },
             None => {
                 // Cannot clone (e.g. streaming body) — no retry possible
-                return Ok(builder.send().await?);
+                return match self.send_attempt(builder).await {
+                    Ok(resp) => Ok(resp),
+                    Err(AttemptError::Rejected(e)) => Err(e),
+                    Err(AttemptError::Transport(e)) => Err(OpenAIError::RequestError(e)),
+                };
             }
         };
 
@@ -673,11 +763,7 @@ impl OpenAI {
             return Ok(response);
         }
 
-        let retry_after = response
-            .headers()
-            .get("retry-after")
-            .and_then(|v| v.to_str().ok())
-            .and_then(|v| v.parse::<f64>().ok());
+        let retry_after = retry_after_secs(&response);
         let last_error = Self::extract_error(status, response).await;
         tokio::time::sleep(Self::backoff_delay(0, retry_after)).await;
         self.retry_loop_raw(builder, last_error, 1).await
@@ -700,9 +786,10 @@ impl OpenAI {
                 None => return Err(last_error),
             };
 
-            let response = match req.send().await {
+            let response = match self.send_attempt(req).await {
                 Ok(resp) => resp,
-                Err(e) => {
+                Err(AttemptError::Rejected(e)) => return Err(e),
+                Err(AttemptError::Transport(e)) => {
                     last_error = OpenAIError::RequestError(e);
                     if attempt < max_retries {
                         tokio::time::sleep(Self::backoff_delay(attempt, None)).await;
@@ -717,11 +804,7 @@ impl OpenAI {
                 return Ok(response);
             }
 
-            let retry_after = response
-                .headers()
-                .get("retry-after")
-                .and_then(|v| v.to_str().ok())
-                .and_then(|v| v.parse::<f64>().ok());
+            let retry_after = retry_after_secs(&response);
             last_error = Self::extract_error(status, response).await;
             tokio::time::sleep(Self::backoff_delay(attempt, retry_after)).await;
         }
@@ -750,7 +833,6 @@ impl OpenAI {
     }
 
     /// Calculate backoff delay: max(retry_after, 0.5 * 2^attempt) seconds.
-    #[cfg(not(target_arch = "wasm32"))]
     fn backoff_delay(attempt: u32, retry_after_secs: Option<f64>) -> Duration {
         let base = crate::runtime::backoff_ms(attempt);
         match retry_after_secs {
@@ -1115,6 +1197,87 @@ mod tests {
         let resp: Resp = client.get("/test").await.unwrap();
         assert!(resp.ok);
         mock_200.assert_async().await;
+    }
+
+    #[cfg(feature = "circuit-breaker")]
+    #[tokio::test]
+    async fn test_circuit_breaker_stops_retry_storm() {
+        let mut server = mockito::Server::new_async().await;
+
+        // Upstream is down: every request returns 503.
+        let mock = server
+            .mock("GET", "/test")
+            .with_status(503)
+            .with_header("retry-after", "0")
+            .with_body(r#"{"error":{"message":"overloaded","type":"server_error","param":null,"code":null}}"#)
+            .expect(2)
+            .create_async()
+            .await;
+
+        // max_retries(5) alone would send 6 requests per call. The breaker
+        // opens after 2 failures and the retry loop stops there.
+        let client = OpenAI::with_config(
+            ClientConfig::new("sk-test")
+                .base_url(server.url())
+                .max_retries(5),
+        )
+        .with_circuit_breaker(crate::CircuitBreaker::new(2, 1.0, Duration::from_secs(60)));
+
+        #[derive(Debug, serde::Deserialize)]
+        struct Resp {
+            _ok: bool,
+        }
+
+        let err = client.get::<Resp>("/test").await.unwrap_err();
+        assert!(
+            matches!(
+                err,
+                OpenAIError::CircuitOpen {
+                    retry_after: Some(_)
+                }
+            ),
+            "got {err:?}"
+        );
+
+        // A clone shares the breaker: the next call fails fast, no request sent.
+        let clone = client.with_options(RequestOptions::new());
+        let err = clone.get::<Resp>("/test").await.unwrap_err();
+        assert!(
+            matches!(err, OpenAIError::CircuitOpen { .. }),
+            "got {err:?}"
+        );
+        mock.assert_async().await;
+    }
+
+    #[cfg(feature = "circuit-breaker")]
+    #[tokio::test]
+    async fn test_circuit_breaker_ignores_client_errors() {
+        let mut server = mockito::Server::new_async().await;
+        let mock = server
+            .mock("GET", "/test")
+            .with_status(400)
+            .with_body(r#"{"error":{"message":"bad","type":"invalid_request_error","param":null,"code":null}}"#)
+            .expect(3)
+            .create_async()
+            .await;
+
+        let client = OpenAI::with_config(ClientConfig::new("sk-test").base_url(server.url()))
+            .with_circuit_breaker(crate::CircuitBreaker::new(1, 1.0, Duration::from_secs(60)));
+
+        #[derive(Debug, serde::Deserialize)]
+        struct Resp {
+            _ok: bool,
+        }
+
+        // A 400 says nothing about upstream health: it never opens the breaker.
+        for _ in 0..3 {
+            let err = client.get::<Resp>("/test").await.unwrap_err();
+            assert!(
+                matches!(err, OpenAIError::ApiError { status: 400, .. }),
+                "got {err:?}"
+            );
+        }
+        mock.assert_async().await;
     }
 
     #[tokio::test]

@@ -92,6 +92,9 @@ pub use config::ClientConfig;
 pub use error::OpenAIError;
 #[cfg(feature = "responses")]
 pub use hedged::{hedged_request, hedged_request_n, speculative};
+/// Circuit breaker type accepted by [`OpenAI::with_circuit_breaker`].
+#[cfg(all(feature = "circuit-breaker", not(target_arch = "wasm32")))]
+pub use llm_resilience::CircuitBreaker;
 pub use pagination::Paginator;
 pub use request_options::RequestOptions;
 pub use streaming::SseStream;
